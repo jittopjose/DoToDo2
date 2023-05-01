@@ -42,9 +42,8 @@ const taskInitialState = {
   name: '',
   description: '',
   due: moment()
-    .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
-    .utc(true)
-    .toISOString(),
+    .set({ hour: 23, minute: 59, second: 59 })
+    .format('YYYY-MM-DDTHH:mm:ss'),
   repeat: NO_REPEAT,
   list: 'personal'
 }

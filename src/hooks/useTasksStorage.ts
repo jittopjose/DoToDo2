@@ -47,10 +47,28 @@ export function useTasksStorage () {
     setTasks(updatedTasks)
   }
 
+  const updateTaskStatus = async (
+    task: Task,
+    status: boolean,
+    remarks: string
+  ) => {
+    const dateStr = getYYYYMMDD(new Date(task.dueDateTime))
+    const tasksKey = `Tasks_${dateStr}`
+    const tasksToUpdate: Task[] = await getTaskStorage().get(tasksKey)
+    const taskToEdit = tasksToUpdate.find(tsk => tsk.id === task.id)
+    if (taskToEdit) {
+      taskToEdit.done = status
+      taskToEdit.remarks = remarks
+    }
+    await getTaskStorage().set(tasksKey, tasksToUpdate)
+    setTasks(tasksToUpdate)
+  }
+
   return {
     getTasks,
     addTask,
     addTaskRule,
-    deleteTask
+    deleteTask,
+    updateTaskStatus
   }
 }
