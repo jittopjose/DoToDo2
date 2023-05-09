@@ -8,16 +8,21 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonChip,
+  IonCol,
   IonContent,
+  IonGrid,
   IonHeader,
   IonIcon,
   IonItem,
+  IonItemGroup,
   IonItemOption,
   IonItemOptions,
   IonItemSliding,
   IonLabel,
   IonList,
   IonPage,
+  IonRow,
   IonTitle,
   IonToolbar
 } from '@ionic/react'
@@ -29,6 +34,8 @@ import { Task, TaskRule } from './types'
 import { getYYYYMMDD } from '../../util'
 import {
   addOutline,
+  calendarClearOutline,
+  calendarOutline,
   checkmarkDoneOutline,
   createOutline,
   lockOpenOutline,
@@ -42,6 +49,7 @@ import {
   EVERY_WEEK_ENDS,
   NO_REPEAT
 } from '../../contstants'
+import { TaskIonPage } from './styles'
 
 const Tasks: React.FC = () => {
   const tasks = useRecoilValue<Task[]>(tasksAtom)
@@ -123,18 +131,43 @@ const Tasks: React.FC = () => {
   }
 
   return (
-    <IonPage>
-      <IonHeader translucent>
-        <IonToolbar>
-          <IonTitle>Tasks</IonTitle>
-          <IonButtons slot='secondary'>
-            <IonButton routerLink='/tasks/create-edit'>
-              <IonIcon slot='icon-only' icon={addOutline} />
+    <TaskIonPage>
+      <IonContent fullscreen>
+        <IonItem lines='none'>
+          <IonGrid>
+            <IonRow className='list-row'>
+              <IonCol size='auto'>
+                <IonBadge
+                  mode='ios'
+                  color={'light'}
+                >
+                  All
+                </IonBadge>
+              </IonCol>
+              <IonCol size='auto'>
+                <IonBadge
+                  mode='ios'
+                  color={'secondary'}
+                >
+                  Personal
+                </IonBadge>
+              </IonCol>
+              <IonCol size='auto'>
+                <IonBadge
+                  mode='ios'
+                  color={'secondary'}
+                >
+                  Work
+                </IonBadge>
+              </IonCol>
+            </IonRow>
+          </IonGrid>
+          <IonButtons slot='end'>
+            <IonButton>
+              <IonIcon slot='icon-only' icon={calendarOutline} />
             </IonButton>
           </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen>
+        </IonItem>
         <IonList>
           {tasks.map((item: Task, key: Key | null | undefined) => {
             return (
@@ -243,7 +276,7 @@ const Tasks: React.FC = () => {
           })}
         </IonList>
       </IonContent>
-    </IonPage>
+    </TaskIonPage>
   )
 }
 
