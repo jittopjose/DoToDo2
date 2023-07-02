@@ -180,7 +180,7 @@ const CreateEditTask: React.FC = () => {
           <IonRow>
             <IonCol>
               <IonItem>
-                <IonLabel position='floating'>Decription</IonLabel>
+                <IonLabel position='floating'>Description</IonLabel>
                 <IonTextarea
                   value={task.description}
                   onIonInput={onDescriptonChange}
