@@ -37,7 +37,7 @@ import {
 import { Task, TaskRule } from './types'
 import { useTasksStorage } from '../../hooks/useTasksStorage'
 import { getYYYYMMDD } from '../../util'
-
+import { useSetRecoilState } from 'recoil'
 const taskInitialState = {
   name: '',
   description: '',
@@ -50,9 +50,8 @@ const taskInitialState = {
 
 const CreateEditTask: React.FC = () => {
   const [task, setTask] = useState(taskInitialState)
-  const { addTask, addTaskRule } = useTasksStorage()
+  const {addTask, addTaskRule } = useTasksStorage()
   const router = useIonRouter()
-
   const onNameChange = (e: InputCustomEvent) => {
     setTask(task => {
       return {
