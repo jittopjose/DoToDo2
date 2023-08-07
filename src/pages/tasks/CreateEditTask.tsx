@@ -99,8 +99,8 @@ const CreateEditTask: React.FC = () => {
 
   const onAddTask = () => {
     const newTask = { ...task }
-    if (newTask.repeat === 'weekly') {
-      const dueDay = new Date(task.due).getDay()
+    if (newTask?.repeat === 'weekly') {
+      const dueDay = new Date(task?.due).getDay()
       const days = NO_REPEAT.split(',')
       days[dueDay] = '1'
       newTask.repeat = days.join(',')
@@ -109,10 +109,10 @@ const CreateEditTask: React.FC = () => {
       const taskRule: TaskRule = getTaskRule(newTask)
       addTaskRule(taskRule)
       const taskWithRule: Task = getTask(newTask, taskRule)
-      addTask(taskWithRule, getYYYYMMDD(new Date(newTask.due)))
+      addTask(taskWithRule, getYYYYMMDD(new Date(newTask?.due)))
     } else {
       const taskWithoutRule: Task = getTask(newTask)
-      addTask(taskWithoutRule, getYYYYMMDD(new Date(newTask.due)))
+      addTask(taskWithoutRule, getYYYYMMDD(new Date(newTask?.due)))
     }
     setTask(taskInitialState)
     if (router.canGoBack()) {
@@ -144,7 +144,7 @@ const CreateEditTask: React.FC = () => {
   }
 
   const isValidTask = () => {
-    if (task.name === '' || task.due === '' || task.list === '') {
+    if (task?.name === '' || task?.due === '' || task?.list === '') {
       return false
     }
     return true
@@ -178,7 +178,7 @@ const CreateEditTask: React.FC = () => {
           <IonRow>
             <IonCol>
               <IonItem>
-                <IonLabel position='floating'>Decription</IonLabel>
+                <IonLabel position='floating'>Description</IonLabel>
                 <IonTextarea
                   value={task.description}
                   onIonInput={onDescriptonChange}
