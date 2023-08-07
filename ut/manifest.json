@@ -1,0 +1,15 @@
+{
+    "name": "dotodo2.jitto",
+    "description": "Do To Do 2",
+    "architecture": "@CLICK_ARCH@",
+    "title": "Do To Do 2",
+    "hooks": {
+        "dotodo2": {
+            "apparmor": "dotodo2.apparmor",
+            "desktop":  "dotodo2.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Jitto P Jose <jittopjose@gmail.com>",
+    "framework" : "@CLICK_FRAMEWORK@"
+}

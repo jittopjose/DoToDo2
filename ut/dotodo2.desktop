@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Do To Do 2
+Exec=dotodo2 %U
+Icon=assets/logo.svg
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true

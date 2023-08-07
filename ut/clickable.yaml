@@ -1,0 +1,10 @@
+clickable_minimum_required: 7.1.2
+builder: rust
+kill: dotodo2
+install_root_data:
+- manifest.json
+- dotodo2.apparmor
+- dotodo2.desktop
+- assets
+- web
+- qml
