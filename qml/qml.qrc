@@ -1,0 +1,14 @@
+<RCC>
+    <!-- React (Ionic build) -->
+    <qresource prefix="/web">
+        <file alias="index.html">../web/index.html</file>
+        <file alias="app.js">../web/app.js</file>
+        <file alias="app.css">../web/app.css</file>
+        <file alias="manifest.json">../web/manifest.json</file>
+    </qresource>
+
+    <!-- QML -->
+    <qresource prefix="/qml">
+        <file>Main.qml</file>
+    </qresource>
+</RCC>

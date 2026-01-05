@@ -1,0 +1,15 @@
+{
+    "name": "dotodo2.jitto",
+    "description": "dotodo2",
+    "architecture": "@CLICK_ARCH@",
+    "title": "dotodo2",
+    "hooks": {
+        "dotodo2": {
+            "apparmor": "dotodo2.apparmor",
+            "desktop":  "dotodo2.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Jitto <email@domain.org>",
+    "framework" : "@CLICK_FRAMEWORK@"
+}
