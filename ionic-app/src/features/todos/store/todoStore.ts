@@ -12,6 +12,7 @@ interface TodoState {
     addTodo: (title: string, dueDate?: number) => void;
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description'>>) => void;
     setFilter: (filter: TodoFilter) => void;
 
     // Computed (helper)
@@ -45,6 +46,12 @@ export const useTodoStore = create<TodoState>()(
 
             deleteTodo: (id) => set((state) => ({
                 todos: state.todos.filter((todo) => todo.id !== id),
+            })),
+
+            updateTodo: (id, updates) => set((state) => ({
+                todos: state.todos.map((todo) =>
+                    todo.id === id ? { ...todo, ...updates } : todo
+                ),
             })),
 
             setFilter: (filter) => set({ filter }),

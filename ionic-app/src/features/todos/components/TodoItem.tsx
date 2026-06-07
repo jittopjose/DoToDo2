@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     IonItem,
     IonLabel,
     IonCheckbox,
     IonButton,
-    IonIcon
+    IonIcon,
+    IonInput
 } from '@ionic/react';
 import { trashOutline } from 'ionicons/icons';
 import { Todo } from '../types';
@@ -28,6 +29,43 @@ const formatDate = (timestamp: number) => {
 export const TodoItem: React.FC<Props> = ({ todo }) => {
     const toggleTodo = useTodoStore((state) => state.toggleTodo);
     const deleteTodo = useTodoStore((state) => state.deleteTodo);
+    const updateTodo = useTodoStore((state) => state.updateTodo);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editText, setEditText] = useState(todo.title);
+    const inputRef = useRef<HTMLIonInputElement>(null);
+
+    useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.setFocus();
+        }
+    }, [isEditing]);
+
+    const handleEdit = () => {
+        if (todo.isCompleted) return;
+        setIsEditing(true);
+        setEditText(todo.title);
+    };
+
+    const handleSave = () => {
+        const trimmed = editText.trim();
+        if (trimmed && trimmed !== todo.title) {
+            updateTodo(todo.id, { title: trimmed });
+        }
+        setIsEditing(false);
+    };
+
+    const handleCancel = () => {
+        setEditText(todo.title);
+        setIsEditing(false);
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSave();
+        } else if (e.key === 'Escape') {
+            handleCancel();
+        }
+    };
 
     return (
         <IonItem>
@@ -36,14 +74,28 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 checked={todo.isCompleted}
                 onIonChange={() => toggleTodo(todo.id)}
             />
-            <IonLabel className={todo.isCompleted ? 'ion-text-wrap line-through' : 'ion-text-wrap'} style={{ textDecoration: todo.isCompleted ? 'line-through' : 'none' }}>
-                {todo.title}
-                {todo.dueDate && (
-                    <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
-                        Due: {formatDate(todo.dueDate)}
-                    </div>
-                )}
-            </IonLabel>
+            {isEditing ? (
+                <IonInput
+                    ref={inputRef}
+                    value={editText}
+                    onIonInput={e => setEditText(e.detail.value!)}
+                    onKeyUp={handleKeyPress}
+                    onBlur={handleSave}
+                />
+            ) : (
+                <IonLabel
+                    className={todo.isCompleted ? 'ion-text-wrap line-through' : 'ion-text-wrap'}
+                    style={{ textDecoration: todo.isCompleted ? 'line-through' : 'none', cursor: 'pointer' }}
+                    onClick={handleEdit}
+                >
+                    {todo.title}
+                    {todo.dueDate && (
+                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
+                            Due: {formatDate(todo.dueDate)}
+                        </div>
+                    )}
+                </IonLabel>
+            )}
             <IonButton fill="clear" color="danger" slot="end" onClick={() => deleteTodo(todo.id)}>
                 <IonIcon icon={trashOutline} />
             </IonButton>
