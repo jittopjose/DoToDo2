@@ -12,7 +12,7 @@ interface TodoState {
     addTodo: (title: string, dueDate?: number) => void;
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description'>>) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate'>>) => void;
     setFilter: (filter: TodoFilter) => void;
 
     // Computed (helper)

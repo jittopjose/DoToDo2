@@ -1,32 +1,73 @@
-# Inline Task Editing Implementation Plan
+# Inline Task Editing & Due Date Editing
 
 ## Goal
-Add ability to edit todo titles inline by tapping/clicking on them.
+Add inline editing for todo titles and due dates with mobile-friendly interactions.
 
-## Changes Required
+## Already Implemented
+- Title editing: Click on title → inline input appears → Enter/blur saves, Escape cancels
+- Due date already displays in AM/PM format
 
-### 1. TodoStore (todoStore.ts)
-- Add `updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description'>>) => void` action
-- Update existing todos in-place without affecting other properties
+## Additional: Due Date Editing
 
-### 2. TodoItem Component (TodoItem.tsx)
-- Add `isEditing` state to track edit mode
-- On title click: enter edit mode, show IonInput with current title
-- On Enter/Blur: save changes via `updateTodo`
-- On Escape: cancel and exit edit mode
-- Visual: show save/cancel buttons in edit mode, or auto-save
+### Changes Required
 
-### 3. Todo Types (types.ts)
-- Already has `description?: string` field - no changes needed
-- Consider adding `editing?: boolean` state (but keep in component state, not persisted)
+### 1. TodoItem Component (TodoItem.tsx)
+- Add `showDueDatePicker` state for mobile-friendly datetime picker
+- Add `dueDateEdit` state to track current due date value during edit
+- Import `IonPopover` and `IonDatetime` from Ionic
+- Import `calendarOutline` icon
 
-## User Flow
-1. User clicks/taps on a todo title
-2. Title transforms into an input field with current text selected
-3. User can modify the title
-4. Enter or click away saves; Escape cancels
+### 2. Implementation Details
+```tsx
+// Add to imports:
+import { IonItem, IonLabel, IonCheckbox, IonButton, IonIcon, IonInput, IonPopover, IonDatetime } from '@ionic/react';
+import { trashOutline, calendarOutline } from 'ionicons/icons';
 
-## Risks & Considerations
-- Ensure WebChannel communication still works if editing triggers backend logging
-- Keep component state local (not persisted) for editing flag
-- Maintain existing delete/toggle functionality
+// Inside TodoItem component - add states:
+const [showDueDatePicker, setShowDueDatePicker] = useState(false);
+
+// Add to JSX - calendar button next to due date:
+{todo.dueDate && (
+    <>
+        <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
+            <IonIcon icon={calendarOutline} />
+        </IonButton>
+        <IonPopover isOpen={showDueDatePicker} onDidDismiss={() => setShowDueDatePicker(false)}>
+            <IonDatetime
+                value={todo.dueDate ? new Date(todo.dueDate).toISOString() : ''}
+                onIonChange={e => {
+                    const newDueDate = e.detail.value ? new Date(e.detail.value).getTime() : undefined;
+                    updateTodo(todo.id, { dueDate: newDueDate });
+                }}
+                presentation="date-time"
+            />
+        </IonPopover>
+    </>
+)}
+
+// Also add a "Set Due Date" button when no due date exists (inside edit mode):
+{!todo.dueDate && isEditing && (
+    <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
+        <IonIcon icon={calendarOutline} />
+    </IonButton>
+)}
+```
+
+### 3. User Flow for Due Date Editing
+1. Click calendar icon → opens datetime picker
+2. Select new date/time → saves automatically
+3. Picker auto-dismisses after selection
+4. Touch targets sized appropriately for mobile
+
+### 4. Risks & Considerations
+- IonDatetime requires ISO date string format
+- Convert between timestamp (storage) and ISO string (UI)
+- Due date value can be undefined to clear/remove it
+
+## Implementation Tasks
+- [ ] Update TodoItem.tsx imports
+- [ ] Add due date editing state
+- [ ] Add calendar button next to due date display
+- [ ] Add IonDatetime popover
+- [ ] Add "Set Due Date" in edit mode for todos without due date
+- [ ] Rebuild with `npm run build`

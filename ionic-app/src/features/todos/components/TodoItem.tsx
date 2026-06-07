@@ -5,9 +5,11 @@ import {
     IonCheckbox,
     IonButton,
     IonIcon,
-    IonInput
+    IonInput,
+    IonPopover,
+    IonDatetime
 } from '@ionic/react';
-import { trashOutline } from 'ionicons/icons';
+import { trashOutline, calendarOutline } from 'ionicons/icons';
 import { Todo } from '../types';
 import { useTodoStore } from '../store/todoStore';
 
@@ -32,6 +34,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const updateTodo = useTodoStore((state) => state.updateTodo);
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(todo.title);
+    const [showDueDatePicker, setShowDueDatePicker] = useState(false);
     const inputRef = useRef<HTMLIonInputElement>(null);
 
     useEffect(() => {
@@ -67,6 +70,13 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         }
     };
 
+    const handleDueDateChange = (e: CustomEvent) => {
+        const value = e.detail.value as string | undefined;
+        const newDueDate = value ? new Date(value).getTime() : undefined;
+        updateTodo(todo.id, { dueDate: newDueDate });
+        setShowDueDatePicker(false);
+    };
+
     return (
         <IonItem>
             <IonCheckbox
@@ -75,13 +85,18 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 onIonChange={() => toggleTodo(todo.id)}
             />
             {isEditing ? (
-                <IonInput
-                    ref={inputRef}
-                    value={editText}
-                    onIonInput={e => setEditText(e.detail.value!)}
-                    onKeyUp={handleKeyPress}
-                    onBlur={handleSave}
-                />
+                <>
+                    <IonInput
+                        ref={inputRef}
+                        value={editText}
+                        onIonInput={e => setEditText(e.detail.value!)}
+                        onKeyUp={handleKeyPress}
+                        onBlur={handleSave}
+                    />
+                    <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
+                        <IonIcon icon={calendarOutline} />
+                    </IonButton>
+                </>
             ) : (
                 <IonLabel
                     className={todo.isCompleted ? 'ion-text-wrap line-through' : 'ion-text-wrap'}
@@ -90,15 +105,31 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 >
                     {todo.title}
                     {todo.dueDate && (
-                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginLeft: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
                             Due: {formatDate(todo.dueDate)}
-                        </div>
+                            <IonIcon icon={calendarOutline} style={{ marginLeft: '4px', fontSize: '14px' }} />
+                        </span>
                     )}
                 </IonLabel>
             )}
             <IonButton fill="clear" color="danger" slot="end" onClick={() => deleteTodo(todo.id)}>
                 <IonIcon icon={trashOutline} />
             </IonButton>
+            {!isEditing && !todo.dueDate && (
+                <IonButton fill="clear" size="small" slot="end" onClick={() => setShowDueDatePicker(true)}>
+                    <IonIcon icon={calendarOutline} />
+                </IonButton>
+            )}
+            <IonPopover
+                isOpen={showDueDatePicker}
+                onDidDismiss={() => setShowDueDatePicker(false)}
+            >
+                <IonDatetime
+                    value={todo.dueDate ? new Date(todo.dueDate).toISOString() : ''}
+                    onIonChange={handleDueDateChange}
+                    presentation="date-time"
+                />
+            </IonPopover>
         </IonItem>
     );
 };
