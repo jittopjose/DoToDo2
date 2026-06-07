@@ -92,6 +92,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         onIonInput={e => setEditText(e.detail.value!)}
                         onKeyUp={handleKeyPress}
                         onBlur={handleSave}
+                        placeholder="Enter title"
                     />
                     <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
                         <IonIcon icon={calendarOutline} />
@@ -103,23 +104,28 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     style={{ textDecoration: todo.isCompleted ? 'line-through' : 'none', cursor: 'pointer' }}
                     onClick={handleEdit}
                 >
-                    {todo.title}
+                    <div>{todo.title}</div>
+                    {todo.description && (
+                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
+                            {todo.description}
+                        </div>
+                    )}
                     {todo.dueDate && (
-                        <span style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginLeft: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
+                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px', display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
+                            <IonIcon icon={calendarOutline} style={{ marginRight: '4px', fontSize: '14px' }} />
                             Due: {formatDate(todo.dueDate)}
-                            <IonIcon icon={calendarOutline} style={{ marginLeft: '4px', fontSize: '14px' }} />
-                        </span>
+                        </div>
                     )}
                 </IonLabel>
+            )}
+            {!isEditing && !todo.dueDate && (
+                <IonButton fill="clear" color="medium" size="small" slot="end" onClick={() => setShowDueDatePicker(true)}>
+                    <IonIcon icon={calendarOutline} />
+                </IonButton>
             )}
             <IonButton fill="clear" color="danger" slot="end" onClick={() => deleteTodo(todo.id)}>
                 <IonIcon icon={trashOutline} />
             </IonButton>
-            {!isEditing && !todo.dueDate && (
-                <IonButton fill="clear" size="small" slot="end" onClick={() => setShowDueDatePicker(true)}>
-                    <IonIcon icon={calendarOutline} />
-                </IonButton>
-            )}
             <IonPopover
                 isOpen={showDueDatePicker}
                 onDidDismiss={() => setShowDueDatePicker(false)}
