@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
 import { IonItem, IonInput, IonButton, IonIcon, IonDatetime, IonPopover } from '@ionic/react';
-import { addOutline, calendarOutline } from 'ionicons/icons';
+import { addOutline, calendarOutline, ellipse } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
+
+const priorityColors = {
+    low: 'var(--ion-color-success)',
+    medium: 'var(--ion-color-warning)',
+    high: 'var(--ion-color-danger)'
+};
 
 export const TodoInput: React.FC = () => {
     const [text, setText] = useState('');
     const [dueDate, setDueDate] = useState<string>('');
+    const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const addTodo = useTodoStore((state) => state.addTodo);
 
     const handleAdd = () => {
         if (text.trim().length === 0) return;
         const dueDateTime = dueDate ? new Date(dueDate).getTime() : undefined;
-        addTodo(text, dueDateTime);
+        addTodo(text, dueDateTime, priority);
         setText('');
         setDueDate('');
+        setPriority(undefined);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleAdd();
         }
+    };
+
+    const handlePriorityClick = () => {
+        const levels: Array<'low' | 'medium' | 'high' | undefined> = ['low', 'medium', 'high', undefined];
+        const currentIndex = levels.indexOf(priority);
+        const nextPriority = levels[(currentIndex + 1) % levels.length];
+        setPriority(nextPriority);
     };
 
     const formatDate = (dateString: string) => {
@@ -45,6 +60,14 @@ export const TodoInput: React.FC = () => {
                     onClick={() => setShowDatePicker(true)}
                 >
                     <IonIcon icon={calendarOutline} />
+                </IonButton>
+                <IonButton
+                    fill={priority ? "solid" : "clear"}
+                    color={priority ? (priority === 'low' ? 'success' : priority === 'medium' ? 'warning' : 'danger') : undefined}
+                    slot="start"
+                    onClick={handlePriorityClick}
+                >
+                    <IonIcon icon={ellipse} />
                 </IonButton>
                 <IonInput
                     value={text}

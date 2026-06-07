@@ -9,10 +9,10 @@ interface TodoState {
     filter: TodoFilter;
 
     // Actions
-    addTodo: (title: string, dueDate?: number) => void;
+    addTodo: (title: string, dueDate?: number, priority?: 'low' | 'medium' | 'high') => void;
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate'>>) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority'>>) => void;
     setFilter: (filter: TodoFilter) => void;
 
     // Computed (helper)
@@ -25,7 +25,7 @@ export const useTodoStore = create<TodoState>()(
             todos: [],
             filter: 'all',
 
-            addTodo: (title, dueDate) => set((state) => ({
+            addTodo: (title, dueDate, priority) => set((state) => ({
                 todos: [
                     {
                         id: uuidv4(),
@@ -33,6 +33,7 @@ export const useTodoStore = create<TodoState>()(
                         isCompleted: false,
                         createdAt: Date.now(),
                         ...(dueDate !== undefined && { dueDate }),
+                        ...(priority !== undefined && { priority }),
                     },
                     ...state.todos,
                 ],

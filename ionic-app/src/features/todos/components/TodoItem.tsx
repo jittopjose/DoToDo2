@@ -9,7 +9,7 @@ import {
     IonPopover,
     IonDatetime
 } from '@ionic/react';
-import { trashOutline, calendarOutline } from 'ionicons/icons';
+import { trashOutline, calendarOutline, ellipse } from 'ionicons/icons';
 import { Todo } from '../types';
 import { useTodoStore } from '../store/todoStore';
 
@@ -26,6 +26,12 @@ const formatDate = (timestamp: number) => {
     const hour12 = hours % 12 || 12;
     const timePart = `${hour12}:${minutes} ${ampm}`;
     return `${datePart}, ${timePart}`;
+};
+
+const priorityColors = {
+    low: 'var(--ion-color-success)',
+    medium: 'var(--ion-color-warning)',
+    high: 'var(--ion-color-danger)'
 };
 
 export const TodoItem: React.FC<Props> = ({ todo }) => {
@@ -77,6 +83,13 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         setShowDueDatePicker(false);
     };
 
+    const handlePriorityClick = () => {
+        const levels: Array<'low' | 'medium' | 'high' | undefined> = ['low', 'medium', 'high', undefined];
+        const currentIndex = levels.indexOf(todo.priority as any);
+        const nextPriority = levels[(currentIndex + 1) % levels.length];
+        updateTodo(todo.id, { priority: nextPriority });
+    };
+
     return (
         <IonItem>
             <IonCheckbox
@@ -84,6 +97,13 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 checked={todo.isCompleted}
                 onIonChange={() => toggleTodo(todo.id)}
             />
+            {todo.priority && !isEditing && (
+                <IonIcon icon={ellipse} style={{
+                    color: priorityColors[todo.priority],
+                    marginRight: '8px',
+                    fontSize: '16px'
+                }} />
+            )}
             {isEditing ? (
                 <>
                     <IonInput
@@ -94,6 +114,12 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         onBlur={handleSave}
                         placeholder="Enter title"
                     />
+                    <IonButton fill="clear" size="small" onClick={handlePriorityClick}>
+                        <IonIcon icon={ellipse} style={{
+                            color: todo.priority ? priorityColors[todo.priority] : 'var(--ion-color-medium)',
+                            fontSize: '16px'
+                        }} />
+                    </IonButton>
                     <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
                         <IonIcon icon={calendarOutline} />
                     </IonButton>
