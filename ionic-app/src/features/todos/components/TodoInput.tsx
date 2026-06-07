@@ -25,7 +25,14 @@ export const TodoInput: React.FC = () => {
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString();
+        const d = new Date(dateString);
+        const datePart = d.toLocaleDateString();
+        const hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12;
+        const timePart = `${hour12}:${minutes} ${ampm}`;
+        return `${datePart}, ${timePart}`;
     };
 
     return (
