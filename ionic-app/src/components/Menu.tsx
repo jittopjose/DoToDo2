@@ -8,7 +8,7 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
-  IonButton,
+  IonBadge,
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
@@ -67,6 +67,8 @@ const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 const Menu: React.FC = () => {
   const location = useLocation();
   const clearCompleted = useTodoStore((state) => state.clearCompleted);
+  const activeCount = useTodoStore((state) => state.getActiveCount());
+  const completedCount = useTodoStore((state) => state.getCompletedCount());
 
   return (
     <IonMenu contentId="main" type="overlay">
@@ -80,6 +82,9 @@ const Menu: React.FC = () => {
                 <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
                   <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
                   <IonLabel>{appPage.title}</IonLabel>
+                  {appPage.title === 'Inbox' && activeCount > 0 && (
+                    <IonBadge color="primary" slot="end">{activeCount}</IonBadge>
+                  )}
                 </IonItem>
               </IonMenuToggle>
             );
@@ -87,6 +92,9 @@ const Menu: React.FC = () => {
           <IonItem lines="none" button onClick={clearCompleted}>
             <IonIcon aria-hidden="true" slot="start" icon={trashOutline} />
             <IonLabel>Clear Completed</IonLabel>
+            {completedCount > 0 && (
+              <IonBadge color="medium" slot="end">{completedCount}</IonBadge>
+            )}
           </IonItem>
         </IonList>
 

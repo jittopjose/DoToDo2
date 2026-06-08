@@ -34,13 +34,13 @@
 - Search results update automatically as you type
 - Added "Clear Completed" button in header and menu
 
-### 3. Task Count Badge ⏳ PENDING
+### 3. Task Count Badge ✅ COMPLETED
 **Changes Required:**
 - Update Menu component to show counts
 - Add count computation in todoStore
 
 **Implementation:**
-- Display active task count in menu
+- Display active task count in menu next to Inbox item
 - Show completed task count
 
 ## Phase 2: Enhanced Organization

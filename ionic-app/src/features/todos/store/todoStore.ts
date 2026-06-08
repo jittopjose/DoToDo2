@@ -20,6 +20,8 @@ interface TodoState {
 
     // Computed (helper)
     getFilteredTodos: () => Todo[];
+    getActiveCount: () => number;
+    getCompletedCount: () => number;
 }
 
 const getFilteredTodos = (todos: Todo[], filter: TodoFilter, searchTerm: string): Todo[] => {
@@ -93,6 +95,16 @@ export const useTodoStore = create<TodoState>()(
             getFilteredTodos: () => {
                 const { todos, filter, searchTerm } = get();
                 return getFilteredTodos(todos, filter, searchTerm);
+            },
+
+            getActiveCount: () => {
+                const { todos } = get();
+                return todos.filter((t) => !t.isCompleted).length;
+            },
+
+            getCompletedCount: () => {
+                const { todos } = get();
+                return todos.filter((t) => t.isCompleted).length;
             },
         }),
         {
