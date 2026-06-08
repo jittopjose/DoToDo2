@@ -4,35 +4,35 @@ import { v4 as uuidv4 } from 'uuid';
 import { storageService } from '../../../services/storage.service';
 import { Todo, TodoFilter } from '../types';
 
-const defaultFolders = ['Inbox', 'Outbox', 'Favorites', 'Archived', 'Trash', 'Spam'];
+const defaultLists = ['All Lists'];
 
 interface TodoState {
     todos: Todo[];
     filter: TodoFilter;
     searchTerm: string;
-    customFolders: string[];
+    customLists: string[];
 
     // Actions
-    addTodo: (title: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', folder?: string) => void;
+    addTodo: (title: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', list?: string) => void;
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'folder'>>) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list'>>) => void;
     setFilter: (filter: TodoFilter) => void;
     setSearchTerm: (term: string) => void;
     clearCompleted: () => void;
-    addFolder: (folder: string) => void;
+    addList: (list: string) => void;
 
     // Computed (helper)
-    getFilteredTodos: (folder: string) => Todo[];
+    getFilteredTodos: (list: string) => Todo[];
     getActiveCount: () => number;
     getCompletedCount: () => number;
 }
 
-const getFilteredTodos = (todos: Todo[], folder: string, filter: TodoFilter, searchTerm: string): Todo[] => {
+const getFilteredTodos = (todos: Todo[], list: string, filter: TodoFilter, searchTerm: string): Todo[] => {
     let filtered = todos;
 
-    if (folder && folder.trim()) {
-        filtered = filtered.filter((t) => t.folder === folder);
+    if (list && list.trim()) {
+        filtered = filtered.filter((t) => t.list === list);
     }
 
     // Apply search filter next
@@ -61,16 +61,16 @@ export const useTodoStore = create<TodoState>()(
             todos: [],
             filter: 'all',
             searchTerm: '',
-            customFolders: [],
+            customLists: [],
 
-            addTodo: (title, dueDate, priority, folder = 'Inbox') => set((state) => ({
+            addTodo: (title, dueDate, priority, list = 'All Lists') => set((state) => ({
                 todos: [
                     {
                         id: uuidv4(),
                         title,
                         isCompleted: false,
                         createdAt: Date.now(),
-                        folder,
+                        list,
                         ...(dueDate !== undefined && { dueDate }),
                         ...(priority !== undefined && { priority }),
                     },
@@ -102,16 +102,16 @@ export const useTodoStore = create<TodoState>()(
                 todos: state.todos.filter((todo) => !todo.isCompleted),
             })),
 
-            addFolder: (folder) => set((state) => {
-                const normalized = folder.trim();
+            addList: (list) => set((state) => {
+                const normalized = list.trim();
                 if (!normalized) return state;
-                if (defaultFolders.includes(normalized) || state.customFolders.includes(normalized)) return state;
-                return { customFolders: [...state.customFolders, normalized] };
+                if (defaultLists.includes(normalized) || state.customLists.includes(normalized)) return state;
+                return { customLists: [...state.customLists, normalized] };
             }),
 
-            getFilteredTodos: (folder) => {
+            getFilteredTodos: (list) => {
                 const { todos, filter, searchTerm } = get();
-                return getFilteredTodos(todos, folder, filter, searchTerm);
+                return getFilteredTodos(todos, list, filter, searchTerm);
             },
 
             getActiveCount: () => {

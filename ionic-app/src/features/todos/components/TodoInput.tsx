@@ -9,7 +9,7 @@ const priorityColors = {
     high: 'var(--ion-color-danger)'
 };
 
-export const TodoInput: React.FC<{ folder: string }> = ({ folder }) => {
+export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
     const [dueDate, setDueDate] = useState<string>('');
     const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
@@ -19,7 +19,7 @@ export const TodoInput: React.FC<{ folder: string }> = ({ folder }) => {
     const handleAdd = () => {
         if (text.trim().length === 0) return;
         const dueDateTime = dueDate ? new Date(dueDate).getTime() : undefined;
-        addTodo(text, dueDateTime, priority, folder);
+        addTodo(text, dueDateTime, priority, list);
         setText('');
         setDueDate('');
         setPriority(undefined);
@@ -71,7 +71,7 @@ export const TodoInput: React.FC<{ folder: string }> = ({ folder }) => {
                 </IonButton>
                 <IonInput
                     value={text}
-                    placeholder={`What needs to be done in ${folder}?`}
+                    placeholder={`What needs to be done in ${list}?`}
                     onIonInput={e => setText(e.detail.value!)}
                     onKeyUp={handleKeyPress}
                 />

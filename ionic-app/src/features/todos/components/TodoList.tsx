@@ -4,16 +4,16 @@ import { useTodoStore } from '../store/todoStore';
 import { TodoItem } from './TodoItem';
 
 interface TodoListProps {
-    folder: string;
+    list: string;
 }
 
-export const TodoList: React.FC<TodoListProps> = ({ folder }) => {
+export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const todos = useTodoStore((state) => state.todos);
     const filter = useTodoStore((state) => state.filter);
     const searchTerm = useTodoStore((state) => state.searchTerm);
 
     const filteredTodos = React.useMemo(() => {
-        let result = todos.filter((todo) => todo.folder === folder);
+        let result = todos.filter((todo) => todo.list === list);
 
         if (searchTerm && searchTerm.trim()) {
             const term = searchTerm.toLowerCase();
@@ -31,7 +31,7 @@ export const TodoList: React.FC<TodoListProps> = ({ folder }) => {
             default:
                 return result;
         }
-    }, [todos, filter, searchTerm, folder]);
+    }, [todos, filter, searchTerm, list]);
 
     return (
         <IonList>
