@@ -13,10 +13,10 @@ interface TodoState {
     customLists: string[];
 
     // Actions
-    addTodo: (title: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', list?: string) => void;
+    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list'>>) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks'>>) => void;
     setFilter: (filter: TodoFilter) => void;
     setSearchTerm: (term: string) => void;
     clearCompleted: () => void;
@@ -63,7 +63,7 @@ export const useTodoStore = create<TodoState>()(
             searchTerm: '',
             customLists: [],
 
-            addTodo: (title, dueDate, priority, list = 'All Lists') => set((state) => ({
+            addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists') => set((state) => ({
                 todos: [
                     {
                         id: uuidv4(),
@@ -71,8 +71,13 @@ export const useTodoStore = create<TodoState>()(
                         isCompleted: false,
                         createdAt: Date.now(),
                         list,
+                        itemType,
+                        ...(description !== undefined && { description }),
                         ...(dueDate !== undefined && { dueDate }),
                         ...(priority !== undefined && { priority }),
+                        ...(quantity !== undefined && { quantity }),
+                        ...(price !== undefined && { price }),
+                        ...(subtasks !== undefined && { subtasks }),
                     },
                     ...state.todos,
                 ],

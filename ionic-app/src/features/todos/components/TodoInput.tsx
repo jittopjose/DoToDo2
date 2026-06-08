@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { IonItem, IonInput, IonButton, IonIcon, IonDatetime, IonPopover } from '@ionic/react';
-import { addOutline, calendarOutline, ellipse } from 'ionicons/icons';
+import { IonButton, IonIcon, IonInput, IonItem, IonLabel, IonPopover, IonSegment, IonSegmentButton, IonTextarea, IonDatetime } from '@ionic/react';
+import { addOutline, calendarOutline, ellipse, listOutline, documentTextOutline, cartOutline, checkmarkDoneOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
 
 const priorityColors = {
@@ -13,16 +13,30 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
     const [dueDate, setDueDate] = useState<string>('');
     const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
+    const [itemType, setItemType] = useState<'todo' | 'shopping' | 'note' | 'checklist'>('todo');
+    const [description, setDescription] = useState('');
+    const [quantity, setQuantity] = useState<string>('1');
+    const [price, setPrice] = useState<string>('');
+    const [checklistText, setChecklistText] = useState('');
+    const [subtasks, setSubtasks] = useState<Array<{ id: string; title: string; isCompleted: boolean }>>([]);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const addTodo = useTodoStore((state) => state.addTodo);
 
     const handleAdd = () => {
         if (text.trim().length === 0) return;
         const dueDateTime = dueDate ? new Date(dueDate).getTime() : undefined;
-        addTodo(text, dueDateTime, priority, list);
+        const quantityValue = quantity ? Number(quantity) : undefined;
+        const priceValue = price ? Number(price) : undefined;
+        const subtasksValue = itemType === 'checklist' && subtasks.length > 0 ? subtasks : undefined;
+        addTodo(text, itemType, description || undefined, dueDateTime, priority, quantityValue, priceValue, subtasksValue, list);
         setText('');
         setDueDate('');
         setPriority(undefined);
+        setDescription('');
+        setQuantity('1');
+        setPrice('');
+        setChecklistText('');
+        setSubtasks([]);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -36,6 +50,13 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
         const currentIndex = levels.indexOf(priority);
         const nextPriority = levels[(currentIndex + 1) % levels.length];
         setPriority(nextPriority);
+    };
+
+    const handleAddChecklistItem = () => {
+        const trimmed = checklistText.trim();
+        if (!trimmed) return;
+        setSubtasks((prev) => [...prev, { id: `${Date.now()}-${prev.length}`, title: trimmed, isCompleted: false }]);
+        setChecklistText('');
     };
 
     const formatDate = (dateString: string) => {
@@ -52,6 +73,22 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
 
     return (
         <>
+            <IonItem>
+                <IonSegment value={itemType} onIonChange={(e) => setItemType(e.detail.value as any)}>
+                    <IonSegmentButton value="todo">
+                        <IonIcon icon={listOutline} />
+                    </IonSegmentButton>
+                    <IonSegmentButton value="shopping">
+                        <IonIcon icon={cartOutline} />
+                    </IonSegmentButton>
+                    <IonSegmentButton value="note">
+                        <IonIcon icon={documentTextOutline} />
+                    </IonSegmentButton>
+                    <IonSegmentButton value="checklist">
+                        <IonIcon icon={checkmarkDoneOutline} />
+                    </IonSegmentButton>
+                </IonSegment>
+            </IonItem>
             <IonItem>
                 <IonButton
                     fill={dueDate ? "solid" : "clear"}
@@ -84,6 +121,45 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
                     <IonIcon icon={addOutline} />
                 </IonButton>
             </IonItem>
+            {(itemType === 'note' || itemType === 'todo' || itemType === 'shopping') && (
+                <IonItem>
+                    <IonLabel position="stacked">Details</IonLabel>
+                    <IonTextarea
+                        value={description}
+                        placeholder={itemType === 'note' ? 'Note body...' : 'Add details...'}
+                        onIonInput={(e) => setDescription(e.detail.value!)}
+                    />
+                </IonItem>
+            )}
+            {itemType === 'shopping' && (
+                <IonItem>
+                    <IonLabel position="stacked">Quantity</IonLabel>
+                    <IonInput
+                        type="number"
+                        value={quantity}
+                        onIonInput={(e) => setQuantity(e.detail.value!)}
+                    />
+                    <IonLabel position="stacked" style={{ marginLeft: '16px' }}>Price</IonLabel>
+                    <IonInput
+                        type="number"
+                        value={price}
+                        onIonInput={(e) => setPrice(e.detail.value!)}
+                    />
+                </IonItem>
+            )}
+            {itemType === 'checklist' && (
+                <IonItem>
+                    <IonInput
+                        value={checklistText}
+                        placeholder="Checklist item"
+                        onIonInput={(e) => setChecklistText(e.detail.value!)}
+                        onKeyUp={(e) => { if (e.key === 'Enter') handleAddChecklistItem(); }}
+                    />
+                    <IonButton fill="clear" slot="end" onClick={handleAddChecklistItem}>
+                        Add
+                    </IonButton>
+                </IonItem>
+            )}
             <IonPopover
                 isOpen={showDatePicker}
                 onDidDismiss={() => setShowDatePicker(false)}
