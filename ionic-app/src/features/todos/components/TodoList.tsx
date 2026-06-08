@@ -3,25 +3,26 @@ import { IonList } from '@ionic/react';
 import { useTodoStore } from '../store/todoStore';
 import { TodoItem } from './TodoItem';
 
-export const TodoList: React.FC = () => {
+interface TodoListProps {
+    folder: string;
+}
+
+export const TodoList: React.FC<TodoListProps> = ({ folder }) => {
     const todos = useTodoStore((state) => state.todos);
     const filter = useTodoStore((state) => state.filter);
     const searchTerm = useTodoStore((state) => state.searchTerm);
 
     const filteredTodos = React.useMemo(() => {
-        if (!todos) return [];
-        let result = todos;
-        
-        // Apply search filter first
+        let result = todos.filter((todo) => todo.folder === folder);
+
         if (searchTerm && searchTerm.trim()) {
             const term = searchTerm.toLowerCase();
-            result = todos.filter((t) =>
+            result = result.filter((t) =>
                 t.title.toLowerCase().includes(term) ||
                 (t.description && t.description.toLowerCase().includes(term))
             );
         }
-        
-        // Apply status filter
+
         switch (filter) {
             case 'active':
                 return result.filter((t) => !t.isCompleted);
@@ -30,7 +31,7 @@ export const TodoList: React.FC = () => {
             default:
                 return result;
         }
-    }, [todos, filter, searchTerm]);
+    }, [todos, filter, searchTerm, folder]);
 
     return (
         <IonList>

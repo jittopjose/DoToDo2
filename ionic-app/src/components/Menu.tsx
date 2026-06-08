@@ -1,6 +1,9 @@
 import {
+  IonBadge,
+  IonButton,
   IonContent,
   IonIcon,
+  IonInput,
   IonItem,
   IonLabel,
   IonList,
@@ -8,11 +11,11 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
-  IonBadge,
 } from '@ionic/react';
 
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { addOutline, archiveOutline, archiveSharp, bookmarkOutline, folderOpenOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import { useTodoStore } from '../features/todos/store/todoStore';
 import './Menu.css';
 
@@ -69,6 +72,16 @@ const Menu: React.FC = () => {
   const clearCompleted = useTodoStore((state) => state.clearCompleted);
   const activeCount = useTodoStore((state) => state.getActiveCount());
   const completedCount = useTodoStore((state) => state.getCompletedCount());
+  const customFolders = useTodoStore((state) => state.customFolders);
+  const addFolder = useTodoStore((state) => state.addFolder);
+  const [newFolderName, setNewFolderName] = useState('');
+
+  const handleAddFolder = () => {
+    const trimmed = newFolderName.trim();
+    if (!trimmed) return;
+    addFolder(trimmed);
+    setNewFolderName('');
+  };
 
   return (
     <IonMenu contentId="main" type="overlay">
@@ -95,6 +108,39 @@ const Menu: React.FC = () => {
             {completedCount > 0 && (
               <IonBadge color="medium" slot="end">{completedCount}</IonBadge>
             )}
+          </IonItem>
+        </IonList>
+
+        <IonList id="custom-folders-list">
+          <IonListHeader>Custom Folders</IonListHeader>
+          {customFolders.length === 0 && (
+            <IonItem lines="none">
+              <IonLabel color="medium">No custom folders yet</IonLabel>
+            </IonItem>
+          )}
+          {customFolders.map((folder, index) => (
+            <IonMenuToggle key={index} autoHide={false}>
+              <IonItem
+                className={location.pathname === `/folder/${encodeURIComponent(folder)}` ? 'selected' : ''}
+                routerLink={`/folder/${encodeURIComponent(folder)}`}
+                routerDirection="none"
+                lines="none"
+                detail={false}
+              >
+                <IonIcon aria-hidden="true" slot="start" ios={folderOpenOutline} md={folderOpenOutline} />
+                <IonLabel>{folder}</IonLabel>
+              </IonItem>
+            </IonMenuToggle>
+          ))}
+          <IonItem lines="none">
+            <IonInput
+              value={newFolderName}
+              placeholder="New folder name"
+              onIonInput={(e) => setNewFolderName(e.detail.value!)}
+            />
+            <IonButton fill="clear" slot="end" onClick={handleAddFolder}>
+              <IonIcon icon={addOutline} />
+            </IonButton>
           </IonItem>
         </IonList>
 

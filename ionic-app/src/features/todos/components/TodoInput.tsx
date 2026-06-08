@@ -9,7 +9,7 @@ const priorityColors = {
     high: 'var(--ion-color-danger)'
 };
 
-export const TodoInput: React.FC = () => {
+export const TodoInput: React.FC<{ folder: string }> = ({ folder }) => {
     const [text, setText] = useState('');
     const [dueDate, setDueDate] = useState<string>('');
     const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
@@ -19,7 +19,7 @@ export const TodoInput: React.FC = () => {
     const handleAdd = () => {
         if (text.trim().length === 0) return;
         const dueDateTime = dueDate ? new Date(dueDate).getTime() : undefined;
-        addTodo(text, dueDateTime, priority);
+        addTodo(text, dueDateTime, priority, folder);
         setText('');
         setDueDate('');
         setPriority(undefined);
@@ -71,7 +71,7 @@ export const TodoInput: React.FC = () => {
                 </IonButton>
                 <IonInput
                     value={text}
-                    placeholder="What needs to be done?"
+                    placeholder={`What needs to be done in ${folder}?`}
                     onIonInput={e => setText(e.detail.value!)}
                     onKeyUp={handleKeyPress}
                 />
@@ -90,7 +90,12 @@ export const TodoInput: React.FC = () => {
             >
                 <IonDatetime
                     value={dueDate}
-                    onIonChange={e => { setDueDate(e.detail.value!); setShowDatePicker(false); }}
+                    onIonChange={e => {
+                        const rawValue = e.detail.value;
+                        const dateValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+                        setDueDate(dateValue ?? '');
+                        setShowDatePicker(false);
+                    }}
                     presentation="date-time"
                     min={new Date().toISOString()}
                 />

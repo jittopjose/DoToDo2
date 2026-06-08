@@ -8,6 +8,7 @@ import './Page.css';
 const Page: React.FC = () => {
 
   const { name } = useParams<{ name: string; }>();
+  const folder = name || 'Inbox';
   const searchTerm = useTodoStore((state) => state.searchTerm);
   const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
   const clearCompleted = useTodoStore((state) => state.clearCompleted);
@@ -19,7 +20,7 @@ const Page: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>{name}</IonTitle>
+          <IonTitle>{folder}</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={clearCompleted}>Clear Completed</IonButton>
           </IonButtons>
@@ -36,11 +37,11 @@ const Page: React.FC = () => {
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">{name}</IonTitle>
+            <IonTitle size="large">{folder}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <TodoInput />
-        <TodoList />
+        <TodoInput folder={folder} />
+        <TodoList folder={folder} />
       </IonContent>
     </IonPage>
   );
