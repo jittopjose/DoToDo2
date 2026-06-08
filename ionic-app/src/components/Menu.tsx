@@ -8,10 +8,12 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
+  IonButton,
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
 import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { useTodoStore } from '../features/todos/store/todoStore';
 import './Menu.css';
 
 interface AppPage {
@@ -64,6 +66,7 @@ const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 
 const Menu: React.FC = () => {
   const location = useLocation();
+  const clearCompleted = useTodoStore((state) => state.clearCompleted);
 
   return (
     <IonMenu contentId="main" type="overlay">
@@ -81,6 +84,10 @@ const Menu: React.FC = () => {
               </IonMenuToggle>
             );
           })}
+          <IonItem lines="none" button onClick={clearCompleted}>
+            <IonIcon aria-hidden="true" slot="start" icon={trashOutline} />
+            <IonLabel>Clear Completed</IonLabel>
+          </IonItem>
         </IonList>
 
         <IonList id="labels-list">

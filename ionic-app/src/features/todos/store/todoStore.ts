@@ -7,6 +7,7 @@ import { Todo, TodoFilter } from '../types';
 interface TodoState {
     todos: Todo[];
     filter: TodoFilter;
+    searchTerm: string;
 
     // Actions
     addTodo: (title: string, dueDate?: number, priority?: 'low' | 'medium' | 'high') => void;
@@ -14,16 +15,42 @@ interface TodoState {
     deleteTodo: (id: string) => void;
     updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority'>>) => void;
     setFilter: (filter: TodoFilter) => void;
+    setSearchTerm: (term: string) => void;
+    clearCompleted: () => void;
 
     // Computed (helper)
     getFilteredTodos: () => Todo[];
 }
+
+const getFilteredTodos = (todos: Todo[], filter: TodoFilter, searchTerm: string): Todo[] => {
+    let filtered = todos;
+    
+    // Apply search filter first
+    if (searchTerm && searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filtered = todos.filter((t) =>
+            t.title.toLowerCase().includes(term) ||
+            (t.description && t.description.toLowerCase().includes(term))
+        );
+    }
+    
+    // Apply status filter
+    switch (filter) {
+        case 'active':
+            return filtered.filter((t) => !t.isCompleted);
+        case 'completed':
+            return filtered.filter((t) => t.isCompleted);
+        default:
+            return filtered;
+    }
+};
 
 export const useTodoStore = create<TodoState>()(
     persist(
         (set, get) => ({
             todos: [],
             filter: 'all',
+            searchTerm: '',
 
             addTodo: (title, dueDate, priority) => set((state) => ({
                 todos: [
@@ -57,16 +84,15 @@ export const useTodoStore = create<TodoState>()(
 
             setFilter: (filter) => set({ filter }),
 
+            setSearchTerm: (term) => set({ searchTerm: term }),
+
+            clearCompleted: () => set((state) => ({
+                todos: state.todos.filter((todo) => !todo.isCompleted),
+            })),
+
             getFilteredTodos: () => {
-                const { todos, filter } = get();
-                switch (filter) {
-                    case 'active':
-                        return todos.filter((t) => !t.isCompleted);
-                    case 'completed':
-                        return todos.filter((t) => t.isCompleted);
-                    default:
-                        return todos;
-                }
+                const { todos, filter, searchTerm } = get();
+                return getFilteredTodos(todos, filter, searchTerm);
             },
         }),
         {
