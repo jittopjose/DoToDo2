@@ -1,5 +1,6 @@
 import React from 'react';
-import { IonList } from '@ionic/react';
+import { IonList, IonIcon } from '@ionic/react';
+import { documentTextOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
 import { TodoItem } from './TodoItem';
 
@@ -33,14 +34,33 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
         }
     }, [todos, filter, searchTerm, list]);
 
+    const totalInFilteredList = todos.filter((t) => t.list === list).length;
+    const isEmptyList = totalInFilteredList === 0;
+    const isSearchActive = searchTerm && searchTerm.trim().length > 0;
+
     return (
         <IonList>
             {filteredTodos.map((todo) => (
                 <TodoItem key={todo.id} todo={todo} />
             ))}
             {filteredTodos.length === 0 && (
-                <div className="ion-padding ion-text-center">
-                    <p style={{ color: 'var(--ion-color-medium)' }}>No tasks found</p>
+                <div className="ion-padding ion-text-center" style={{ padding: '48px 16px' }}>
+                    <IonIcon icon={documentTextOutline} style={{ fontSize: '48px', color: 'var(--ion-color-medium)', marginBottom: '16px' }} />
+                    {isEmptyList ? (
+                        <>
+                            <h2 style={{ margin: '0 0 8px 0', color: 'var(--ion-color-dark)' }}>No tasks yet</h2>
+                            <p style={{ margin: 0, color: 'var(--ion-color-medium)' }}>
+                                Tap the input above to add your first task
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <h2 style={{ margin: '0 0 8px 0', color: 'var(--ion-color-dark)' }}>No matching tasks</h2>
+                            <p style={{ margin: 0, color: 'var(--ion-color-medium)' }}>
+                                {isSearchActive ? `No results for "${searchTerm}"` : 'Try changing the filter'}
+                            </p>
+                        </>
+                    )}
                 </div>
             )}
         </IonList>

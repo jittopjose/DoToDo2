@@ -15,6 +15,7 @@ interface TodoState {
     // Actions
     addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
     toggleTodo: (id: string) => void;
+    toggleSubtask: (todoId: string, subtaskId: string) => void;
     deleteTodo: (id: string) => void;
     updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks'>>) => void;
     setFilter: (filter: TodoFilter) => void;
@@ -87,6 +88,19 @@ export const useTodoStore = create<TodoState>()(
                 todos: state.todos.map((todo) =>
                     todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
                 ),
+            })),
+
+            toggleSubtask: (todoId, subtaskId) => set((state) => ({
+                todos: state.todos.map((todo) => {
+                    if (todo.id !== todoId) return todo;
+                    if (!todo.subtasks) return todo;
+                    return {
+                        ...todo,
+                        subtasks: todo.subtasks.map((subtask) =>
+                            subtask.id === subtaskId ? { ...subtask, isCompleted: !subtask.isCompleted } : subtask
+                        )
+                    };
+                }),
             })),
 
             deleteTodo: (id) => set((state) => ({

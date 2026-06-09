@@ -22,6 +22,13 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const addTodo = useTodoStore((state) => state.addTodo);
 
+    const titlePlaceholders = {
+        todo: `What needs to be done in ${list}?`,
+        shopping: 'What should you buy?',
+        note: 'Enter note title',
+        checklist: 'Enter checklist title',
+    } as const;
+
     const handleAdd = () => {
         if (text.trim().length === 0) return;
         const dueDateTime = dueDate ? new Date(dueDate).getTime() : undefined;
@@ -108,7 +115,7 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
                 </IonButton>
                 <IonInput
                     value={text}
-                    placeholder={`What needs to be done in ${list}?`}
+                    placeholder={titlePlaceholders[itemType]}
                     onIonInput={e => setText(e.detail.value!)}
                     onKeyUp={handleKeyPress}
                 />
