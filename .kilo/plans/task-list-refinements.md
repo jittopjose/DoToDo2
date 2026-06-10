@@ -19,10 +19,11 @@ The task list area consists of:
 ### 2. Overdue Task Visual Indicator [High Priority]
 **Current**: Due dates shown but no visual distinction for overdue
 **Improvement**:
-- Highlight overdue tasks with red accent styling (overrides priority colors)
-- Show "overdue" badge or "X days ago" for past due dates
-- Color-code due dates based on proximity (today, soon, future)
-**Decision**: Red styling overrides priority dot for overdue tasks
+- Highlight overdue tasks with red left border (subtle styling)
+- Show "overdue" badge for overdue tasks
+- Date formatting shows "X days ago" for past dates
+- Red alert icon replaces priority dot for overdue
+**Decision**: Red border + alert icon for overdue tasks (subtle highlight)
 
 ### 3. Checklist Subtask Toggle [Medium Priority]
 **Current**: Checklist items are read-only display
@@ -82,7 +83,7 @@ The task list area consists of:
 
 ### High Priority (Phase 1) ✅ COMPLETED
 - [x] Add `isOverdue` helper function in TodoItem.tsx
-- [x] Apply red accent styling to overdue tasks (background/border)
+- [x] Apply thin red left border to overdue tasks (subtle styling)
 - [x] Update formatDate to show "X days ago" for past dates
 - [x] Create differentiated empty states in TodoList.tsx
 - [x] Add empty state illustration/icon (documentTextOutline)

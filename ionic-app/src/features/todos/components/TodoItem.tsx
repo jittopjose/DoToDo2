@@ -127,7 +127,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         <IonItemSliding>
             <IonItem
                 style={{
-                    '--background': isOverdue(todo) ? 'var(--ion-color-danger-tint)' : undefined,
                     borderLeft: isOverdue(todo) ? '3px solid var(--ion-color-danger)' : undefined
                 } as any}
             >
@@ -135,7 +134,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 slot="start"
                 checked={todo.isCompleted}
                 onIonChange={() => toggleTodo(todo.id)}
-                style={isOverdue(todo) ? { '--background-checked': 'var(--ion-color-danger)' } as any : undefined}
             />
             {!isOverdue(todo) && todo.priority && !isEditing && (
                 <IonIcon icon={ellipse} style={{
