@@ -93,13 +93,24 @@ The task list area consists of:
 
 ### Medium Priority (Phase 2) ✅ COMPLETED
 - [x] Implement IonItemSliding with IonItemOptions for swipe actions (Material-style)
-- [x] Add long-press for action sheet with more options
 
-### Low Priority (Phase 3)
-- [ ] Add CSS transitions for task animations
-- [ ] Add task count and progress summary to Page header
-- [ ] Add ARIA labels for screen readers
-- [ ] Implement keyboard navigation shortcuts
+### Medium Priority (Phase 2b) ✅ COMPLETED
+- [x] Add description inline editing in edit mode
+- [x] Add shopping item quantity/price inline editing
+- [x] Auto-focus on clicked field for inline edits
+
+### Low Priority (Phase 3) ✅ COMPLETED
+- [x] Add CSS transitions for task animations
+- [x] Add task count and progress summary to Page header
+- [x] Add ARIA labels for screen readers
+- [x] Implement keyboard navigation shortcuts (Ionic provides built-in support)
+- [x] Add Done/Cancel buttons for mobile touch UX in edit modes
+
+### Mobile UX Notes
+- Edit mode now shows explicit "Done" and "Cancel" buttons
+- Shopping edit mode shows "Done" and "Cancel" buttons
+- Users can tap outside the input to trigger blur (still works)
+- Auto-focus automatically focuses first input when entering edit mode
 
 ## Files to Modify
 - `src/features/todos/components/TodoItem.tsx` - Overdue styling, subtask toggle

@@ -73,14 +73,31 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const updateTodo = useTodoStore((state) => state.updateTodo);
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(todo.title);
+    const [editDescription, setEditDescription] = useState(todo.description || '');
     const [showDueDatePicker, setShowDueDatePicker] = useState(false);
+    const [editingShopping, setEditingShopping] = useState(false);
+    const [editQuantity, setEditQuantity] = useState(todo.quantity?.toString() ?? '');
+    const [editPrice, setEditPrice] = useState(todo.price?.toString() ?? '');
     const inputRef = useRef<HTMLIonInputElement>(null);
+    const descRef = useRef<HTMLIonInputElement>(null);
+    const qtyRef = useRef<HTMLIonInputElement>(null);
+    const priceRef = useRef<HTMLIonInputElement>(null);
 
     useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.setFocus();
         }
     }, [isEditing]);
+
+    useEffect(() => {
+        if (editingShopping) {
+            if (qtyRef.current && todo.quantity !== undefined) {
+                qtyRef.current.setFocus();
+            } else if (priceRef.current && (todo.quantity === undefined || todo.price !== undefined)) {
+                priceRef.current.setFocus();
+            }
+        }
+    }, [editingShopping]);
 
     const handleEdit = () => {
         if (todo.isCompleted) return;
@@ -123,8 +140,49 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         updateTodo(todo.id, { priority: nextPriority });
     };
 
+    const handleDescriptionSave = () => {
+        const trimmed = editDescription.trim();
+        if (trimmed !== (todo.description || '')) {
+            updateTodo(todo.id, { description: trimmed || undefined });
+        }
+    };
+
+    const handleShoppingSave = () => {
+        const newQuantity = editQuantity ? parseFloat(editQuantity) : undefined;
+        const newPrice = editPrice ? parseFloat(editPrice) : undefined;
+        updateTodo(todo.id, { 
+            quantity: isNaN(newQuantity) ? undefined : newQuantity,
+            price: isNaN(newPrice) ? undefined : newPrice
+        });
+        setEditingShopping(false);
+    };
+
+    const handleShoppingCancel = () => {
+        setEditQuantity(todo.quantity?.toString() ?? '');
+        setEditPrice(todo.price?.toString() ?? '');
+        setEditingShopping(false);
+    };
+
+    const handleShoppingKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleShoppingSave();
+        } else if (e.key === 'Escape') {
+            handleShoppingCancel();
+        }
+    };
+
+    const handleDescKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleDescriptionSave();
+            setIsEditing(false);
+        } else if (e.key === 'Escape') {
+            setEditDescription(todo.description || '');
+            setIsEditing(false);
+        }
+    };
+
     return (
-        <IonItemSliding>
+        <IonItemSliding className="todo-item">
             <IonItem
                 style={{
                     borderLeft: isOverdue(todo) ? '3px solid var(--ion-color-danger)' : undefined
@@ -134,6 +192,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 slot="start"
                 checked={todo.isCompleted}
                 onIonChange={() => toggleTodo(todo.id)}
+                aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
             />
             {!isOverdue(todo) && todo.priority && !isEditing && (
                 <IonIcon icon={ellipse} style={{
@@ -150,25 +209,44 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 }} />
             )}
             {isEditing ? (
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <IonInput
+                            ref={inputRef}
+                            value={editText}
+                            onIonInput={e => setEditText(e.detail.value!)}
+                            onKeyUp={handleKeyPress}
+                            placeholder="Enter title"
+                            style={{ flex: 1 }}
+                        />
+                        <IonButton fill="clear" size="small" onClick={() => { handleSave(); handleDescriptionSave(); }} aria-label="Save changes">
+                            Done
+                        </IonButton>
+                        <IonButton fill="clear" size="small" onClick={() => { handleCancel(); setEditDescription(todo.description || ''); }} aria-label="Cancel editing">
+                            Cancel
+                        </IonButton>
+                    </div>
                     <IonInput
-                        ref={inputRef}
-                        value={editText}
-                        onIonInput={e => setEditText(e.detail.value!)}
-                        onKeyUp={handleKeyPress}
-                        onBlur={handleSave}
-                        placeholder="Enter title"
+                        ref={descRef}
+                        value={editDescription}
+                        onIonInput={e => setEditDescription(e.detail.value!)}
+                        onKeyUp={handleDescKeyPress}
+                        placeholder="Add description"
+                        style={{ fontSize: '14px' }}
+                        aria-label="Edit description"
                     />
-                    <IonButton fill="clear" size="small" onClick={handlePriorityClick}>
-                        <IonIcon icon={ellipse} style={{
-                            color: todo.priority ? priorityColors[todo.priority] : 'var(--ion-color-medium)',
-                            fontSize: '16px'
-                        }} />
-                    </IonButton>
-                    <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
-                        <IonIcon icon={calendarOutline} />
-                    </IonButton>
-                </>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        <IonButton fill="clear" size="small" onClick={handlePriorityClick}>
+                            <IonIcon icon={ellipse} style={{
+                                color: todo.priority ? priorityColors[todo.priority] : 'var(--ion-color-medium)',
+                                fontSize: '16px'
+                            }} />
+                        </IonButton>
+                        <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
+                            <IonIcon icon={calendarOutline} />
+                        </IonButton>
+                    </div>
+                </div>
             ) : (
                 <IonLabel
                     className={todo.isCompleted ? 'ion-text-wrap line-through' : 'ion-text-wrap'}
@@ -189,10 +267,39 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         </div>
                     )}
                     {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
-                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
-                            {todo.quantity !== undefined && <span>Qty: {todo.quantity}</span>}
-                            {todo.quantity !== undefined && todo.price !== undefined && <span> · </span>}
-                            {todo.price !== undefined && <span>Price: ${todo.price.toFixed(2)}</span>}
+                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setEditingShopping(true); }} aria-label="Edit shopping item details">
+                            {editingShopping ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <IonInput
+                                        ref={qtyRef}
+                                        value={editQuantity}
+                                        onIonInput={e => setEditQuantity(e.detail.value!)}
+                                        onKeyUp={handleShoppingKeyPress}
+                                        type="number"
+                                        placeholder="Qty"
+                                        style={{ width: '60px', fontSize: '12px' }}
+                                        aria-label="Edit quantity"
+                                    />
+                                    <IonInput
+                                        ref={priceRef}
+                                        value={editPrice}
+                                        onIonInput={e => setEditPrice(e.detail.value!)}
+                                        onKeyUp={handleShoppingKeyPress}
+                                        type="number"
+                                        placeholder="Price"
+                                        style={{ width: '80px', fontSize: '12px' }}
+                                        aria-label="Edit price"
+                                    />
+                                    <IonButton fill="clear" size="small" onClick={handleShoppingSave}>Done</IonButton>
+                                    <IonButton fill="clear" size="small" onClick={handleShoppingCancel}>Cancel</IonButton>
+                                </div>
+                            ) : (
+                                <>
+                                    {todo.quantity !== undefined && <span>Qty: {todo.quantity}</span>}
+                                    {todo.quantity !== undefined && todo.price !== undefined && <span> · </span>}
+                                    {todo.price !== undefined && <span>Price: ${todo.price.toFixed(2)}</span>}
+                                </>
+                            )}
                         </div>
                     )}
                     {todo.itemType === 'checklist' && todo.subtasks && todo.subtasks.length > 0 && (
@@ -212,6 +319,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     >
                                         <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
                                         <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
+                                        <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
                                     </div>
                                 ))}
                             </div>
@@ -237,7 +345,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
             </IonPopover>
             </IonItem>
             <IonItemOptions side="end">
-                <IonItemOption color="danger" onClick={() => deleteTodo(todo.id)}>
+                <IonItemOption color="danger" onClick={() => deleteTodo(todo.id)} aria-label={`Delete ${todo.title}`}>
                     <IonIcon icon={trashOutline} />
                 </IonItemOption>
             </IonItemOptions>
