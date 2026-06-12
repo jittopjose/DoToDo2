@@ -1,2 +1,225 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
+:root {
+  --dotodo-primary: #6c5ce7;
+  --dotodo-primary-rgb: 108, 92, 231;
+  --dotodo-primary-contrast: #ffffff;
+  --dotodo-primary-soft: rgba(108, 92, 231, 0.12);
+  --dotodo-secondary: #8b5cf6;
+  --dotodo-secondary-rgb: 139, 92, 246;
+  --dotodo-success: #10b981;
+  --dotodo-success-rgb: 16, 185, 129;
+  --dotodo-warning: #f59e0b;
+  --dotodo-warning-rgb: 245, 158, 11;
+  --dotodo-danger: #ef4444;
+  --dotodo-danger-rgb: 239, 68, 68;
+  --dotodo-bg: #f7f4ef;
+  --dotodo-bg-rgb: 247, 244, 239;
+  --dotodo-surface: #fffaf3;
+  --dotodo-surface-strong: #ffffff;
+  --dotodo-card: rgba(255, 250, 243, 0.92);
+  --dotodo-text: #202433;
+  --dotodo-muted: #687083;
+  --dotodo-border: rgba(32, 36, 51, 0.1);
+  --dotodo-shadow-soft: 0 14px 34px rgba(31, 41, 55, 0.1);
+  --dotodo-shadow-card: 0 8px 24px rgba(31, 41, 55, 0.08);
+  --dotodo-radius-sm: 12px;
+  --dotodo-radius-md: 18px;
+  --dotodo-radius-lg: 26px;
+  --dotodo-motion-fast: 180ms;
+  --dotodo-motion-soft: 650ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ion-color-primary: var(--dotodo-primary);
+  --ion-color-primary-rgb: var(--dotodo-primary-rgb);
+  --ion-color-primary-contrast: var(--dotodo-primary-contrast);
+  --ion-color-primary-shade: #5b4bd6;
+  --ion-color-primary-tint: #7d6eed;
+  --ion-color-secondary: var(--dotodo-secondary);
+  --ion-color-secondary-rgb: var(--dotodo-secondary-rgb);
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-tertiary: #14b8a6;
+  --ion-color-tertiary-rgb: 20, 184, 166;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-success: var(--dotodo-success);
+  --ion-color-success-rgb: var(--dotodo-success-rgb);
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-warning: var(--dotodo-warning);
+  --ion-color-warning-rgb: var(--dotodo-warning-rgb);
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-danger: var(--dotodo-danger);
+  --ion-color-danger-rgb: var(--dotodo-danger-rgb);
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-light: var(--dotodo-surface-strong);
+  --ion-color-light-rgb: 255, 255, 255;
+  --ion-color-light-contrast: var(--dotodo-text);
+  --ion-color-medium: var(--dotodo-muted);
+  --ion-color-medium-rgb: 104, 112, 131;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-dark: var(--dotodo-text);
+  --ion-color-dark-rgb: 32, 36, 51;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-background-color: var(--dotodo-bg);
+  --ion-background-color-rgb: var(--dotodo-bg-rgb);
+  --ion-text-color: var(--dotodo-text);
+  --ion-text-color-rgb: var(--dotodo-text);
+  --ion-toolbar-background: transparent;
+  --ion-toolbar-color: var(--dotodo-text);
+  --ion-item-background: transparent;
+  --ion-item-border-color: transparent;
+  --ion-card-background: var(--dotodo-surface-strong);
+  --ion-border-color: var(--dotodo-border);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dotodo-primary: #8b7cff;
+    --dotodo-primary-rgb: 139, 124, 255;
+    --dotodo-primary-contrast: #171923;
+    --dotodo-primary-soft: rgba(139, 124, 255, 0.18);
+    --dotodo-secondary: #a78bfa;
+    --dotodo-secondary-rgb: 167, 139, 250;
+    --dotodo-success: #34d399;
+    --dotodo-success-rgb: 52, 211, 153;
+    --dotodo-warning: #fbbf24;
+    --dotodo-warning-rgb: 251, 191, 36;
+    --dotodo-danger: #fb7185;
+    --dotodo-danger-rgb: 251, 113, 133;
+    --dotodo-bg: #11131c;
+    --dotodo-bg-rgb: 17, 19, 28;
+    --dotodo-surface: #171a24;
+    --dotodo-surface-strong: #1d2130;
+    --dotodo-card: rgba(29, 33, 48, 0.9);
+    --dotodo-text: #f5f7fb;
+    --dotodo-muted: #9aa3b2;
+    --dotodo-border: rgba(245, 247, 251, 0.1);
+    --dotodo-shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.28);
+    --dotodo-shadow-card: 0 8px 22px rgba(0, 0, 0, 0.2);
+
+    --ion-color-primary: var(--dotodo-primary);
+    --ion-color-primary-rgb: var(--dotodo-primary-rgb);
+    --ion-color-primary-contrast: var(--dotodo-primary-contrast);
+    --ion-color-primary-shade: #7364e8;
+    --ion-color-primary-tint: #9b8cff;
+    --ion-color-secondary: var(--dotodo-secondary);
+    --ion-color-secondary-rgb: var(--dotodo-secondary-rgb);
+    --ion-color-secondary-contrast: #171923;
+    --ion-color-tertiary: #2dd4bf;
+    --ion-color-tertiary-rgb: 45, 212, 191;
+    --ion-color-tertiary-contrast: #0f172a;
+    --ion-color-success: var(--dotodo-success);
+    --ion-color-success-rgb: var(--dotodo-success-rgb);
+    --ion-color-success-contrast: #052e24;
+    --ion-color-warning: var(--dotodo-warning);
+    --ion-color-warning-rgb: var(--dotodo-warning-rgb);
+    --ion-color-warning-contrast: #241b03;
+    --ion-color-danger: var(--dotodo-danger);
+    --ion-color-danger-rgb: var(--dotodo-danger-rgb);
+    --ion-color-danger-contrast: #3b0710;
+    --ion-color-light: var(--dotodo-surface-strong);
+    --ion-color-light-rgb: 29, 33, 48;
+    --ion-color-light-contrast: var(--dotodo-text);
+    --ion-color-medium: var(--dotodo-muted);
+    --ion-color-medium-rgb: 154, 163, 178;
+    --ion-color-medium-contrast: #171923;
+    --ion-color-dark: var(--dotodo-text);
+    --ion-color-dark-rgb: 245, 247, 251;
+    --ion-color-dark-contrast: #171923;
+    --ion-background-color: var(--dotodo-bg);
+    --ion-background-color-rgb: var(--dotodo-bg-rgb);
+    --ion-text-color: var(--dotodo-text);
+    --ion-text-color-rgb: var(--dotodo-text);
+    --ion-toolbar-background: transparent;
+    --ion-toolbar-color: var(--dotodo-text);
+    --ion-item-background: transparent;
+    --ion-item-border-color: transparent;
+    --ion-card-background: var(--dotodo-surface-strong);
+    --ion-border-color: var(--dotodo-border);
+
+    color-scheme: dark;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(var(--dotodo-primary-rgb), 0.16), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(var(--dotodo-secondary-rgb), 0.12), transparent 32%),
+    var(--dotodo-bg);
+  color: var(--dotodo-text);
+  font-family: var(--ion-font-family);
+}
+
+body {
+  overflow: hidden;
+}
+
+ion-app {
+  background: transparent;
+}
+
+ion-content {
+  --background: var(--dotodo-bg);
+}
+
+ion-toolbar {
+  --background: transparent;
+  --color: var(--dotodo-text);
+  --border-color: transparent;
+}
+
+ion-title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+ion-button {
+  --border-radius: 999px;
+  font-weight: 700;
+}
+
+ion-searchbar {
+  --background: var(--dotodo-surface-strong);
+  --border-radius: 18px;
+  --box-shadow: none;
+  --color: var(--dotodo-text);
+  --icon-color: var(--dotodo-muted);
+  --placeholder-color: var(--dotodo-muted);
+  --clear-button-color: var(--dotodo-muted);
+}
+
+ion-item {
+  --border-radius: var(--dotodo-radius-md);
+  --inner-border-width: 0;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+ion-input,
+ion-textarea {
+  --color: var(--dotodo-text);
+  --placeholder-color: var(--dotodo-muted);
+}
+
+ion-checkbox {
+  --background-checked: var(--dotodo-primary);
+  --checkmark-color: var(--dotodo-primary-contrast);
+}
+
+ion-progress-bar {
+  --background: rgba(var(--dotodo-primary-rgb), 0.14);
+  --progress-background: var(--dotodo-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

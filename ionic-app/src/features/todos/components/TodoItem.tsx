@@ -17,6 +17,7 @@ import {
 import { trashOutline, calendarOutline, ellipse, listOutline, cartOutline, documentTextOutline, checkmarkDoneOutline, alertCircleOutline } from 'ionicons/icons';
 import { Todo } from '../types';
 import { useTodoStore } from '../store/todoStore';
+import './TodoItem.css';
 
 interface Props {
     todo: Todo;
@@ -44,12 +45,6 @@ const formatDate = (timestamp: number) => {
         return `${diffDays} day${diffDays > 1 ? 's' : ''} ago (${datePart})`;
     }
     return `${datePart}, ${timePart}`;
-};
-
-const priorityColors = {
-    low: 'var(--ion-color-success)',
-    medium: 'var(--ion-color-warning)',
-    high: 'var(--ion-color-danger)'
 };
 
 const typeIcons = {
@@ -99,7 +94,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 priceRef.current.setFocus();
             }
         }
-    }, [editingShopping]);
+    }, [editingShopping, priceRef, qtyRef, todo.price, todo.quantity]);
 
     const handleEdit = () => {
         if (todo.isCompleted) return;
@@ -153,8 +148,8 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         const newQuantity = editQuantity ? parseFloat(editQuantity) : undefined;
         const newPrice = editPrice ? parseFloat(editPrice) : undefined;
         updateTodo(todo.id, { 
-            quantity: isNaN(newQuantity) ? undefined : newQuantity,
-            price: isNaN(newPrice) ? undefined : newPrice
+            quantity: typeof newQuantity === 'number' && Number.isFinite(newQuantity) ? newQuantity : undefined,
+            price: typeof newPrice === 'number' && Number.isFinite(newPrice) ? newPrice : undefined
         });
         setEditingShopping(false);
     };
@@ -184,168 +179,152 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     };
 
     return (
-        <IonItemSliding className="todo-item">
-            <IonItem
-                style={{
-                    borderLeft: isOverdue(todo) ? '3px solid var(--ion-color-danger)' : undefined
-                } as any}
-            >
+        <IonItemSliding className={`todo-item ${isOverdue(todo) ? 'is-overdue' : ''}`}>
+            <IonItem className="task-row" lines="none">
             <IonCheckbox
+                className="task-checkbox"
                 slot="start"
                 checked={todo.isCompleted}
                 onIonChange={() => toggleTodo(todo.id)}
                 aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
             />
             {!isOverdue(todo) && todo.priority && !isEditing && (
-                <IonIcon icon={ellipse} style={{
-                    color: priorityColors[todo.priority],
-                    marginRight: '8px',
-                    fontSize: '16px'
-                }} />
+                <IonIcon className={`task-priority-dot task-priority-dot--${todo.priority}`} icon={ellipse} />
             )}
             {isOverdue(todo) && !isEditing && (
-                <IonIcon icon={alertCircleOutline} style={{
-                    color: 'var(--ion-color-danger)',
-                    marginRight: '8px',
-                    fontSize: '16px'
-                }} />
+                <IonIcon className="task-overdue-icon" icon={alertCircleOutline} />
             )}
             {isEditing ? (
-                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="edit-stack">
+                    <div className="edit-title-row">
                         <IonInput
                             ref={inputRef}
+                            className="edit-title-input"
                             value={editText}
                             onIonInput={e => setEditText(e.detail.value!)}
                             onKeyUp={handleKeyPress}
                             placeholder="Enter title"
-                            style={{ flex: 1 }}
                         />
-                        <IonButton fill="clear" size="small" onClick={() => { handleSave(); handleDescriptionSave(); }} aria-label="Save changes">
+                        <IonButton className="compact-button save-button" fill="clear" size="small" onClick={() => { handleSave(); handleDescriptionSave(); }} aria-label="Save changes">
                             Done
                         </IonButton>
-                        <IonButton fill="clear" size="small" onClick={() => { handleCancel(); setEditDescription(todo.description || ''); }} aria-label="Cancel editing">
+                        <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={() => { handleCancel(); setEditDescription(todo.description || ''); }} aria-label="Cancel editing">
                             Cancel
                         </IonButton>
                     </div>
                     <IonInput
                         ref={descRef}
+                        className="edit-description-input"
                         value={editDescription}
                         onIonInput={e => setEditDescription(e.detail.value!)}
                         onKeyUp={handleDescKeyPress}
                         placeholder="Add description"
-                        style={{ fontSize: '14px' }}
                         aria-label="Edit description"
                     />
                     {todo.subtasks && todo.subtasks.length > 0 && (
-                        <div style={{ marginTop: '4px' }}>
-                            <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                        <div className="edit-subtask-summary">
+                            <IonText className="task-progress-text">
                                 Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
                             </IonText>
                         </div>
                     )}
                     <IonInput
+                        className="subtask-input"
                         value={newSubtaskText}
                         onIonInput={e => setNewSubtaskText(e.detail.value!)}
                         onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
                         placeholder="Add subtask..."
-                        style={{ fontSize: '12px' }}
                         aria-label="Add subtask to this task"
                     />
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                        <IonButton fill="clear" size="small" onClick={handlePriorityClick}>
-                            <IonIcon icon={ellipse} style={{
-                                color: todo.priority ? priorityColors[todo.priority] : 'var(--ion-color-medium)',
-                                fontSize: '16px'
-                            }} />
+                    <div className="edit-actions">
+                        <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={handlePriorityClick} aria-label="Change priority">
+                            <IonIcon className={`task-priority-dot ${todo.priority ? `task-priority-dot--${todo.priority}` : ''}`} icon={ellipse} />
                         </IonButton>
-                        <IonButton fill="clear" size="small" onClick={() => setShowDueDatePicker(true)}>
+                        <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={() => setShowDueDatePicker(true)} aria-label="Change due date">
                             <IonIcon icon={calendarOutline} />
                         </IonButton>
                     </div>
                 </div>
             ) : (
                 <IonLabel
-                    className={todo.isCompleted ? 'ion-text-wrap line-through' : 'ion-text-wrap'}
-                    style={{ textDecoration: todo.isCompleted ? 'line-through' : 'none', cursor: 'pointer' }}
+                    className={`task-label ${todo.isCompleted ? 'is-completed' : ''}`}
                     onClick={handleEdit}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <IonIcon icon={typeIcons[todo.itemType]} style={{ fontSize: '18px', color: 'var(--ion-color-primary)' }} />
-                        <strong>{todo.title}</strong>
-                        <IonBadge color="medium" style={{ textTransform: 'none' }}>{typeLabels[todo.itemType]}</IonBadge>
+                    <div className="task-title-row">
+                        <IonIcon className={`task-type-icon task-type-icon--${todo.itemType}`} icon={typeIcons[todo.itemType]} />
+                        <strong className="task-title-text">{todo.title}</strong>
+                        <IonBadge className="task-badge" color="medium">{typeLabels[todo.itemType]}</IonBadge>
                         {isOverdue(todo) && (
-                            <IonBadge color="danger" style={{ fontSize: '10px' }}>Overdue</IonBadge>
+                            <IonBadge className="task-badge task-badge--danger" color="danger">Overdue</IonBadge>
                         )}
                     </div>
                     {todo.description && (
-                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
+                        <div className="task-description">
                             {todo.description}
                         </div>
                     )}
                     {todo.subtasks && todo.subtasks.length > 0 && todo.itemType !== 'checklist' && (
-                        <div style={{ marginTop: '8px' }}>
-                            <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                        <div className="task-subtask-list">
+                            <IonText className="task-progress-text">
                                 Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
                             </IonText>
-                            <div style={{ marginTop: '4px' }}>
-                                {todo.subtasks.map((subtask) => (
-                                    <div 
-                                        key={subtask.id} 
-                                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: subtask.isCompleted ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', cursor: 'pointer' }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleSubtask(todo.id, subtask.id);
-                                        }}
-                                    >
-                                        <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
-                                        <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
-                                    </div>
-                                ))}
-                            </div>
+                            {todo.subtasks.map((subtask) => (
+                                <div
+                                    className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                                    key={subtask.id}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleSubtask(todo.id, subtask.id);
+                                    }}
+                                >
+                                    <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
+                                    <span>{subtask.title}</span>
+                                    <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
+                                </div>
+                            ))}
                         </div>
                     )}
                     {todo.itemType === 'todo' && !todo.isCompleted && (
-                        <div style={{ marginTop: '8px', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                        <div className="task-subtask-add-row">
                             <IonInput
+                                className="subtask-input"
                                 value={newSubtaskText}
                                 onIonInput={e => setNewSubtaskText(e.detail.value!)}
                                 onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                placeholder={todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add subtask..."}
-                                style={{ fontSize: '12px', flex: 1 }}
+                                placeholder="Add subtask..."
                                 aria-label="Add new subtask to this task"
                             />
-                            <IonButton fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                            <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
                                 Add
                             </IonButton>
                         </div>
                     )}
                     {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
-                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setEditingShopping(true); }} aria-label="Edit shopping item details">
+                        <div className="task-shopping-row" onClick={(e) => { e.stopPropagation(); setEditingShopping(true); }} aria-label="Edit shopping item details">
                             {editingShopping ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <div className="shopping-edit-row" onClick={(e) => e.stopPropagation()}>
                                     <IonInput
                                         ref={qtyRef}
+                                        className="shopping-edit-input"
                                         value={editQuantity}
                                         onIonInput={e => setEditQuantity(e.detail.value!)}
                                         onKeyUp={handleShoppingKeyPress}
                                         type="number"
                                         placeholder="Qty"
-                                        style={{ width: '60px', fontSize: '12px' }}
                                         aria-label="Edit quantity"
                                     />
                                     <IonInput
                                         ref={priceRef}
+                                        className="shopping-edit-input"
                                         value={editPrice}
                                         onIonInput={e => setEditPrice(e.detail.value!)}
                                         onKeyUp={handleShoppingKeyPress}
                                         type="number"
                                         placeholder="Price"
-                                        style={{ width: '80px', fontSize: '12px' }}
                                         aria-label="Edit price"
                                     />
-                                    <IonButton fill="clear" size="small" onClick={handleShoppingSave}>Done</IonButton>
-                                    <IonButton fill="clear" size="small" onClick={handleShoppingCancel}>Cancel</IonButton>
+                                    <IonButton className="compact-button save-button" fill="clear" size="small" onClick={handleShoppingSave}>Done</IonButton>
+                                    <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={handleShoppingCancel}>Cancel</IonButton>
                                 </div>
                             ) : (
                                 <>
@@ -357,24 +336,24 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         </div>
                     )}
                     {todo.itemType === 'checklist' && (
-                        <div style={{ marginTop: '8px' }}>
+                        <div className="task-checklist-block">
                             {todo.subtasks && todo.subtasks.length > 0 ? (
                                 <>
-                                    <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                                    <IonText className="task-progress-text">
                                         Checklist: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
                                     </IonText>
-                                    <div style={{ marginTop: '4px' }}>
+                                    <div className="task-subtask-list">
                                         {todo.subtasks.map((subtask) => (
-                                            <div 
-                                                key={subtask.id} 
-                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: subtask.isCompleted ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', cursor: 'pointer' }}
+                                            <div
+                                                className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                                                key={subtask.id}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     toggleSubtask(todo.id, subtask.id);
                                                 }}
                                             >
-                                                <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
-                                                <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
+                                                <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
+                                                <span>{subtask.title}</span>
                                                 <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
                                             </div>
                                         ))}
@@ -382,16 +361,16 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                 </>
                             ) : null}
                             {!todo.isCompleted && (
-                                <div style={{ marginTop: todo.subtasks && todo.subtasks.length > 0 ? '8px' : '0', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                <div className="task-subtask-add-row">
                                     <IonInput
+                                        className="subtask-input"
                                         value={newSubtaskText}
                                         onIonInput={e => setNewSubtaskText(e.detail.value!)}
                                         onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
                                         placeholder={todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add your first subtask..."}
-                                        style={{ fontSize: '12px', flex: 1 }}
                                         aria-label="Add new subtask"
                                     />
-                                    <IonButton fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                                    <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
                                         Add
                                     </IonButton>
                                 </div>
@@ -399,17 +378,14 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         </div>
                     )}
                     {todo.dueDate && (
-                        <div style={{ fontSize: '12px', color: isOverdue(todo) ? 'var(--ion-color-danger)' : 'var(--ion-color-medium)', marginTop: '4px', display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
-                            <IonIcon icon={calendarOutline} style={{ marginRight: '4px', fontSize: '14px' }} />
-                            Due: {formatDate(todo.dueDate)}
+                        <div className={`task-due-row ${isOverdue(todo) ? 'is-overdue' : ''}`} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
+                            <IonIcon icon={calendarOutline} />
+                            <span>Due: {formatDate(todo.dueDate)}</span>
                         </div>
                     )}
                 </IonLabel>
             )}
-            <IonPopover
-                isOpen={showDueDatePicker}
-                onDidDismiss={() => setShowDueDatePicker(false)}
-            >
+            <IonPopover className="datetime-popover" isOpen={showDueDatePicker} onDidDismiss={() => setShowDueDatePicker(false)}>
                 <IonDatetime
                     value={todo.dueDate ? new Date(todo.dueDate).toISOString() : ''}
                     onIonChange={handleDueDateChange}
@@ -417,7 +393,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 />
             </IonPopover>
             </IonItem>
-            <IonItemOptions side="end">
+            <IonItemOptions side="end" className="task-options">
                 <IonItemOption color="danger" onClick={() => deleteTodo(todo.id)} aria-label={`Delete ${todo.title}`}>
                     <IonIcon icon={trashOutline} />
                 </IonItemOption>

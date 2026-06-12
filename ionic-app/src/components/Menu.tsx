@@ -35,22 +35,30 @@ const Menu: React.FC = () => {
   };
 
   return (
-    <IonMenu contentId="main" type="overlay">
-      <IonContent>
-        <IonList id="lists-list">
-          <IonListHeader>Lists</IonListHeader>
+    <IonMenu className="app-menu" contentId="main" type="overlay">
+      <IonContent className="menu-content">
+        <div className="menu-brand">
+          <div className="menu-mark">✓</div>
+          <div>
+            <strong>dotodo2</strong>
+            <span>{activeCount} open task{activeCount === 1 ? '' : 's'}</span>
+          </div>
+        </div>
+
+        <IonList id="lists-list" className="menu-list">
+          <IonListHeader className="menu-section-title">Lists</IonListHeader>
           <IonMenuToggle autoHide={false}>
-            <IonItem className={location.pathname === '/list/All Lists' ? 'selected' : ''} routerLink="/list/All Lists" routerDirection="none" lines="none" detail={false}>
+            <IonItem className={`menu-item ${location.pathname === '/list/All Lists' ? 'is-selected' : ''}`} routerLink="/list/All Lists" routerDirection="none" lines="none" detail={false}>
               <IonIcon aria-hidden="true" slot="start" ios={listOutline} md={listSharp} />
               <IonLabel>All Lists</IonLabel>
               {activeCount > 0 && (
-                <IonBadge color="primary" slot="end">{activeCount}</IonBadge>
+                <IonBadge className="menu-badge" color="primary" slot="end">{activeCount}</IonBadge>
               )}
             </IonItem>
           </IonMenuToggle>
 
           {customLists.length === 0 && (
-            <IonItem lines="none">
+            <IonItem lines="none" className="menu-empty">
               <IonLabel color="medium">No custom lists yet</IonLabel>
             </IonItem>
           )}
@@ -58,34 +66,35 @@ const Menu: React.FC = () => {
           {customLists.map((list, index) => (
             <IonMenuToggle key={index} autoHide={false}>
               <IonItem
-                className={location.pathname === `/list/${encodeURIComponent(list)}` ? 'selected' : ''}
+                className={`menu-item ${location.pathname === `/list/${encodeURIComponent(list)}` ? 'is-selected' : ''}`}
                 routerLink={`/list/${encodeURIComponent(list)}`}
                 routerDirection="none"
                 lines="none"
                 detail={false}
               >
-                <IonIcon aria-hidden="true" slot="start" ios={folderOpenOutline} md={folderOpenOutline} />
+                <IonIcon aria-hidden="true" slot="start" icon={folderOpenOutline} />
                 <IonLabel>{list}</IonLabel>
               </IonItem>
             </IonMenuToggle>
           ))}
 
-          <IonItem lines="none">
+          <IonItem lines="none" className="menu-create-row">
             <IonInput
+              className="menu-list-input"
               value={newListName}
               placeholder="New list name"
               onIonInput={(e) => setNewListName(e.detail.value!)}
             />
-            <IonButton fill="clear" slot="end" onClick={handleAddList}>
+            <IonButton className="menu-add-button" fill="clear" slot="end" onClick={handleAddList} aria-label="Add list">
               <IonIcon icon={addOutline} />
             </IonButton>
           </IonItem>
 
-          <IonItem lines="none" button onClick={clearCompleted}>
+          <IonItem lines="none" className="menu-clear-row" button onClick={clearCompleted}>
             <IonIcon aria-hidden="true" slot="start" icon={trashOutline} />
             <IonLabel>Clear Completed</IonLabel>
             {completedCount > 0 && (
-              <IonBadge color="medium" slot="end">{completedCount}</IonBadge>
+              <IonBadge className="menu-badge menu-badge-muted" color="medium" slot="end">{completedCount}</IonBadge>
             )}
           </IonItem>
         </IonList>

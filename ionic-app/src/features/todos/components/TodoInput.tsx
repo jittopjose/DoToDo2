@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { IonButton, IonIcon, IonInput, IonItem, IonLabel, IonPopover, IonSegment, IonSegmentButton, IonTextarea, IonDatetime } from '@ionic/react';
 import { addOutline, calendarOutline, ellipse, listOutline, documentTextOutline, cartOutline, checkmarkDoneOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
-
-const priorityColors = {
-    low: 'var(--ion-color-success)',
-    medium: 'var(--ion-color-warning)',
-    high: 'var(--ion-color-danger)'
-};
+import './TodoInput.css';
 
 export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
@@ -80,100 +75,118 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
 
     return (
         <>
-            <IonItem>
-                <IonSegment value={itemType} onIonChange={(e) => setItemType(e.detail.value as any)}>
-                    <IonSegmentButton value="todo">
+            <IonItem lines="none" className="composer-card">
+                <IonSegment value={itemType} onIonChange={(e) => setItemType(e.detail.value as any)} className="type-segment">
+                    <IonSegmentButton value="todo" className="type-pill">
                         <IonIcon icon={listOutline} />
+                        <IonLabel>Task</IonLabel>
                     </IonSegmentButton>
-                    <IonSegmentButton value="shopping">
+                    <IonSegmentButton value="shopping" className="type-pill">
                         <IonIcon icon={cartOutline} />
+                        <IonLabel>Shop</IonLabel>
                     </IonSegmentButton>
-                    <IonSegmentButton value="note">
+                    <IonSegmentButton value="note" className="type-pill">
                         <IonIcon icon={documentTextOutline} />
+                        <IonLabel>Note</IonLabel>
                     </IonSegmentButton>
-                    <IonSegmentButton value="checklist">
+                    <IonSegmentButton value="checklist" className="type-pill">
                         <IonIcon icon={checkmarkDoneOutline} />
+                        <IonLabel>Check</IonLabel>
                     </IonSegmentButton>
                 </IonSegment>
             </IonItem>
-            <IonItem>
+            <IonItem lines="none" className="composer-main">
                 <IonButton
+                    className="composer-action date-action"
                     fill={dueDate ? "solid" : "clear"}
                     color={dueDate ? "primary" : undefined}
                     slot="start"
                     onClick={() => setShowDatePicker(true)}
+                    aria-label="Choose due date"
                 >
                     <IonIcon icon={calendarOutline} />
                 </IonButton>
                 <IonButton
+                    className={`composer-action priority-action ${priority ? `priority-action--${priority}` : ''}`}
                     fill={priority ? "solid" : "clear"}
                     color={priority ? (priority === 'low' ? 'success' : priority === 'medium' ? 'warning' : 'danger') : undefined}
                     slot="start"
                     onClick={handlePriorityClick}
+                    aria-label="Choose priority"
                 >
                     <IonIcon icon={ellipse} />
                 </IonButton>
                 <IonInput
+                    className="composer-title-input"
                     value={text}
                     placeholder={titlePlaceholders[itemType]}
                     onIonInput={e => setText(e.detail.value!)}
                     onKeyUp={handleKeyPress}
                 />
                 {dueDate && (
-                    <span style={{ marginLeft: '8px', fontSize: '12px', color: 'var(--ion-color-primary)' }}>
+                    <span className="due-chip">
                         {formatDate(dueDate)}
                     </span>
                 )}
-                <IonButton slot="end" onClick={handleAdd}>
+                <IonButton className="composer-add-button" slot="end" onClick={handleAdd} disabled={!text.trim()}>
                     <IonIcon icon={addOutline} />
                 </IonButton>
             </IonItem>
             {(itemType === 'note' || itemType === 'todo' || itemType === 'shopping') && (
-                <IonItem>
+                <IonItem lines="none" className="composer-detail">
                     <IonLabel position="stacked">Details</IonLabel>
                     <IonTextarea
+                        className="composer-textarea"
                         value={description}
                         placeholder={itemType === 'note' ? 'Note body...' : 'Add details...'}
                         onIonInput={(e) => setDescription(e.detail.value!)}
+                        rows={3}
                     />
                 </IonItem>
             )}
             {itemType === 'shopping' && (
-                <IonItem>
-                    <IonLabel position="stacked">Quantity</IonLabel>
-                    <IonInput
-                        type="number"
-                        value={quantity}
-                        onIonInput={(e) => setQuantity(e.detail.value!)}
-                    />
-                    <IonLabel position="stacked" style={{ marginLeft: '16px' }}>Price</IonLabel>
-                    <IonInput
-                        type="number"
-                        value={price}
-                        onIonInput={(e) => setPrice(e.detail.value!)}
-                    />
+                <IonItem lines="none" className="shopping-row">
+                    <div className="shopping-field">
+                        <IonLabel position="stacked">Quantity</IonLabel>
+                        <IonInput
+                            className="composer-input"
+                            type="number"
+                            value={quantity}
+                            onIonInput={(e) => setQuantity(e.detail.value!)}
+                        />
+                    </div>
+                    <div className="shopping-field">
+                        <IonLabel position="stacked">Price</IonLabel>
+                        <IonInput
+                            className="composer-input"
+                            type="number"
+                            value={price}
+                            onIonInput={(e) => setPrice(e.detail.value!)}
+                        />
+                    </div>
                 </IonItem>
             )}
             {itemType === 'checklist' && (
                 <>
-                    <IonItem>
-                        <IonLabel position="stacked">Subtasks (enter one below)</IonLabel>
+                    <IonItem lines="none" className="checklist-row">
+                        <IonLabel position="stacked">Subtasks</IonLabel>
                         <IonInput
+                            className="composer-input"
                             value={checklistText}
                             placeholder="Checklist item"
                             onIonInput={(e) => setChecklistText(e.detail.value!)}
                             onKeyUp={(e) => { if (e.key === 'Enter') handleAddChecklistItem(); }}
                         />
-                        <IonButton fill="clear" slot="end" onClick={handleAddChecklistItem}>
+                        <IonButton className="checklist-add-button" fill="clear" slot="end" onClick={handleAddChecklistItem}>
                             Add
                         </IonButton>
                     </IonItem>
                     {subtasks.length > 0 && (
-                        <IonItem>
-                            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px', padding: '4px 0' }}>
+                        <IonItem lines="none" className="checklist-preview">
+                            <div className="checklist-preview-list">
                                 {subtasks.map((subtask, index) => (
-                                    <div key={subtask.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                                        <span style={{ flex: 1 }}>{subtask.title}</span>
+                                    <div className="checklist-chip" key={subtask.id}>
+                                        <span>{subtask.title}</span>
                                         <IonButton fill="clear" size="small" onClick={() => setSubtasks(prev => prev.filter((_, i) => i !== index))} aria-label={`Remove ${subtask.title}`}>
                                             Remove
                                         </IonButton>
@@ -184,10 +197,7 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
                     )}
                 </>
             )}
-            <IonPopover
-                isOpen={showDatePicker}
-                onDidDismiss={() => setShowDatePicker(false)}
-            >
+            <IonPopover className="datetime-popover" isOpen={showDatePicker} onDidDismiss={() => setShowDatePicker(false)}>
                 <IonDatetime
                     value={dueDate}
                     onIonChange={e => {

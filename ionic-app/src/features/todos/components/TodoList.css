@@ -1,0 +1,49 @@
+.todo-list {
+  --ion-item-background: transparent;
+  padding: 0 12px 28px;
+}
+
+.empty-state {
+  display: grid;
+  justify-items: center;
+  margin: 30px 0 8px;
+  padding: 34px 20px;
+  border: 1px dashed var(--dotodo-border);
+  border-radius: var(--dotodo-radius-lg);
+  background: var(--dotodo-card);
+  box-shadow: var(--dotodo-shadow-card);
+  text-align: center;
+}
+
+.empty-illustration {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  margin-bottom: 16px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top left, rgba(var(--dotodo-primary-rgb), 0.24), transparent 58%),
+    rgba(var(--dotodo-primary-rgb), 0.1);
+  color: var(--dotodo-primary);
+}
+
+.empty-illustration ion-icon {
+  font-size: 38px;
+}
+
+.empty-state h2 {
+  margin: 0 0 8px;
+  color: var(--dotodo-text);
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.empty-state p {
+  max-width: 280px;
+  margin: 0;
+  color: var(--dotodo-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
