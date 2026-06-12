@@ -155,17 +155,34 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
                 </IonItem>
             )}
             {itemType === 'checklist' && (
-                <IonItem>
-                    <IonInput
-                        value={checklistText}
-                        placeholder="Checklist item"
-                        onIonInput={(e) => setChecklistText(e.detail.value!)}
-                        onKeyUp={(e) => { if (e.key === 'Enter') handleAddChecklistItem(); }}
-                    />
-                    <IonButton fill="clear" slot="end" onClick={handleAddChecklistItem}>
-                        Add
-                    </IonButton>
-                </IonItem>
+                <>
+                    <IonItem>
+                        <IonLabel position="stacked">Subtasks (enter one below)</IonLabel>
+                        <IonInput
+                            value={checklistText}
+                            placeholder="Checklist item"
+                            onIonInput={(e) => setChecklistText(e.detail.value!)}
+                            onKeyUp={(e) => { if (e.key === 'Enter') handleAddChecklistItem(); }}
+                        />
+                        <IonButton fill="clear" slot="end" onClick={handleAddChecklistItem}>
+                            Add
+                        </IonButton>
+                    </IonItem>
+                    {subtasks.length > 0 && (
+                        <IonItem>
+                            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px', padding: '4px 0' }}>
+                                {subtasks.map((subtask, index) => (
+                                    <div key={subtask.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                                        <span style={{ flex: 1 }}>{subtask.title}</span>
+                                        <IonButton fill="clear" size="small" onClick={() => setSubtasks(prev => prev.filter((_, i) => i !== index))} aria-label={`Remove ${subtask.title}`}>
+                                            Remove
+                                        </IonButton>
+                                    </div>
+                                ))}
+                            </div>
+                        </IonItem>
+                    )}
+                </>
             )}
             <IonPopover
                 isOpen={showDatePicker}

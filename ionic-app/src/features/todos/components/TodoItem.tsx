@@ -69,6 +69,7 @@ const typeLabels = {
 export const TodoItem: React.FC<Props> = ({ todo }) => {
     const toggleTodo = useTodoStore((state) => state.toggleTodo);
     const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
+    const addSubtask = useTodoStore((state) => state.addSubtask);
     const deleteTodo = useTodoStore((state) => state.deleteTodo);
     const updateTodo = useTodoStore((state) => state.updateTodo);
     const [isEditing, setIsEditing] = useState(false);
@@ -78,6 +79,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [editingShopping, setEditingShopping] = useState(false);
     const [editQuantity, setEditQuantity] = useState(todo.quantity?.toString() ?? '');
     const [editPrice, setEditPrice] = useState(todo.price?.toString() ?? '');
+    const [newSubtaskText, setNewSubtaskText] = useState('');
     const inputRef = useRef<HTMLIonInputElement>(null);
     const descRef = useRef<HTMLIonInputElement>(null);
     const qtyRef = useRef<HTMLIonInputElement>(null);
@@ -235,6 +237,21 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                         style={{ fontSize: '14px' }}
                         aria-label="Edit description"
                     />
+                    {todo.subtasks && todo.subtasks.length > 0 && (
+                        <div style={{ marginTop: '4px' }}>
+                            <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                                Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                            </IonText>
+                        </div>
+                    )}
+                    <IonInput
+                        value={newSubtaskText}
+                        onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                        onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
+                        placeholder="Add subtask..."
+                        style={{ fontSize: '12px' }}
+                        aria-label="Add subtask to this task"
+                    />
                     <div style={{ display: 'flex', gap: '4px' }}>
                         <IonButton fill="clear" size="small" onClick={handlePriorityClick}>
                             <IonIcon icon={ellipse} style={{
@@ -264,6 +281,43 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     {todo.description && (
                         <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', marginTop: '4px' }}>
                             {todo.description}
+                        </div>
+                    )}
+                    {todo.subtasks && todo.subtasks.length > 0 && todo.itemType !== 'checklist' && (
+                        <div style={{ marginTop: '8px' }}>
+                            <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                                Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                            </IonText>
+                            <div style={{ marginTop: '4px' }}>
+                                {todo.subtasks.map((subtask) => (
+                                    <div 
+                                        key={subtask.id} 
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: subtask.isCompleted ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', cursor: 'pointer' }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleSubtask(todo.id, subtask.id);
+                                        }}
+                                    >
+                                        <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
+                                        <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {todo.itemType === 'todo' && !todo.isCompleted && (
+                        <div style={{ marginTop: '8px', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <IonInput
+                                value={newSubtaskText}
+                                onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
+                                placeholder={todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add subtask..."}
+                                style={{ fontSize: '12px', flex: 1 }}
+                                aria-label="Add new subtask to this task"
+                            />
+                            <IonButton fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                                Add
+                            </IonButton>
                         </div>
                     )}
                     {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
@@ -302,27 +356,46 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                             )}
                         </div>
                     )}
-                    {todo.itemType === 'checklist' && todo.subtasks && todo.subtasks.length > 0 && (
+                    {todo.itemType === 'checklist' && (
                         <div style={{ marginTop: '8px' }}>
-                            <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
-                                Checklist: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
-                            </IonText>
-                            <div style={{ marginTop: '4px' }}>
-                                {todo.subtasks.map((subtask) => (
-                                    <div 
-                                        key={subtask.id} 
-                                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: subtask.isCompleted ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', cursor: 'pointer' }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleSubtask(todo.id, subtask.id);
-                                        }}
-                                    >
-                                        <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
-                                        <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
-                                        <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
+                            {todo.subtasks && todo.subtasks.length > 0 ? (
+                                <>
+                                    <IonText style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
+                                        Checklist: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                                    </IonText>
+                                    <div style={{ marginTop: '4px' }}>
+                                        {todo.subtasks.map((subtask) => (
+                                            <div 
+                                                key={subtask.id} 
+                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: subtask.isCompleted ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', cursor: 'pointer' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleSubtask(todo.id, subtask.id);
+                                                }}
+                                            >
+                                                <IonIcon icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} style={{ fontSize: '12px' }} />
+                                                <span style={{ textDecoration: subtask.isCompleted ? 'line-through' : 'none' }}>{subtask.title}</span>
+                                                <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                </>
+                            ) : null}
+                            {!todo.isCompleted && (
+                                <div style={{ marginTop: todo.subtasks && todo.subtasks.length > 0 ? '8px' : '0', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                    <IonInput
+                                        value={newSubtaskText}
+                                        onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                        onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
+                                        placeholder={todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add your first subtask..."}
+                                        style={{ fontSize: '12px', flex: 1 }}
+                                        aria-label="Add new subtask"
+                                    />
+                                    <IonButton fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                                        Add
+                                    </IonButton>
+                                </div>
+                            )}
                         </div>
                     )}
                     {todo.dueDate && (

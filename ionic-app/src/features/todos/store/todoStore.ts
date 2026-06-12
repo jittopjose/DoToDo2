@@ -14,6 +14,7 @@ interface TodoState {
 
     // Actions
     addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
+    addSubtask: (todoId: string, title: string) => void;
     toggleTodo: (id: string) => void;
     toggleSubtask: (todoId: string, subtaskId: string) => void;
     deleteTodo: (id: string) => void;
@@ -101,6 +102,17 @@ export const useTodoStore = create<TodoState>()(
                         )
                     };
                 }),
+            })),
+
+            addSubtask: (todoId, title) => set((state) => ({
+                todos: state.todos.map((todo) => {
+                    if (todo.id !== todoId) return todo;
+                    const newSubtask = { id: uuidv4(), title, isCompleted: false };
+                    return {
+                        ...todo,
+                        subtasks: [...(todo.subtasks || []), newSubtask]
+                    };
+                })
             })),
 
             deleteTodo: (id) => set((state) => ({

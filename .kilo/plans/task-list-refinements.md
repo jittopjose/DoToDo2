@@ -111,9 +111,18 @@ The task list area consists of:
 - Shopping edit mode shows "Done" and "Cancel" buttons
 - Users can tap outside the input to trigger blur (still works)
 - Auto-focus automatically focuses first input when entering edit mode
+- Checklist creation shows added subtasks with remove buttons
+- **Regular tasks (todo type) now support subtasks inline**
 
-## Files to Modify
-- `src/features/todos/components/TodoItem.tsx` - Overdue styling, subtask toggle
-- `src/features/todos/components/TodoList.tsx` - Empty state enhancement
-- `src/features/todos/store/todoStore.ts` - toggleSubtask action
-- `src/pages/Page.tsx` - Progress indicator
+## Files Modified
+- `ionic-app/src/features/todos/components/TodoItem.tsx` - All task rendering improvements
+- `ionic-app/src/features/todos/components/TodoList.tsx` - Empty state enhancement
+- `ionic-app/src/features/todos/store/todoStore.ts` - toggleSubtask + addSubtask actions
+- `ionic-app/src/pages/Page.tsx` - Progress indicator header
+- `ionic-app/src/pages/Page.css` - Animations styling
+- `ionic-app/src/features/todos/components/TodoInput.tsx` - Checklist subtask preview
+
+### Additional Feature: Add Subtasks to Existing Checklist
+- [x] Added `addSubtask` action to todoStore.ts
+- [x] Added inline input field for adding subtasks in view mode
+- [x] Input hidden when checklist is completed (to prevent modification)
