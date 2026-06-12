@@ -9,8 +9,8 @@
 .task-row {
   --background: var(--dotodo-card);
   --border-radius: var(--dotodo-radius-lg);
-  --padding-start: 14px;
-  --padding-end: 14px;
+  --padding-start: 18px;
+  --padding-end: 18px;
   margin-bottom: 0;
   border: 1px solid var(--dotodo-border);
   box-shadow: var(--dotodo-shadow-card);
@@ -25,13 +25,44 @@
   transform: scale(0.992);
 }
 
+.task-row-grid {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row-main {
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row-main > .ion-col {
+  padding: 0;
+}
+
+.task-checkbox-col {
+  display: flex;
+  align-items: center;
+  padding-right: 10px !important;
+}
+
+.task-content-stack {
+  min-width: 0;
+}
+
+.task-content-stack > .ion-row,
+.task-content-stack > .ion-row > .ion-col {
+  margin: 0;
+  padding: 0;
+}
+
 .task-checkbox {
   --size: 22px;
   --border-radius: 8px;
   --checkbox-background: transparent;
   --background-checked: var(--dotodo-primary);
   --checkmark-color: var(--dotodo-primary-contrast);
-  margin-right: 6px;
 }
 
 .task-priority-dot {
@@ -61,6 +92,8 @@
   width: 100%;
   flex-direction: column;
   gap: 8px;
+  margin: 0;
+  padding: 0;
 }
 
 .edit-title-row,
@@ -68,9 +101,32 @@
 .task-title-row,
 .task-subtask-add-row,
 .shopping-edit-row {
-  display: flex;
   align-items: center;
   gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.edit-title-row > .ion-col,
+.edit-actions > .ion-col,
+.task-title-row > .ion-col,
+.task-subtask-add-row > .ion-col,
+.shopping-edit-row > .ion-col {
+  padding: 0;
+}
+
+.edit-title-row > .ion-col:not(:first-child),
+.edit-actions > .ion-col:not(:first-child),
+.shopping-edit-row > .ion-col:not(:first-child) {
+  padding-left: 6px;
+}
+
+.task-title-col {
+  padding-left: 8px !important;
+}
+
+.task-title-row > .ion-col:not(.task-title-col) {
+  padding-right: 6px !important;
 }
 
 .edit-title-row {
@@ -95,6 +151,7 @@
 }
 
 .edit-subtask-summary {
+  display: block;
   padding-left: 4px;
 }
 
@@ -112,7 +169,9 @@
 }
 
 .task-title-row {
-  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   min-height: 28px;
 }
 
@@ -147,6 +206,7 @@
 
 .task-title-text {
   overflow-wrap: anywhere;
+  margin: 0;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -178,6 +238,11 @@
   font-size: 12px;
 }
 
+.task-description,
+.task-progress-text {
+  display: block;
+}
+
 .task-description {
   margin-top: 5px;
   line-height: 1.35;
@@ -187,14 +252,34 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-top: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.task-subtask-list > .ion-row {
+  margin: 0;
+  padding: 0;
+}
+
+.task-subtask-list > .ion-row > .ion-col {
+  padding: 0;
 }
 
 .task-subtask-row {
+  display: block;
+  padding: 0;
+  color: var(--dotodo-muted);
+  font-size: 12px;
+}
+
+.task-subtask-cell {
   display: flex;
   align-items: center;
   gap: 7px;
   padding: 5px 0;
+}
+
+.task-subtask-text {
   color: var(--dotodo-muted);
   font-size: 12px;
 }
@@ -203,7 +288,7 @@
   color: var(--dotodo-success);
 }
 
-.task-subtask-row.is-completed span {
+.task-subtask-row.is-completed .task-subtask-text {
   text-decoration: line-through;
 }
 
@@ -212,7 +297,23 @@
 }
 
 .task-subtask-add-row {
+  justify-content: flex-end;
   margin-top: 8px;
+}
+
+.task-subtask-add-row > .ion-col:first-child {
+  padding-right: 8px !important;
+}
+
+.task-subtask-add-row .subtask-input {
+  flex: 1;
+}
+
+.subtask-add-button {
+  --color: var(--dotodo-primary);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  text-transform: uppercase;
 }
 
 .task-subtask-add-row .subtask-input {

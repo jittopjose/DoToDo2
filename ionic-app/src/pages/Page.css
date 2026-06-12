@@ -25,56 +25,68 @@
   opacity: 0.6;
 }
 
-.header-panel {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin: 12px 12px 12px;
+.page-grid {
+  margin: 0;
+  padding: 0;
+}
+
+.progress-row {
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+.composer-row {
+  margin: 0;
+  padding: 0 12px 14px;
+}
+
+.list-row {
+  margin: 0;
+  padding: 0;
 }
 
 .panel-card {
+  --border-radius: 16px;
+  --background: var(--dotodo-card);
   min-width: 0;
   border: 1px solid var(--dotodo-border);
-  border-radius: var(--dotodo-radius-lg);
-  background: var(--dotodo-card);
   box-shadow: var(--dotodo-shadow-card);
   backdrop-filter: blur(18px);
 }
 
 .progress-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 0;
-  align-items: center;
-  gap: 14px;
-  height: 92px;
-  padding: 14px;
+  height: 112px;
   overflow: hidden;
-  will-change: height, padding, background;
+  will-change: height, background;
   transition:
     height var(--dotodo-motion-soft),
-    padding var(--dotodo-motion-soft),
     background var(--dotodo-motion-soft);
 }
 
 .progress-panel--search-open {
-  height: 154px;
-  grid-template-rows: auto minmax(0, 1fr);
-  padding-bottom: 12px;
+  height: 176px;
   background: linear-gradient(135deg, var(--dotodo-card), var(--dotodo-primary-soft));
 }
 
-.progress-main {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 14px;
+.progress-content {
+  padding: 16px !important;
 }
 
-.progress-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.progress-grid {
+  margin: 0;
+  padding: 0;
+}
+
+.progress-main {
+  margin: 0;
+}
+
+.progress-main > .ion-col {
+  padding: 0;
+}
+
+.progress-ring-col {
+  padding-right: 12px !important;
 }
 
 .progress-copy {
@@ -83,20 +95,14 @@
   flex: 1;
   flex-direction: column;
   gap: 3px;
+  padding-left: 12px !important;
 }
 
-.progress-copy strong {
-  overflow: hidden;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.progress-copy small {
-  color: var(--dotodo-muted);
-  font-size: 13px;
+.progress-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: 8px !important;
 }
 
 .focus-eyebrow {
@@ -105,6 +111,22 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.progress-title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-subtitle {
+  color: var(--dotodo-muted);
+  font-size: 13px;
 }
 
 .progress-ring {
@@ -155,8 +177,7 @@
   font-size: 22px;
 }
 
-.progress-search-shell {
-  grid-column: 1 / -1;
+.progress-search-grid {
   grid-row: 2;
   height: 0;
   margin-top: 0;
@@ -174,16 +195,24 @@
   transition-delay: 0ms;
 }
 
-.progress-panel--search-open .progress-search-shell {
+.progress-search-grid--open {
   height: 56px;
-  margin-top: 4px;
+  margin-top: 8px;
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
   transition-delay: 160ms;
 }
 
-.progress-search-shell ion-searchbar {
+.progress-search-grid > .ion-row {
+  margin: 0;
+}
+
+.progress-search-grid > .ion-row > .ion-col {
+  padding: 0;
+}
+
+.progress-search-grid ion-searchbar {
   --background: transparent;
   --min-height: 48px;
   height: 48px;
@@ -198,10 +227,6 @@
   padding: 0;
 }
 
-.header-panel + .composer-card {
-  margin-top: 0;
-}
-
 .page-content {
   --padding-start: 0;
   --padding-end: 0;
@@ -210,12 +235,11 @@
 
 @media (max-width: 640px) {
   .progress-panel {
-    height: 84px;
-    padding: 12px 10px;
+    height: 104px;
   }
 
-  .progress-main {
-    gap: 10px;
+  .progress-panel--search-open {
+    height: 170px;
   }
 
   .progress-ring {
@@ -223,12 +247,8 @@
     height: 56px;
   }
 
-  .progress-copy strong {
+  .progress-title {
     font-size: 16px;
-  }
-
-  .progress-panel--search-open {
-    height: 148px;
   }
 }
 

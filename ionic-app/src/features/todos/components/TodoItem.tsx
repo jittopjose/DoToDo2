@@ -9,10 +9,14 @@ import {
     IonPopover,
     IonDatetime,
     IonBadge,
-    IonText,
     IonItemSliding,
     IonItemOptions,
-    IonItemOption
+    IonItemOption,
+    IonCardTitle,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonNote
 } from '@ionic/react';
 import { trashOutline, calendarOutline, ellipse, listOutline, cartOutline, documentTextOutline, checkmarkDoneOutline, alertCircleOutline } from 'ionicons/icons';
 import { Todo } from '../types';
@@ -181,217 +185,275 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     return (
         <IonItemSliding className={`todo-item ${isOverdue(todo) ? 'is-overdue' : ''}`}>
             <IonItem className="task-row" lines="none">
-            <IonCheckbox
-                className="task-checkbox"
-                slot="start"
-                checked={todo.isCompleted}
-                onIonChange={() => toggleTodo(todo.id)}
-                aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
-            />
-            {!isOverdue(todo) && todo.priority && !isEditing && (
-                <IonIcon className={`task-priority-dot task-priority-dot--${todo.priority}`} icon={ellipse} />
-            )}
-            {isOverdue(todo) && !isEditing && (
-                <IonIcon className="task-overdue-icon" icon={alertCircleOutline} />
-            )}
-            {isEditing ? (
-                <div className="edit-stack">
-                    <div className="edit-title-row">
-                        <IonInput
-                            ref={inputRef}
-                            className="edit-title-input"
-                            value={editText}
-                            onIonInput={e => setEditText(e.detail.value!)}
-                            onKeyUp={handleKeyPress}
-                            placeholder="Enter title"
-                        />
-                        <IonButton className="compact-button save-button" fill="clear" size="small" onClick={() => { handleSave(); handleDescriptionSave(); }} aria-label="Save changes">
-                            Done
-                        </IonButton>
-                        <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={() => { handleCancel(); setEditDescription(todo.description || ''); }} aria-label="Cancel editing">
-                            Cancel
-                        </IonButton>
-                    </div>
-                    <IonInput
-                        ref={descRef}
-                        className="edit-description-input"
-                        value={editDescription}
-                        onIonInput={e => setEditDescription(e.detail.value!)}
-                        onKeyUp={handleDescKeyPress}
-                        placeholder="Add description"
-                        aria-label="Edit description"
-                    />
-                    {todo.subtasks && todo.subtasks.length > 0 && (
-                        <div className="edit-subtask-summary">
-                            <IonText className="task-progress-text">
-                                Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
-                            </IonText>
-                        </div>
-                    )}
-                    <IonInput
-                        className="subtask-input"
-                        value={newSubtaskText}
-                        onIonInput={e => setNewSubtaskText(e.detail.value!)}
-                        onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                        placeholder="Add subtask..."
-                        aria-label="Add subtask to this task"
-                    />
-                    <div className="edit-actions">
-                        <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={handlePriorityClick} aria-label="Change priority">
-                            <IonIcon className={`task-priority-dot ${todo.priority ? `task-priority-dot--${todo.priority}` : ''}`} icon={ellipse} />
-                        </IonButton>
-                        <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={() => setShowDueDatePicker(true)} aria-label="Change due date">
-                            <IonIcon icon={calendarOutline} />
-                        </IonButton>
-                    </div>
-                </div>
-            ) : (
-                <IonLabel
-                    className={`task-label ${todo.isCompleted ? 'is-completed' : ''}`}
-                    onClick={handleEdit}
-                >
-                    <div className="task-title-row">
-                        <IonIcon className={`task-type-icon task-type-icon--${todo.itemType}`} icon={typeIcons[todo.itemType]} />
-                        <strong className="task-title-text">{todo.title}</strong>
-                        <IonBadge className="task-badge" color="medium">{typeLabels[todo.itemType]}</IonBadge>
-                        {isOverdue(todo) && (
-                            <IonBadge className="task-badge task-badge--danger" color="danger">Overdue</IonBadge>
-                        )}
-                    </div>
-                    {todo.description && (
-                        <div className="task-description">
-                            {todo.description}
-                        </div>
-                    )}
-                    {todo.subtasks && todo.subtasks.length > 0 && todo.itemType !== 'checklist' && (
-                        <div className="task-subtask-list">
-                            <IonText className="task-progress-text">
-                                Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
-                            </IonText>
-                            {todo.subtasks.map((subtask) => (
-                                <div
-                                    className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                                    key={subtask.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleSubtask(todo.id, subtask.id);
-                                    }}
-                                >
-                                    <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
-                                    <span>{subtask.title}</span>
-                                    <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {todo.itemType === 'todo' && !todo.isCompleted && (
-                        <div className="task-subtask-add-row">
-                            <IonInput
-                                className="subtask-input"
-                                value={newSubtaskText}
-                                onIonInput={e => setNewSubtaskText(e.detail.value!)}
-                                onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                placeholder="Add subtask..."
-                                aria-label="Add new subtask to this task"
+                <IonGrid className="task-row-grid">
+                    <IonRow className="task-row-main">
+                        <IonCol size="auto" className="task-checkbox-col">
+                            <IonCheckbox
+                                className="task-checkbox"
+                                slot="start"
+                                checked={todo.isCompleted}
+                                onIonChange={() => toggleTodo(todo.id)}
+                                aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
                             />
-                            <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
-                                Add
-                            </IonButton>
-                        </div>
-                    )}
-                    {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
-                        <div className="task-shopping-row" onClick={(e) => { e.stopPropagation(); setEditingShopping(true); }} aria-label="Edit shopping item details">
-                            {editingShopping ? (
-                                <div className="shopping-edit-row" onClick={(e) => e.stopPropagation()}>
+                        </IonCol>
+                        <IonCol className="task-content-stack">
+                            {isEditing ? (
+                                <IonGrid className="edit-stack">
+                                    <IonRow className="edit-title-row">
+                                        <IonCol>
+                                            <IonInput
+                                                ref={inputRef}
+                                                className="edit-title-input"
+                                                value={editText}
+                                                onIonInput={e => setEditText(e.detail.value!)}
+                                                onKeyUp={handleKeyPress}
+                                                placeholder="Enter title"
+                                            />
+                                        </IonCol>
+                                        <IonCol size="auto">
+                                            <IonButton className="compact-button save-button" fill="clear" size="small" onClick={() => { handleSave(); handleDescriptionSave(); }} aria-label="Save changes">
+                                                Done
+                                            </IonButton>
+                                        </IonCol>
+                                        <IonCol size="auto">
+                                            <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={() => { handleCancel(); setEditDescription(todo.description || ''); }} aria-label="Cancel editing">
+                                                Cancel
+                                            </IonButton>
+                                        </IonCol>
+                                    </IonRow>
                                     <IonInput
-                                        ref={qtyRef}
-                                        className="shopping-edit-input"
-                                        value={editQuantity}
-                                        onIonInput={e => setEditQuantity(e.detail.value!)}
-                                        onKeyUp={handleShoppingKeyPress}
-                                        type="number"
-                                        placeholder="Qty"
-                                        aria-label="Edit quantity"
+                                        ref={descRef}
+                                        className="edit-description-input"
+                                        value={editDescription}
+                                        onIonInput={e => setEditDescription(e.detail.value!)}
+                                        onKeyUp={handleDescKeyPress}
+                                        placeholder="Add description"
+                                        aria-label="Edit description"
                                     />
-                                    <IonInput
-                                        ref={priceRef}
-                                        className="shopping-edit-input"
-                                        value={editPrice}
-                                        onIonInput={e => setEditPrice(e.detail.value!)}
-                                        onKeyUp={handleShoppingKeyPress}
-                                        type="number"
-                                        placeholder="Price"
-                                        aria-label="Edit price"
-                                    />
-                                    <IonButton className="compact-button save-button" fill="clear" size="small" onClick={handleShoppingSave}>Done</IonButton>
-                                    <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={handleShoppingCancel}>Cancel</IonButton>
-                                </div>
-                            ) : (
-                                <>
-                                    {todo.quantity !== undefined && <span>Qty: {todo.quantity}</span>}
-                                    {todo.quantity !== undefined && todo.price !== undefined && <span> · </span>}
-                                    {todo.price !== undefined && <span>Price: ${todo.price.toFixed(2)}</span>}
-                                </>
-                            )}
-                        </div>
-                    )}
-                    {todo.itemType === 'checklist' && (
-                        <div className="task-checklist-block">
-                            {todo.subtasks && todo.subtasks.length > 0 ? (
-                                <>
-                                    <IonText className="task-progress-text">
-                                        Checklist: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
-                                    </IonText>
-                                    <div className="task-subtask-list">
-                                        {todo.subtasks.map((subtask) => (
-                                            <div
-                                                className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                                                key={subtask.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleSubtask(todo.id, subtask.id);
-                                                }}
-                                            >
-                                                <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
-                                                <span>{subtask.title}</span>
-                                                <span className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : null}
-                            {!todo.isCompleted && (
-                                <div className="task-subtask-add-row">
+                                    {todo.subtasks && todo.subtasks.length > 0 && (
+                                        <IonNote color="medium" className="edit-subtask-summary">
+                                            Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                                        </IonNote>
+                                    )}
                                     <IonInput
                                         className="subtask-input"
+                                        color="medium"
                                         value={newSubtaskText}
                                         onIonInput={e => setNewSubtaskText(e.detail.value!)}
                                         onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                        placeholder={todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add your first subtask..."}
-                                        aria-label="Add new subtask"
+                                        placeholder={newSubtaskText.trim() ? '' : 'Add subtask...'}
+                                        aria-label="Add subtask to this task"
                                     />
-                                    <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
-                                        Add
-                                    </IonButton>
-                                </div>
+                                    <IonRow className="edit-actions">
+                                        <IonCol size="auto">
+                                            <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={handlePriorityClick} aria-label="Change priority">
+                                                <IonIcon className={`task-priority-dot ${todo.priority ? `task-priority-dot--${todo.priority}` : ''}`} icon={ellipse} />
+                                            </IonButton>
+                                        </IonCol>
+                                        <IonCol size="auto">
+                                            <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={() => setShowDueDatePicker(true)} aria-label="Change due date">
+                                                <IonIcon icon={calendarOutline} />
+                                            </IonButton>
+                                        </IonCol>
+                                    </IonRow>
+                                </IonGrid>
+                            ) : (
+                                <IonGrid className="task-content-stack">
+                                    <IonRow className="task-title-row">
+                                        <IonCol size="auto">
+                                            {!isOverdue(todo) && todo.priority && (
+                                                <IonIcon className={`task-priority-dot task-priority-dot--${todo.priority}`} icon={ellipse} />
+                                            )}
+                                            {isOverdue(todo) && (
+                                                <IonIcon className="task-overdue-icon" icon={alertCircleOutline} />
+                                            )}
+                                        </IonCol>
+                                        <IonCol size="auto">
+                                            <IonIcon className={`task-type-icon task-type-icon--${todo.itemType}`} icon={typeIcons[todo.itemType]} />
+                                        </IonCol>
+                                        <IonCol className="task-title-col">
+                                            <IonCardTitle className="task-title-text">{todo.title}</IonCardTitle>
+                                            {todo.description && (
+                                                <IonNote color="medium" className="task-description">
+                                                    {todo.description}
+                                                </IonNote>
+                                            )}
+                                        </IonCol>
+                                        <IonCol size="auto">
+                                            <IonBadge className="task-badge" color="medium">{typeLabels[todo.itemType]}</IonBadge>
+                                        </IonCol>
+                                        {isOverdue(todo) && (
+                                            <IonCol size="auto">
+                                                <IonBadge className="task-badge task-badge--danger" color="danger">Overdue</IonBadge>
+                                            </IonCol>
+                                        )}
+                                    </IonRow>
+                                    {todo.subtasks && todo.subtasks.length > 0 && todo.itemType !== 'checklist' && (
+                                        <IonGrid className="task-subtask-list">
+                                            <IonRow>
+                                                <IonCol>
+                                                    <IonNote color="medium" className="task-progress-text">
+                                                        Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                                                    </IonNote>
+                                                </IonCol>
+                                            </IonRow>
+                                            {todo.subtasks.map((subtask) => (
+                                                <IonRow
+                                                    className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                                                    key={subtask.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleSubtask(todo.id, subtask.id);
+                                                    }}
+                                                >
+                                                    <IonCol className="task-subtask-cell">
+                                                        <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
+                                                        <IonNote color="medium" className="task-subtask-text">{subtask.title}</IonNote>
+                                                        <IonNote className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</IonNote>
+                                                    </IonCol>
+                                                </IonRow>
+                                            ))}
+                                        </IonGrid>
+                                    )}
+                                    {todo.itemType === 'todo' && !todo.isCompleted && (
+                                        <IonRow className="task-subtask-add-row">
+                                            <IonCol>
+                                                <IonInput
+                                                    className="subtask-input"
+                                                    color="medium"
+                                                    value={newSubtaskText}
+                                                    onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                                    onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
+                                                    placeholder={newSubtaskText.trim() ? '' : 'Add subtask...'}
+                                                    aria-label="Add new subtask to this task"
+                                                />
+                                            </IonCol>
+                                            <IonCol size="auto">
+                                                <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                                                    ADD
+                                                </IonButton>
+                                            </IonCol>
+                                        </IonRow>
+                                    )}
+                                    {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
+                                        <IonNote color="medium" className="task-shopping-row" onClick={(e) => { e.stopPropagation(); setEditingShopping(true); }} aria-label="Edit shopping item details">
+                                            {editingShopping ? (
+                                                <IonRow className="shopping-edit-row" onClick={(e) => e.stopPropagation()}>
+                                                    <IonCol size="auto">
+                                                        <IonInput
+                                                            ref={qtyRef}
+                                                            className="shopping-edit-input"
+                                                            value={editQuantity}
+                                                            onIonInput={e => setEditQuantity(e.detail.value!)}
+                                                            onKeyUp={handleShoppingKeyPress}
+                                                            type="number"
+                                                            placeholder="Qty"
+                                                            aria-label="Edit quantity"
+                                                        />
+                                                    </IonCol>
+                                                    <IonCol size="auto">
+                                                        <IonInput
+                                                            ref={priceRef}
+                                                            className="shopping-edit-input"
+                                                            value={editPrice}
+                                                            onIonInput={e => setEditPrice(e.detail.value!)}
+                                                            onKeyUp={handleShoppingKeyPress}
+                                                            type="number"
+                                                            placeholder="Price"
+                                                            aria-label="Edit price"
+                                                        />
+                                                    </IonCol>
+                                                    <IonCol size="auto">
+                                                        <IonButton className="compact-button save-button" fill="clear" size="small" onClick={handleShoppingSave}>Done</IonButton>
+                                                    </IonCol>
+                                                    <IonCol size="auto">
+                                                        <IonButton className="compact-button cancel-button" fill="clear" size="small" onClick={handleShoppingCancel}>Cancel</IonButton>
+                                                    </IonCol>
+                                                </IonRow>
+                                            ) : (
+                                                <>
+                                                    {todo.quantity !== undefined && <>Qty: {todo.quantity}</>}
+                                                    {todo.quantity !== undefined && todo.price !== undefined && <> · </>}
+                                                    {todo.price !== undefined && <>Price: ${todo.price.toFixed(2)}</>}
+                                                </>
+                                            )}
+                                        </IonNote>
+                                    )}
+                                    {todo.itemType === 'checklist' && (
+                                        <IonGrid className="task-checklist-block">
+                                            {todo.subtasks && todo.subtasks.length > 0 ? (
+                                                <>
+                                                    <IonRow>
+                                                        <IonCol>
+                                                            <IonNote color="medium" className="task-progress-text">
+                                                                Checklist: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
+                                                            </IonNote>
+                                                        </IonCol>
+                                                    </IonRow>
+                                                    <IonRow>
+                                                        <IonCol>
+                                                            <IonGrid className="task-subtask-list">
+                                                                {todo.subtasks.map((subtask) => (
+                                                                    <IonRow
+                                                                        className={`task-subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                                                                        key={subtask.id}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            toggleSubtask(todo.id, subtask.id);
+                                                                        }}
+                                                                    >
+                                                                        <IonCol className="task-subtask-cell">
+                                                                            <IonIcon className="task-subtask-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
+                                                                            <IonNote color="medium" className="task-subtask-text">{subtask.title}</IonNote>
+                                                                            <IonNote className="sr-only">{subtask.isCompleted ? ' (completed)' : ' (pending)'}</IonNote>
+                                                                        </IonCol>
+                                                                    </IonRow>
+                                                                ))}
+                                                            </IonGrid>
+                                                        </IonCol>
+                                                    </IonRow>
+                                                </>
+                                            ) : null}
+                                            {!todo.isCompleted && (
+                                                <IonRow className="task-subtask-add-row">
+                                                    <IonCol>
+                                                        <IonInput
+                                                            className="subtask-input"
+                                                            color="medium"
+                                                            value={newSubtaskText}
+                                                            onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                                            onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
+                                                            placeholder={newSubtaskText.trim() ? '' : (todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add your first subtask...")}
+                                                            aria-label="Add new subtask"
+                                                        />
+                                                    </IonCol>
+                                                    <IonCol size="auto">
+                                                        <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
+                                                            ADD
+                                                        </IonButton>
+                                                    </IonCol>
+                                                </IonRow>
+                                            )}
+                                        </IonGrid>
+                                    )}
+                                    {todo.dueDate && (
+                                        <IonNote color="medium" className={`task-due-row ${isOverdue(todo) ? 'is-overdue' : ''}`} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
+                                            <IonIcon icon={calendarOutline} />
+                                            Due: {formatDate(todo.dueDate)}
+                                        </IonNote>
+                                    )}
+                                </IonGrid>
                             )}
-                        </div>
-                    )}
-                    {todo.dueDate && (
-                        <div className={`task-due-row ${isOverdue(todo) ? 'is-overdue' : ''}`} onClick={(e) => { e.stopPropagation(); setShowDueDatePicker(true); }}>
-                            <IonIcon icon={calendarOutline} />
-                            <span>Due: {formatDate(todo.dueDate)}</span>
-                        </div>
-                    )}
-                </IonLabel>
-            )}
-            <IonPopover className="datetime-popover" isOpen={showDueDatePicker} onDidDismiss={() => setShowDueDatePicker(false)}>
-                <IonDatetime
-                    value={todo.dueDate ? new Date(todo.dueDate).toISOString() : ''}
-                    onIonChange={handleDueDateChange}
-                    presentation="date-time"
-                />
-            </IonPopover>
+                        </IonCol>
+                    </IonRow>
+                </IonGrid>
+                <IonPopover className="datetime-popover" isOpen={showDueDatePicker} onDidDismiss={() => setShowDueDatePicker(false)}>
+                    <IonDatetime
+                        value={todo.dueDate ? new Date(todo.dueDate).toISOString() : ''}
+                        onIonChange={handleDueDateChange}
+                        presentation="date-time"
+                    />
+                </IonPopover>
             </IonItem>
             <IonItemOptions side="end" className="task-options">
                 <IonItemOption color="danger" onClick={() => deleteTodo(todo.id)} aria-label={`Delete ${todo.title}`}>

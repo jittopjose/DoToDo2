@@ -175,6 +175,10 @@ ion-title {
   letter-spacing: -0.03em;
 }
 
+ion-card {
+  --border-radius: 16px;
+}
+
 ion-button {
   --border-radius: 999px;
   font-weight: 700;

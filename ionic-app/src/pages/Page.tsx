@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonPage, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonMenuButton, IonNote, IonPage, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
 import { closeOutline, searchOutline } from 'ionicons/icons';
 import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
@@ -68,38 +68,60 @@ const Page: React.FC = () => {
       </IonHeader>
 
       <IonContent className="page-content">
-        <div className="header-panel">
-          <div className={`panel-card progress-panel ${shouldShowSearch ? 'progress-panel--search-open' : ''}`}>
-            <div className="progress-main">
-              <div className="progress-ring" style={progressStyle} aria-label={`${progressPercent}% complete`}>
-                <span>{progressPercent}%</span>
-              </div>
-              <div className="progress-copy">
-                <span className="focus-eyebrow">Daily progress</span>
-                <strong>{completedTasks} of {totalTasks} done</strong>
-                <small>{focusSubtitle}</small>
-              </div>
-            </div>
-            <div className="progress-actions">
-              <IonButton className={`progress-search-button ${shouldShowSearch ? 'progress-search-button--active' : ''}`} fill="clear" onClick={shouldShowSearch ? closeSearch : openSearch} aria-label={shouldShowSearch ? 'Close search' : 'Search todos'}>
-                <IonIcon icon={shouldShowSearch ? closeOutline : searchOutline} />
-              </IonButton>
-            </div>
-            <div className="progress-search-shell">
-              <IonSearchbar
-                ref={searchbarRef}
-                disabled={!shouldShowSearch}
-                value={searchTerm || ''}
-                onIonInput={(e) => setSearchTerm(e.detail.value || '')}
-                onIonCancel={closeSearch}
-                placeholder="Search todos..."
-                aria-label="Search todos"
-              />
-            </div>
-          </div>
-        </div>
-        <TodoInput list={list} />
-        <TodoList list={list} />
+        <IonGrid className="page-grid">
+          <IonRow className="progress-row">
+            <IonCol>
+              <IonCard className={`panel-card progress-panel ${shouldShowSearch ? 'progress-panel--search-open' : ''}`}>
+                <IonCardContent className="ion-padding progress-content">
+                  <IonGrid className="progress-grid">
+                    <IonRow className="progress-main">
+                      <IonCol size="auto" className="progress-ring-col">
+                        <IonNote className="progress-ring" style={progressStyle} aria-label={`${progressPercent}% complete`}>
+                          <span>{progressPercent}%</span>
+                        </IonNote>
+                      </IonCol>
+                      <IonCol className="progress-copy">
+                        <IonNote className="focus-eyebrow">Daily progress</IonNote>
+                        <IonCardTitle className="progress-title">{completedTasks} of {totalTasks} done</IonCardTitle>
+                        <IonNote className="progress-subtitle">{focusSubtitle}</IonNote>
+                      </IonCol>
+                      <IonCol size="auto" className="progress-actions">
+                        <IonButton className={`progress-search-button ${shouldShowSearch ? 'progress-search-button--active' : ''}`} fill="clear" onClick={shouldShowSearch ? closeSearch : openSearch} aria-label={shouldShowSearch ? 'Close search' : 'Search todos'}>
+                          <IonIcon icon={shouldShowSearch ? closeOutline : searchOutline} />
+                        </IonButton>
+                      </IonCol>
+                    </IonRow>
+                    <IonGrid className={`progress-search-grid ${shouldShowSearch ? 'progress-search-grid--open' : ''}`}>
+                      <IonRow>
+                        <IonCol>
+                          <IonSearchbar
+                            ref={searchbarRef}
+                            disabled={!shouldShowSearch}
+                            value={searchTerm || ''}
+                            onIonInput={(e) => setSearchTerm(e.detail.value || '')}
+                            onIonCancel={closeSearch}
+                            placeholder="Search todos..."
+                            aria-label="Search todos"
+                          />
+                        </IonCol>
+                      </IonRow>
+                    </IonGrid>
+                  </IonGrid>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+          <IonRow className="composer-row">
+            <IonCol>
+              <TodoInput list={list} />
+            </IonCol>
+          </IonRow>
+          <IonRow className="list-row">
+            <IonCol>
+              <TodoList list={list} />
+            </IonCol>
+          </IonRow>
+        </IonGrid>
       </IonContent>
     </IonPage>
   );

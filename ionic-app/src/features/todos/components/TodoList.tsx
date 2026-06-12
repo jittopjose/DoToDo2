@@ -1,5 +1,5 @@
 import React from 'react';
-import { IonList, IonIcon } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
 import { documentTextOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
 import { TodoItem } from './TodoItem';
@@ -45,26 +45,31 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                 <TodoItem key={todo.id} todo={todo} />
             ))}
             {filteredTodos.length === 0 && (
-                <div className={`empty-state ${isSearchActive ? 'is-searching' : ''}`}>
-                    <div className="empty-illustration">
-                        <IonIcon icon={documentTextOutline} />
-                    </div>
-                    {isEmptyList ? (
-                        <>
-                            <h2>No tasks yet</h2>
-                            <p>
-                                Add your first task above and give today a clear shape.
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <h2>No matching tasks</h2>
-                            <p>
-                                {isSearchActive ? `No results for "${searchTerm}"` : 'Try changing the filter'}
-                            </p>
-                        </>
-                    )}
-                </div>
+                <IonCard className={`empty-card ${isSearchActive ? 'is-searching' : ''}`}>
+                    <IonCardContent className="ion-padding empty-content">
+                        <IonGrid className="empty-grid">
+                            <IonRow className="ion-justify-content-center">
+                                <IonCol size="auto" className="empty-illustration">
+                                    <IonIcon icon={documentTextOutline} />
+                                </IonCol>
+                            </IonRow>
+                            <IonRow className="ion-justify-content-center">
+                                <IonCol size="12">
+                                    <IonCardTitle className="empty-title">
+                                        {isEmptyList ? 'No tasks yet' : 'No matching tasks'}
+                                    </IonCardTitle>
+                                    <IonNote className="empty-copy">
+                                        {isEmptyList
+                                            ? 'Add your first task above and give today a clear shape.'
+                                            : isSearchActive
+                                                ? `No results for "${searchTerm}"`
+                                                : 'Try changing the filter'}
+                                    </IonNote>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
+                    </IonCardContent>
+                </IonCard>
             )}
         </IonList>
     );
