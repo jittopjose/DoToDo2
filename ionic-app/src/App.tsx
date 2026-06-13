@@ -1,6 +1,5 @@
 import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-// @ts-ignore
 import { createMemoryHistory } from 'history';
 import { Redirect, Route } from 'react-router-dom';
 import Menu from './components/Menu';

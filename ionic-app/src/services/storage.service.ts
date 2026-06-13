@@ -24,7 +24,7 @@ class StorageService {
         return this._storage?.get(key);
     }
 
-    async set(key: string, value: any) {
+    async set(key: string, value: string | number | boolean | object) {
         await this.init();
         return this._storage?.set(key, value);
     }

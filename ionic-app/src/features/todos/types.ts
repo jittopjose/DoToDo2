@@ -1,3 +1,5 @@
+export type TodoPriority = 'low' | 'medium' | 'high';
+
 export interface Todo {
     id: string;
     title: string;
@@ -10,7 +12,7 @@ export interface Todo {
     price?: number;
     subtasks?: TodoSubtask[];
     dueDate?: number;
-    priority?: 'low' | 'medium' | 'high';
+    priority?: TodoPriority;
 }
 
 export interface TodoSubtask {

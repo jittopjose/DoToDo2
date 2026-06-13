@@ -1,9 +1,83 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { Todo, TodoFilter, TodoTypeFilter } from '../types';
+import { Todo, TodoFilter, TodoPriority, TodoSubtask, TodoTypeFilter } from '../types';
 
 const defaultLists = ['All Lists'];
+
+type PersistedTodo = {
+    id?: string;
+    title?: string;
+    isCompleted?: boolean;
+    createdAt?: number;
+    list?: string;
+    itemType?: Todo['itemType'];
+    description?: string;
+    quantity?: number;
+    price?: number;
+    subtasks?: Array<Partial<TodoSubtask> & { id?: string; title?: string; isCompleted?: boolean }>;
+    dueDate?: number;
+    priority?: unknown;
+};
+
+type PersistedState = Partial<TodoState> & {
+    todos?: unknown;
+    typeFilter?: unknown;
+};
+
+const isTodoFilter = (filter: unknown): filter is TodoFilter => filter === 'all' || filter === 'active' || filter === 'completed';
+const isTodoTypeFilter = (filter: unknown): filter is TodoTypeFilter => filter === 'all' || filter === 'todo' || filter === 'shopping' || filter === 'note' || filter === 'checklist';
+const isTodoPriority = (priority: unknown): priority is TodoPriority => priority === 'low' || priority === 'medium' || priority === 'high';
+
+const normalizePersistedSubtasks = (subtasks: unknown): TodoSubtask[] | undefined => {
+    if (!Array.isArray(subtasks)) return undefined;
+
+    return subtasks.map((subtask) => {
+        const item = subtask as Partial<TodoSubtask> & { id?: string; title?: string; isCompleted?: boolean };
+        return {
+            id: typeof item.id === 'string' ? item.id : uuidv4(),
+            title: typeof item.title === 'string' && item.title.trim() ? item.title : 'Subtask',
+            isCompleted: typeof item.isCompleted === 'boolean' ? item.isCompleted : false,
+        };
+    });
+};
+
+const normalizePersistedTodo = (todo: unknown): Todo => {
+    const item = todo as PersistedTodo;
+    const subtasks = normalizePersistedSubtasks(item.subtasks);
+
+    return {
+        id: typeof item.id === 'string' ? item.id : uuidv4(),
+        title: typeof item.title === 'string' && item.title.trim() ? item.title : 'Untitled task',
+        isCompleted: typeof item.isCompleted === 'boolean' ? item.isCompleted : false,
+        createdAt: typeof item.createdAt === 'number' ? item.createdAt : Date.now(),
+        list: typeof item.list === 'string' && item.list.trim() ? item.list : 'All Lists',
+        itemType: item.itemType || 'todo',
+        ...(typeof item.description === 'string' && item.description.trim() && { description: item.description.trim() }),
+        ...(typeof item.quantity === 'number' && Number.isFinite(item.quantity) && { quantity: item.quantity }),
+        ...(typeof item.price === 'number' && Number.isFinite(item.price) && { price: item.price }),
+        ...(subtasks && { subtasks }),
+        ...(typeof item.dueDate === 'number' && { dueDate: item.dueDate }),
+        ...(isTodoPriority(item.priority) && { priority: item.priority }),
+    };
+};
+
+const normalizePersistedState = (state: unknown): Partial<TodoState> => {
+    if (!state || typeof state !== 'object') return {};
+
+    const persisted = state as PersistedState;
+    const customLists = Array.isArray(persisted.customLists)
+        ? persisted.customLists.filter((list): list is string => typeof list === 'string' && Boolean(list.trim()))
+        : [];
+
+    return {
+        ...(Array.isArray(persisted.todos) ? { todos: persisted.todos.map(normalizePersistedTodo) } : { todos: [] }),
+        filter: isTodoFilter(persisted.filter) ? persisted.filter : 'all',
+        typeFilter: isTodoTypeFilter(persisted.typeFilter) ? persisted.typeFilter : 'all',
+        searchTerm: typeof persisted.searchTerm === 'string' ? persisted.searchTerm : '',
+        customLists,
+    };
+};
 
 interface TodoState {
     todos: Todo[];
@@ -13,7 +87,7 @@ interface TodoState {
     customLists: string[];
 
     // Actions
-    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: 'low' | 'medium' | 'high', quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
+    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
     addSubtask: (todoId: string, title: string) => void;
     toggleTodo: (id: string) => void;
     toggleSubtask: (todoId: string, subtaskId: string) => void;
@@ -169,33 +243,11 @@ export const useTodoStore = create<TodoState>()(
         {
             name: 'todo-storage',
             version: 1,
-            merge: (persisted, current) => {
-                const p = persisted as any;
-                const c = current as any;
-                return {
-                    ...c,
-                    ...p,
-                    typeFilter: p.typeFilter || c.typeFilter || 'all',
-                    todos: Array.isArray(p.todos) ? p.todos.map((t: any) => ({
-                        ...t,
-                        list: t.list || 'All Lists',
-                        itemType: t.itemType || 'todo',
-                    })) : c.todos,
-                };
-            },
-            migrate: (persistedState: unknown, version: number) => {
-                const state = persistedState as any;
-                if (!state) return { todos: [], filter: 'all', typeFilter: 'all', searchTerm: '', customLists: [] };
-                return {
-                    ...state,
-                    typeFilter: state.typeFilter || 'all',
-                    todos: Array.isArray(state.todos) ? state.todos.map((t: any) => ({
-                        ...t,
-                        list: t.list || 'All Lists',
-                        itemType: t.itemType || 'todo',
-                    })) : [],
-                };
-            },
+            merge: (persisted, current) => ({
+                ...current,
+                ...normalizePersistedState(persisted),
+            }),
+            migrate: (persistedState: unknown) => normalizePersistedState(persistedState),
             storage: typeof window !== 'undefined'
                 ? createJSONStorage(() => localStorage)
                 : undefined,
