@@ -4,10 +4,19 @@ const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(),
 
 const hasTime = (date: Date) => date.getHours() !== 0 || date.getMinutes() !== 0;
 
-const formatTime = (date: Date) => date.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-});
+const formatTime = (date: Date) => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    if (hours === 23 && minutes === 59) {
+        return ', EOD';
+    }
+
+    return date.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+};
 
 export const formatDueDate = (timestamp: number) => {
     const due = new Date(timestamp);

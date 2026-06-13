@@ -578,3 +578,35 @@
   white-space: nowrap;
   border: 0;
 }
+
+.calendar-picker-modal {
+  --width: min(420px, 92vw);
+  --height: auto;
+}
+
+.calendar-picker-content {
+  --padding-top: 24px;
+  --padding-end: 16px;
+  --padding-bottom: 24px;
+  --padding-start: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.due-calendar-datetime {
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 16px;
+}
+
+.due-calendar-select {
+  --border-radius: var(--dotodo-radius-md);
+  width: 100%;
+  min-height: 44px;
+}
+
+.calendar-cancel-button {
+  --border-radius: 999px;
+  min-height: 42px;
+}
