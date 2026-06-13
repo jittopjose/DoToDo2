@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { storageService } from '../../../services/storage.service';
-import { Todo, TodoFilter } from '../types';
+import { Todo, TodoFilter, TodoTypeFilter } from '../types';
 
 const defaultLists = ['All Lists'];
 
 interface TodoState {
     todos: Todo[];
     filter: TodoFilter;
+    typeFilter: TodoTypeFilter;
     searchTerm: string;
     customLists: string[];
 
@@ -20,6 +20,7 @@ interface TodoState {
     deleteTodo: (id: string) => void;
     updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks'>>) => void;
     setFilter: (filter: TodoFilter) => void;
+    setTypeFilter: (typeFilter: TodoTypeFilter) => void;
     setSearchTerm: (term: string) => void;
     clearCompleted: () => void;
     addList: (list: string) => void;
@@ -30,11 +31,15 @@ interface TodoState {
     getCompletedCount: () => number;
 }
 
-const getFilteredTodos = (todos: Todo[], list: string, filter: TodoFilter, searchTerm: string): Todo[] => {
+const getFilteredTodos = (todos: Todo[], list: string, filter: TodoFilter, typeFilter: TodoTypeFilter, searchTerm: string): Todo[] => {
     let filtered = todos;
 
     if (list && list.trim()) {
         filtered = filtered.filter((t) => t.list === list);
+    }
+
+    if (typeFilter && typeFilter !== 'all') {
+        filtered = filtered.filter((t) => t.itemType === typeFilter);
     }
 
     // Apply search filter next
@@ -62,28 +67,32 @@ export const useTodoStore = create<TodoState>()(
         (set, get) => ({
             todos: [],
             filter: 'all',
+            typeFilter: 'all',
             searchTerm: '',
             customLists: [],
 
-            addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists') => set((state) => ({
-                todos: [
-                    {
-                        id: uuidv4(),
-                        title,
-                        isCompleted: false,
-                        createdAt: Date.now(),
-                        list,
-                        itemType,
-                        ...(description !== undefined && { description }),
-                        ...(dueDate !== undefined && { dueDate }),
-                        ...(priority !== undefined && { priority }),
-                        ...(quantity !== undefined && { quantity }),
-                        ...(price !== undefined && { price }),
-                        ...(subtasks !== undefined && { subtasks }),
-                    },
-                    ...state.todos,
-                ],
-            })),
+            addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists') => {
+                const typeFilterOrDefault = get().typeFilter || 'all';
+                set((state) => ({
+                    todos: [
+                        {
+                            id: uuidv4(),
+                            title,
+                            isCompleted: false,
+                            createdAt: Date.now(),
+                            list,
+                            itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
+                            ...(description !== undefined && { description }),
+                            ...(dueDate !== undefined && { dueDate }),
+                            ...(priority !== undefined && { priority }),
+                            ...(quantity !== undefined && { quantity }),
+                            ...(price !== undefined && { price }),
+                            ...(subtasks !== undefined && { subtasks }),
+                        },
+                        ...state.todos,
+                    ],
+                }));
+            },
 
             toggleTodo: (id) => set((state) => ({
                 todos: state.todos.map((todo) =>
@@ -127,6 +136,8 @@ export const useTodoStore = create<TodoState>()(
 
             setFilter: (filter) => set({ filter }),
 
+            setTypeFilter: (typeFilter) => set({ typeFilter }),
+
             setSearchTerm: (term) => set({ searchTerm: term }),
 
             clearCompleted: () => set((state) => ({
@@ -141,8 +152,8 @@ export const useTodoStore = create<TodoState>()(
             }),
 
             getFilteredTodos: (list) => {
-                const { todos, filter, searchTerm } = get();
-                return getFilteredTodos(todos, list, filter, searchTerm);
+                const { todos, filter, typeFilter, searchTerm } = get();
+                return getFilteredTodos(todos, list, filter, typeFilter || 'all', searchTerm);
             },
 
             getActiveCount: () => {
@@ -157,17 +168,37 @@ export const useTodoStore = create<TodoState>()(
         }),
         {
             name: 'todo-storage',
-            storage: createJSONStorage(() => ({
-                getItem: async (key) => {
-                    return await storageService.get(key);
-                },
-                setItem: async (key, value) => {
-                    await storageService.set(key, value);
-                },
-                removeItem: async (key) => {
-                    await storageService.remove(key);
-                }
-            })),
+            version: 1,
+            merge: (persisted, current) => {
+                const p = persisted as any;
+                const c = current as any;
+                return {
+                    ...c,
+                    ...p,
+                    typeFilter: p.typeFilter || c.typeFilter || 'all',
+                    todos: Array.isArray(p.todos) ? p.todos.map((t: any) => ({
+                        ...t,
+                        list: t.list || 'All Lists',
+                        itemType: t.itemType || 'todo',
+                    })) : c.todos,
+                };
+            },
+            migrate: (persistedState: unknown, version: number) => {
+                const state = persistedState as any;
+                if (!state) return { todos: [], filter: 'all', typeFilter: 'all', searchTerm: '', customLists: [] };
+                return {
+                    ...state,
+                    typeFilter: state.typeFilter || 'all',
+                    todos: Array.isArray(state.todos) ? state.todos.map((t: any) => ({
+                        ...t,
+                        list: t.list || 'All Lists',
+                        itemType: t.itemType || 'todo',
+                    })) : [],
+                };
+            },
+            storage: typeof window !== 'undefined'
+                ? createJSONStorage(() => localStorage)
+                : undefined,
         }
     )
 );

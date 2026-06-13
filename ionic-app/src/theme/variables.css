@@ -19,6 +19,8 @@
   --dotodo-text: #202433;
   --dotodo-muted: #687083;
   --dotodo-border: rgba(32, 36, 51, 0.1);
+  --dotodo-card-border: rgba(32, 36, 51, 0.08);
+  --dotodo-card-padding: 18px;
   --dotodo-shadow-soft: 0 14px 34px rgba(31, 41, 55, 0.1);
   --dotodo-shadow-card: 0 8px 24px rgba(31, 41, 55, 0.08);
   --dotodo-radius-sm: 12px;
@@ -93,6 +95,8 @@
     --dotodo-text: #f5f7fb;
     --dotodo-muted: #9aa3b2;
     --dotodo-border: rgba(245, 247, 251, 0.1);
+    --dotodo-card-border: rgba(255, 255, 255, 0.08);
+    --dotodo-card-padding: 18px;
     --dotodo-shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.28);
     --dotodo-shadow-card: 0 8px 22px rgba(0, 0, 0, 0.2);
 

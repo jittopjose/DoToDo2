@@ -9,10 +9,12 @@
 .task-row {
   --background: var(--dotodo-card);
   --border-radius: var(--dotodo-radius-lg);
-  --padding-start: 18px;
-  --padding-end: 18px;
+  --padding-top: 14px;
+  --padding-end: 16px;
+  --padding-bottom: 14px;
+  --padding-start: 16px;
   margin-bottom: 0;
-  border: 1px solid var(--dotodo-border);
+  border: 1px solid var(--dotodo-card-border);
   box-shadow: var(--dotodo-shadow-card);
   overflow: hidden;
   transition:
@@ -44,7 +46,7 @@
 .task-checkbox-col {
   display: flex;
   align-items: center;
-  padding-right: 10px !important;
+  padding-right: 12px !important;
 }
 
 .task-content-stack {
@@ -136,7 +138,7 @@
 .edit-title-input {
   flex: 1;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .edit-description-input,
@@ -145,7 +147,7 @@
 }
 
 .edit-description-input {
-  border: 1px solid var(--dotodo-border);
+  border: 1px solid var(--dotodo-card-border);
   border-radius: 14px;
   background: rgba(var(--dotodo-primary-rgb), 0.06);
 }
@@ -172,15 +174,15 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: 28px;
+  min-height: 34px;
 }
 
 .task-type-icon {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
 }
 
@@ -190,26 +192,26 @@
 }
 
 .task-type-icon--shopping {
-  background: rgba(20, 184, 166, 0.13);
-  color: #14b8a6;
+  background: rgba(var(--ion-color-tertiary-rgb), 0.12);
+  color: var(--ion-color-tertiary);
 }
 
 .task-type-icon--note {
-  background: rgba(245, 158, 11, 0.14);
+  background: rgba(var(--dotodo-warning-rgb), 0.13);
   color: var(--dotodo-warning);
 }
 
 .task-type-icon--checklist {
-  background: rgba(16, 185, 129, 0.13);
+  background: rgba(var(--dotodo-success-rgb), 0.12);
   color: var(--dotodo-success);
 }
 
 .task-title-text {
   overflow-wrap: anywhere;
   margin: 0;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.015em;
 }
 
 .task-label.is-completed .task-title-text {
@@ -218,11 +220,35 @@
 }
 
 .task-badge {
+  --background: rgba(var(--dotodo-primary-rgb), 0.1);
+  --color: var(--dotodo-primary);
+  --padding-start: 8px;
+  --padding-end: 8px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-weight: 850;
+  letter-spacing: 0.03em;
   text-transform: none;
+}
+
+.task-badge--todo {
+  --background: rgba(var(--dotodo-primary-rgb), 0.1);
+  --color: var(--dotodo-primary);
+}
+
+.task-badge--shopping {
+  --background: rgba(var(--ion-color-tertiary-rgb), 0.1);
+  --color: var(--ion-color-tertiary);
+}
+
+.task-badge--note {
+  --background: rgba(var(--dotodo-warning-rgb), 0.1);
+  --color: var(--dotodo-warning);
+}
+
+.task-badge--checklist {
+  --background: rgba(var(--dotodo-success-rgb), 0.1);
+  --color: var(--dotodo-success);
 }
 
 .task-badge--danger {
@@ -244,7 +270,7 @@
 }
 
 .task-description {
-  margin-top: 5px;
+  margin-top: 6px;
   line-height: 1.35;
 }
 
@@ -301,23 +327,49 @@
   margin-top: 8px;
 }
 
-.task-subtask-add-row > .ion-col:first-child {
-  padding-right: 8px !important;
+.subtask-inline {
+  --background: transparent;
+  --inner-border-width: 0;
+  --padding-top: 0;
+  --padding-end: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  flex: 1;
+  margin-top: 8px;
+  min-height: 32px;
 }
 
-.task-subtask-add-row .subtask-input {
+.subtask-input {
+  --background: transparent;
+  --border-style: none;
+  --color: var(--dotodo-muted);
+  --placeholder-color: var(--dotodo-muted);
+  --padding-top: 0;
+  --padding-end: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
   flex: 1;
+  font-size: 13px;
 }
 
 .subtask-add-button {
   --color: var(--dotodo-primary);
-  --padding-start: 12px;
-  --padding-end: 12px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-height: 30px;
+  opacity: 0;
+  pointer-events: none;
   text-transform: uppercase;
+  transform: translateX(4px);
+  transition:
+    opacity var(--dotodo-motion-fast),
+    transform var(--dotodo-motion-fast);
 }
 
-.task-subtask-add-row .subtask-input {
-  flex: 1;
+.subtask-add-button.is-revealed {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
 .task-shopping-row {
@@ -362,7 +414,7 @@
   --background-activated: rgba(var(--dotodo-primary-rgb), 0.12);
   min-height: 32px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .save-button {
@@ -377,10 +429,6 @@
 .icon-compact-button {
   width: 32px;
   padding-inline: 0;
-}
-
-.subtask-add-button {
-  --color: var(--dotodo-primary);
 }
 
 .task-options {

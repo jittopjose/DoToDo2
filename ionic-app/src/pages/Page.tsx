@@ -18,9 +18,9 @@ const Page: React.FC = () => {
   const searchTerm = useTodoStore((state) => state.searchTerm);
   const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
   const clearCompleted = useTodoStore((state) => state.clearCompleted);
-  const todos = useTodoStore((state) => state.todos);
+  const getFilteredTodos = useTodoStore((state) => state.getFilteredTodos);
 
-  const listTodos = todos.filter((t) => t.list === list);
+  const listTodos = getFilteredTodos(list);
   const totalTasks = listTodos.length;
   const completedTasks = listTodos.filter((t) => t.isCompleted).length;
   const remainingTasks = totalTasks - completedTasks;
@@ -58,12 +58,12 @@ const Page: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle className="page-title">{list}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton className="clear-button" disabled={completedTasks === 0} onClick={clearCompleted}>
-              Clear completed
-            </IonButton>
-          </IonButtons>
+<IonTitle className="page-title">{list}</IonTitle>
+            <IonButtons slot="end">
+              <IonButton className="clear-button" disabled={completedTasks === 0} onClick={clearCompleted}>
+                Clear completed
+              </IonButton>
+            </IonButtons>
         </IonToolbar>
       </IonHeader>
 
@@ -72,7 +72,7 @@ const Page: React.FC = () => {
           <IonRow className="progress-row">
             <IonCol>
               <IonCard className={`panel-card progress-panel ${shouldShowSearch ? 'progress-panel--search-open' : ''}`}>
-                <IonCardContent className="ion-padding progress-content">
+                <IonCardContent className="progress-content">
                   <IonGrid className="progress-grid">
                     <IonRow className="progress-main">
                       <IonCol size="auto" className="progress-ring-col">

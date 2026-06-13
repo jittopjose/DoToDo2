@@ -1,316 +1,210 @@
 .composer-card {
-  --border-radius: 16px;
+  --border: 1px solid rgba(255, 255, 255, 0.05);
+  --border-radius: var(--dotodo-radius-lg);
   --background: var(--dotodo-card);
   margin: 0;
+  border: var(--dotodo-card-border);
   box-shadow: var(--dotodo-shadow-card);
   backdrop-filter: blur(18px);
 }
 
 .composer-content {
-  padding: 12px !important;
+  padding: var(--dotodo-card-padding) !important;
 }
 
-.composer-top-row,
-.composer-section,
-.composer-section.shopping-grid,
-.composer-section.checklist-row,
-.checklist-preview-list {
+.composer-input-grid {
   margin: 0;
   padding: 0;
-}
-
-.composer-top-row > .ion-row > .ion-col {
-  padding: 0;
-}
-
-.type-segment {
-  display: flex;
-  gap: 6px;
-  width: 100%;
-  margin: 0;
-  padding: 4px;
-  border-radius: 18px;
-  background: rgba(var(--dotodo-primary-rgb), 0.07);
-}
-
-.type-segment .segment-button-checked {
-  background: linear-gradient(135deg, var(--dotodo-primary), var(--dotodo-secondary));
-  color: var(--dotodo-primary-contrast);
-  box-shadow: 0 10px 22px rgba(var(--dotodo-primary-rgb), 0.22);
-}
-
-.type-segment .segment-button-checked ion-icon,
-.type-segment .segment-button-checked ion-label {
-  color: var(--dotodo-primary-contrast);
-}
-
-.type-pill {
-  --padding-top: 8px;
-  --padding-end: 6px;
-  --padding-bottom: 8px;
-  --padding-start: 6px;
-  display: flex;
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 48px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 8px 6px;
-  border-radius: 16px;
-}
-
-.type-pill ion-icon {
-  flex: 0 0 auto;
-  font-size: 20px;
-}
-
-.type-pill ion-label {
-  flex: 0 0 auto;
-  color: var(--dotodo-muted);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.composer-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.composer-action {
-  --border-radius: 16px;
-  --padding-start: 10px;
-  --padding-end: 10px;
-  min-width: 42px;
-  min-height: 42px;
-}
-
-.composer-action ion-icon {
-  font-size: 20px;
-}
-
-.priority-action--low {
-  --color: var(--dotodo-success);
-  --color-activated: var(--dotodo-success);
-}
-
-.priority-action--medium {
-  --color: var(--dotodo-warning);
-  --color-activated: var(--dotodo-warning);
-}
-
-.priority-action--high {
-  --color: var(--dotodo-danger);
-  --color-activated: var(--dotodo-danger);
 }
 
 .composer-input-row {
-  --background: rgba(255, 255, 255, 0.05);
-  --border-radius: 16px;
-  --inner-border-width: 0;
-  --padding-top: 0;
-  --padding-end: 4px;
-  --padding-bottom: 0;
-  --padding-start: 12px;
-  min-height: 56px;
-  margin-top: 0;
-}
-
-.composer-title-input {
-  --placeholder-font-style: normal;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 0;
-  --padding-end: 0;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.due-chip {
-  max-width: 36%;
-  overflow: hidden;
-  color: var(--dotodo-primary);
-  font-size: 11px;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.composer-add-button {
-  --background: var(--dotodo-primary);
-  --background-activated: var(--dotodo-primary-shade);
-  --border-radius: 16px;
-  --color: var(--dotodo-primary-contrast);
-  flex: 0 0 auto;
-  min-width: 46px;
-  min-height: 46px;
-}
-
-.composer-add-button:disabled {
-  --background: rgba(var(--dotodo-primary-rgb), 0.18);
-  opacity: 0.7;
-}
-
-.composer-add-button ion-icon {
-  font-size: 22px;
-}
-
-.composer-section {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--dotodo-border);
-}
-
-.composer-section-label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--dotodo-muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.composer-placeholder {
-  display: block;
-  margin: -4px 0 8px;
-  color: var(--dotodo-muted);
-  font-size: 13px;
-}
-
-.composer-textarea,
-.composer-input {
-  --background: rgba(255, 255, 255, 0.05);
-  --border-radius: 16px;
-  --color: var(--dotodo-text);
-  --placeholder-color: var(--dotodo-muted);
-  font-size: 14px;
-}
-
-.composer-textarea {
-  --padding-top: 12px;
-  --padding-end: 12px;
-  --padding-bottom: 12px;
-  --padding-start: 12px;
-}
-
-.composer-input {
-  --padding-top: 10px;
-  --padding-end: 12px;
-  --padding-bottom: 10px;
-  --padding-start: 12px;
-}
-
-.composer-field {
-  min-width: 0;
-}
-
-.composer-checklist-action {
   display: flex;
-  align-items: end;
-  padding-left: 8px;
-}
-
-.checklist-add-button {
-  --border-radius: 16px;
-  --color: var(--dotodo-primary);
-  --background-activated: var(--dotodo-primary-soft);
-  min-height: 42px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.checklist-preview {
-  margin-top: 8px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 0;
   padding: 0;
 }
 
-.checklist-preview-list {
-  margin-top: 0;
+.composer-input-col {
+  min-width: 0;
+  flex: 1;
+  padding: 0 !important;
 }
 
-.checklist-preview-list > .ion-row {
+.composer-input-actions {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.composer-title-input {
+  --background: transparent;
+  --border-style: none;
+  --color: var(--dotodo-text);
+  --placeholder-color: var(--dotodo-muted);
+  --padding-top: 0;
+  --padding-end: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  width: 100%;
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.composer-add-button {
+  --border-radius: 999px;
+  --background: var(--dotodo-primary);
+  --background-activated: var(--dotodo-primary-shade);
+  --color: var(--dotodo-primary-contrast);
+  --box-shadow: 0 12px 24px rgba(var(--dotodo-primary-rgb), 0.24);
+  display: grid;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  place-items: center;
+}
+
+.composer-add-button:disabled {
+  --background: rgba(var(--dotodo-primary-rgb), 0.2);
+  --box-shadow: none;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.composer-add-button ion-icon {
+  font-size: 23px;
+}
+
+.composer-type-scroll {
+  display: block;
   margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-.checklist-preview-list > .ion-row > .ion-col {
-  padding: 0 6px 6px 0;
+.composer-type-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.checklist-chip {
+.composer-type-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.composer-type-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.composer-type-chip {
+  --background: rgba(255, 255, 255, 0.035);
+  --border: 1px solid var(--dotodo-card-border);
+  --chip-color: var(--dotodo-muted);
+  --padding-top: 0;
+  --padding-end: 10px;
+  --padding-bottom: 0;
+  --padding-start: 10px;
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
-  border: 1px solid var(--dotodo-border);
+  justify-content: center;
+  gap: 5px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 38px;
+  border: var(--border);
   border-radius: 999px;
-  background: rgba(var(--dotodo-primary-rgb), 0.08);
-  color: var(--dotodo-text);
-  font-size: 12px;
-  font-weight: 800;
+  color: var(--chip-color);
+  opacity: 0.4;
+  transition:
+    background var(--dotodo-motion-soft),
+    border-color var(--dotodo-motion-soft),
+    box-shadow var(--dotodo-motion-soft),
+    color var(--dotodo-motion-soft),
+    opacity var(--dotodo-motion-soft),
+    transform var(--dotodo-motion-fast);
 }
 
-.checklist-chip span {
-  max-width: 180px;
+.composer-type-chip::before {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--dotodo-secondary);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition:
+    opacity var(--dotodo-motion-soft),
+    transform var(--dotodo-motion-soft);
+}
+
+.composer-type-chip:active {
+  transform: scale(0.98);
+}
+
+.composer-type-chip ion-icon,
+.composer-type-label {
+  color: var(--chip-color);
+  transition:
+    color var(--dotodo-motion-soft),
+    opacity var(--dotodo-motion-soft);
+}
+
+.composer-type-chip ion-icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.composer-type-label {
+  display: inline-block;
   overflow: hidden;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.checklist-chip ion-button {
-  --color: var(--dotodo-muted);
-  min-height: 24px;
-  font-size: 11px;
+.composer-type-chip.is-active {
+  --background: rgba(var(--dotodo-secondary-rgb), 0.1);
+  --border: 1px solid rgba(139, 92, 246, 0.4);
+  --chip-color: var(--dotodo-secondary);
+  border: var(--border);
+  box-shadow:
+    0 10px 24px rgba(var(--dotodo-secondary-rgb), 0.12),
+    inset 0 0 0 1px rgba(var(--dotodo-secondary-rgb), 0.06);
+  opacity: 1;
 }
 
-.datetime-popover {
-  --background: var(--dotodo-surface-strong);
-  --color: var(--dotodo-text);
-  border-radius: 16px;
-}
-
-.datetime-popover ion-datetime {
-  --background: var(--dotodo-surface-strong);
-  --title-color: var(--dotodo-text);
-  --datetime-background: var(--dotodo-surface-strong);
+.composer-type-chip.is-active::before {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 @media (max-width: 640px) {
   .composer-content {
-    padding: 10px !important;
-  }
-
-  .composer-actions {
-    justify-content: flex-start;
-  }
-
-  .composer-input-row {
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
-
-  .composer-title-input {
-    flex-basis: 100%;
-  }
-
-  .due-chip {
-    max-width: 100%;
-  }
-
-  .composer-add-button {
-    width: 100%;
-  }
-
-  .composer-checklist-action {
-    align-items: stretch;
-    padding-left: 0;
-    padding-top: 8px;
-  }
-
-  .checklist-add-button {
-    width: 100%;
+    padding: 14px !important;
   }
 }

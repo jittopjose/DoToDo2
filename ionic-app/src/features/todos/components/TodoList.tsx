@@ -2,6 +2,7 @@ import React from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
 import { documentTextOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
+import { TodoTypeFilter } from '../types';
 import { TodoItem } from './TodoItem';
 import './TodoList.css';
 
@@ -9,33 +10,24 @@ interface TodoListProps {
     list: string;
 }
 
+const typeLabels: Record<Exclude<TodoTypeFilter, 'all'>, string> = {
+    todo: 'Task',
+    shopping: 'Shopping',
+    note: 'Note',
+    checklist: 'Checklist',
+};
+
 export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const todos = useTodoStore((state) => state.todos);
-    const filter = useTodoStore((state) => state.filter);
+    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
     const searchTerm = useTodoStore((state) => state.searchTerm);
+    const getFilteredTodos = useTodoStore((state) => state.getFilteredTodos);
 
-    const filteredTodos = React.useMemo(() => {
-        let result = todos.filter((todo) => todo.list === list);
+    const filteredTodos = getFilteredTodos(list);
 
-        if (searchTerm && searchTerm.trim()) {
-            const term = searchTerm.toLowerCase();
-            result = result.filter((t) =>
-                t.title.toLowerCase().includes(term) ||
-                (t.description && t.description.toLowerCase().includes(term))
-            );
-        }
-
-        switch (filter) {
-            case 'active':
-                return result.filter((t) => !t.isCompleted);
-            case 'completed':
-                return result.filter((t) => t.isCompleted);
-            default:
-                return result;
-        }
-    }, [todos, filter, searchTerm, list]);
-
-    const totalInFilteredList = todos.filter((t) => t.list === list).length;
+    const totalInFilteredList = todos.filter((todo) =>
+        todo.list === list && (typeFilter === 'all' || todo.itemType === typeFilter)
+    ).length;
     const isEmptyList = totalInFilteredList === 0;
     const isSearchActive = searchTerm && searchTerm.trim().length > 0;
 
@@ -60,10 +52,15 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                                     </IonCardTitle>
                                     <IonNote className="empty-copy">
                                         {isEmptyList
-                                            ? 'Add your first task above and give today a clear shape.'
+                                            ? typeFilter === 'all'
+                                                ? 'Add your first task above and give today a clear shape.'
+                                                : `Add your first ${typeLabels[typeFilter].toLowerCase()} item above.`
                                             : isSearchActive
                                                 ? `No results for "${searchTerm}"`
-                                                : 'Try changing the filter'}
+                                                : typeFilter === 'all'
+                                                    ? 'Try changing the filter'
+                                                    : 'Try another category'
+                                        }
                                     </IonNote>
                                 </IonCol>
                             </IonRow>

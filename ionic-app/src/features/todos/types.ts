@@ -20,3 +20,4 @@ export interface TodoSubtask {
 }
 
 export type TodoFilter = 'all' | 'active' | 'completed';
+export type TodoTypeFilter = Todo['itemType'] | 'all';

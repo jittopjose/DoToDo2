@@ -79,6 +79,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [editQuantity, setEditQuantity] = useState(todo.quantity?.toString() ?? '');
     const [editPrice, setEditPrice] = useState(todo.price?.toString() ?? '');
     const [newSubtaskText, setNewSubtaskText] = useState('');
+    const [isSubtaskFocused, setIsSubtaskFocused] = useState(false);
     const inputRef = useRef<HTMLIonInputElement>(null);
     const descRef = useRef<HTMLIonInputElement>(null);
     const qtyRef = useRef<HTMLIonInputElement>(null);
@@ -146,6 +147,12 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         if (trimmed !== (todo.description || '')) {
             updateTodo(todo.id, { description: trimmed || undefined });
         }
+    };
+
+    const handleAddSubtask = () => {
+        if (!newSubtaskText.trim()) return;
+        addSubtask(todo.id, newSubtaskText);
+        setNewSubtaskText('');
     };
 
     const handleShoppingSave = () => {
@@ -235,15 +242,28 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                             Subtasks: {todo.subtasks.filter((s) => s.isCompleted).length}/{todo.subtasks.length}
                                         </IonNote>
                                     )}
-                                    <IonInput
-                                        className="subtask-input"
-                                        color="medium"
-                                        value={newSubtaskText}
-                                        onIonInput={e => setNewSubtaskText(e.detail.value!)}
-                                        onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                        placeholder={newSubtaskText.trim() ? '' : 'Add subtask...'}
-                                        aria-label="Add subtask to this task"
-                                    />
+                                    <IonItem className="subtask-inline" lines="none">
+                                        <IonInput
+                                            className="subtask-input"
+                                            value={newSubtaskText}
+                                            onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                            onKeyUp={(e) => { if (e.key === 'Enter') handleAddSubtask(); }}
+                                            onIonFocus={() => setIsSubtaskFocused(true)}
+                                            onIonBlur={() => setIsSubtaskFocused(false)}
+                                            placeholder="Add subtask..."
+                                            aria-label="Add subtask to this task"
+                                        />
+                                        <IonButton
+                                            className={`compact-button subtask-add-button ${isSubtaskFocused || newSubtaskText.trim() ? 'is-revealed' : ''}`}
+                                            slot="end"
+                                            fill="clear"
+                                            size="small"
+                                            onClick={handleAddSubtask}
+                                            aria-label="Add subtask"
+                                        >
+                                            ADD
+                                        </IonButton>
+                                    </IonItem>
                                     <IonRow className="edit-actions">
                                         <IonCol size="auto">
                                             <IonButton className="compact-button icon-compact-button" fill="clear" size="small" onClick={handlePriorityClick} aria-label="Change priority">
@@ -280,7 +300,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                             )}
                                         </IonCol>
                                         <IonCol size="auto">
-                                            <IonBadge className="task-badge" color="medium">{typeLabels[todo.itemType]}</IonBadge>
+                                            <IonBadge className={`task-badge task-badge--${todo.itemType}`}>{typeLabels[todo.itemType]}</IonBadge>
                                         </IonCol>
                                         {isOverdue(todo) && (
                                             <IonCol size="auto">
@@ -317,22 +337,28 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     )}
                                     {todo.itemType === 'todo' && !todo.isCompleted && (
                                         <IonRow className="task-subtask-add-row">
-                                            <IonCol>
-                                                <IonInput
-                                                    className="subtask-input"
-                                                    color="medium"
-                                                    value={newSubtaskText}
-                                                    onIonInput={e => setNewSubtaskText(e.detail.value!)}
-                                                    onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                                    placeholder={newSubtaskText.trim() ? '' : 'Add subtask...'}
-                                                    aria-label="Add new subtask to this task"
-                                                />
-                                            </IonCol>
-                                            <IonCol size="auto">
-                                                <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
-                                                    ADD
-                                                </IonButton>
-                                            </IonCol>
+                                        <IonItem className="subtask-inline" lines="none">
+                                            <IonInput
+                                                className="subtask-input"
+                                                value={newSubtaskText}
+                                                onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                                onKeyUp={(e) => { if (e.key === 'Enter') handleAddSubtask(); }}
+                                                onIonFocus={() => setIsSubtaskFocused(true)}
+                                                onIonBlur={() => setIsSubtaskFocused(false)}
+                                                placeholder="Add subtask..."
+                                                aria-label="Add new subtask to this task"
+                                            />
+                                            <IonButton
+                                                className={`compact-button subtask-add-button ${isSubtaskFocused || newSubtaskText.trim() ? 'is-revealed' : ''}`}
+                                                slot="end"
+                                                fill="clear"
+                                                size="small"
+                                                onClick={handleAddSubtask}
+                                                aria-label="Add subtask"
+                                            >
+                                                ADD
+                                            </IonButton>
+                                        </IonItem>
                                         </IonRow>
                                     )}
                                     {todo.itemType === 'shopping' && (todo.quantity || todo.price) && (
@@ -416,22 +442,28 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                             ) : null}
                                             {!todo.isCompleted && (
                                                 <IonRow className="task-subtask-add-row">
-                                                    <IonCol>
-                                                        <IonInput
-                                                            className="subtask-input"
-                                                            color="medium"
-                                                            value={newSubtaskText}
-                                                            onIonInput={e => setNewSubtaskText(e.detail.value!)}
-                                                            onKeyUp={(e) => { if (e.key === 'Enter') { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); } }}
-                                                            placeholder={newSubtaskText.trim() ? '' : (todo.subtasks && todo.subtasks.length > 0 ? "Add subtask..." : "Add your first subtask...")}
-                                                            aria-label="Add new subtask"
-                                                        />
-                                                    </IonCol>
-                                                    <IonCol size="auto">
-                                                        <IonButton className="compact-button subtask-add-button" fill="clear" size="small" onClick={() => { addSubtask(todo.id, newSubtaskText); setNewSubtaskText(''); }}>
-                                                            ADD
-                                                        </IonButton>
-                                                    </IonCol>
+                                                <IonItem className="subtask-inline" lines="none">
+                                                    <IonInput
+                                                        className="subtask-input"
+                                                        value={newSubtaskText}
+                                                        onIonInput={e => setNewSubtaskText(e.detail.value!)}
+                                                        onKeyUp={(e) => { if (e.key === 'Enter') handleAddSubtask(); }}
+                                                        onIonFocus={() => setIsSubtaskFocused(true)}
+                                                        onIonBlur={() => setIsSubtaskFocused(false)}
+                                                        placeholder={todo.subtasks && todo.subtasks.length > 0 ? 'Add subtask...' : 'Add your first subtask...'}
+                                                        aria-label="Add new subtask"
+                                                    />
+                                                    <IonButton
+                                                        className={`compact-button subtask-add-button ${isSubtaskFocused || newSubtaskText.trim() ? 'is-revealed' : ''}`}
+                                                        slot="end"
+                                                        fill="clear"
+                                                        size="small"
+                                                        onClick={handleAddSubtask}
+                                                        aria-label="Add subtask"
+                                                    >
+                                                        ADD
+                                                    </IonButton>
+                                                </IonItem>
                                                 </IonRow>
                                             )}
                                         </IonGrid>

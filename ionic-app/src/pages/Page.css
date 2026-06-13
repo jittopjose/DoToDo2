@@ -3,19 +3,23 @@
 }
 
 .top-toolbar {
-  --padding-start: 16px;
-  --padding-end: 16px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  height: 64px;
   min-height: 64px;
 }
 
 .page-title {
+  margin: 0;
   font-size: 24px;
+  line-height: 1;
 }
 
 .clear-button {
   --color: var(--dotodo-primary);
   --color-activated: var(--dotodo-primary);
   --background-activated: var(--dotodo-primary-soft);
+  margin-inline-start: 8px;
   font-size: 13px;
   text-transform: none;
 }
@@ -32,7 +36,7 @@
 
 .progress-row {
   margin: 0;
-  padding: 0 12px 12px;
+  padding: 14px 12px 10px;
 }
 
 .composer-row {
@@ -46,16 +50,18 @@
 }
 
 .panel-card {
-  --border-radius: 16px;
+  --border-radius: var(--dotodo-radius-lg);
   --background: var(--dotodo-card);
+  margin: 0;
   min-width: 0;
-  border: 1px solid var(--dotodo-border);
+  border: 1px solid var(--dotodo-card-border);
   box-shadow: var(--dotodo-shadow-card);
   backdrop-filter: blur(18px);
 }
 
 .progress-panel {
   height: 112px;
+  margin: 0;
   overflow: hidden;
   will-change: height, background;
   transition:
@@ -69,7 +75,7 @@
 }
 
 .progress-content {
-  padding: 16px !important;
+  padding: var(--dotodo-card-padding) !important;
 }
 
 .progress-grid {
@@ -78,6 +84,7 @@
 }
 
 .progress-main {
+  align-items: center;
   margin: 0;
 }
 
@@ -86,7 +93,7 @@
 }
 
 .progress-ring-col {
-  padding-right: 12px !important;
+  padding-right: 14px !important;
 }
 
 .progress-copy {
@@ -94,15 +101,15 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 3px;
-  padding-left: 12px !important;
+  gap: 2px;
+  padding-left: 14px !important;
 }
 
 .progress-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-left: 8px !important;
+  padding-left: 10px !important;
 }
 
 .focus-eyebrow {
@@ -165,8 +172,8 @@
   --color: var(--dotodo-muted);
   --background-activated: var(--dotodo-primary-soft);
   flex: 0 0 auto;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 42px;
+  min-height: 42px;
 }
 
 .progress-search-button--active {
