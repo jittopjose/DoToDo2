@@ -16,12 +16,10 @@ import {
     IonTextarea,
     IonTitle,
 } from '@ionic/react';
-import { addOutline, calendarOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse, flagOutline } from 'ionicons/icons';
+import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse, flagOutline } from 'ionicons/icons';
 import { Todo, TodoPriority } from '../types';
-import { formatDueDate } from '../utils/formatDueDate';
-import { getDueDateInputValue, getDueTimestampFromInput, getDueTimestampFromDays, isDueQuickSelected, parseOptionalNumber } from './TodoItem.utils';
+import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
 import { EditorSection, priorityLabels, priorityLevels, sectionTitles, typeLabels } from './TodoItem.constants';
-import { getSubtaskProgress } from './TodoItem.utils';
 import './TodoItem.css';
 export type { EditorSection };
 
@@ -56,8 +54,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     const [quantity, setQuantity] = useState(todo.quantity?.toString() ?? '');
     const [price, setPrice] = useState(todo.price?.toString() ?? '');
     const [newSubtaskText, setNewSubtaskText] = useState('');
-    const [dueTimestamp, setDueTimestamp] = useState<number | undefined>(todo.dueDate);
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     const resetForm = () => {
         setTitle(todo.title);
@@ -66,14 +62,12 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         setQuantity(todo.quantity?.toString() ?? '');
         setPrice(todo.price?.toString() ?? '');
         setNewSubtaskText('');
-        setDueTimestamp(todo.dueDate);
-        setIsCalendarOpen(false);
     };
 
     useEffect(() => {
         if (!isOpen) return;
         resetForm();
-    }, [isOpen, todo.id, todo.title, todo.description, todo.dueDate, todo.priority, todo.quantity, todo.price]);
+    }, [isOpen, todo.id, todo.title, todo.description, todo.priority, todo.quantity, todo.price]);
 
     useEffect(() => {
         if (!isOpen || !initialSection) return;
@@ -88,42 +82,15 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
 
     const close = () => onDismiss();
 
-    const handleCalendarChange = (event: CustomEvent) => {
-        const value = event.detail.value as string | undefined;
-        const next = value ? getDueTimestampFromInput(value) : undefined;
-        setDueTimestamp(next);
-        onUpdate(todo.id, { dueDate: next });
-        setIsCalendarOpen(false);
-        if (quickMode) close();
-    };
-
-    const handleCalendarCancel = () => {
-        setIsCalendarOpen(false);
-    };
-
     const handleSave = () => {
         onUpdate(todo.id, {
             title: title.trim() || todo.title,
             description: description.trim() || undefined,
             priority,
-            dueDate: dueTimestamp,
             quantity: parseOptionalNumber(quantity),
             price: parseOptionalNumber(price),
         });
         close();
-    };
-
-    const handleDueQuickSelect = (daysFromNow: number) => {
-        const next = getDueTimestampFromDays(daysFromNow);
-        setDueTimestamp(next);
-        onUpdate(todo.id, { dueDate: next });
-        if (quickMode) close();
-    };
-
-    const handleClearDueDate = () => {
-        setDueTimestamp(undefined);
-        onUpdate(todo.id, { dueDate: undefined });
-        if (quickMode) close();
     };
 
     const handlePrioritySelect = (nextPriority: TodoPriority | undefined) => {
@@ -154,7 +121,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         if (quickMode) close();
     };
 
-    const dueInputValue = getDueDateInputValue(dueTimestamp);
     const subtaskProgress = getSubtaskProgress(todo);
 
     return (
@@ -223,84 +189,10 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
 
                         {(quickMode
                             ? [initialSection]
-                            : (['due', 'priority', 'subtasks'] as readonly EditorSection[])
+                            : (['priority', 'subtasks'] as readonly EditorSection[])
                         ).map((section) => {
                             if (section === 'shopping' && todo.itemType !== 'shopping') return null;
-                            return section === 'due' ? (
-                                <IonGrid key="todo-editor-section-due" className="editor-section" id="todo-editor-section-due">
-                                    <IonRow className="editor-section-heading">
-                                        <IonCol>
-                                            <IonIcon icon={calendarOutline} />
-                                            <IonTitle>Due date</IonTitle>
-                                        </IonCol>
-                                        {!quickMode && todo.dueDate && (
-                                            <IonCol size="auto">
-                                                <IonButton className="editor-text-button" fill="clear" size="small" onClick={handleClearDueDate}>
-                                                    Clear
-                                                </IonButton>
-                                            </IonCol>
-                                        )}
-                                    </IonRow>
-                                    <IonGrid className="due-quick-options">
-                                        <IonRow>
-                                            <IonCol size="4">
-                                                <IonButton
-                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 0) ? 'is-selected' : ''}`}
-                                                    fill={dueTimestamp && isDueQuickSelected(todo, 0) ? 'solid' : 'outline'}
-                                                    onClick={() => handleDueQuickSelect(0)}
-                                                >
-                                                    Today
-                                                </IonButton>
-                                            </IonCol>
-                                            <IonCol size="4">
-                                                <IonButton
-                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 1) ? 'is-selected' : ''}`}
-                                                    fill={dueTimestamp && isDueQuickSelected(todo, 1) ? 'solid' : 'outline'}
-                                                    onClick={() => handleDueQuickSelect(1)}
-                                                >
-                                                    Tomorrow
-                                                </IonButton>
-                                            </IonCol>
-                                            <IonCol size="4">
-                                                <IonButton
-                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 7) ? 'is-selected' : ''}`}
-                                                    fill={dueTimestamp && isDueQuickSelected(todo, 7) ? 'solid' : 'outline'}
-                                                    onClick={() => handleDueQuickSelect(7)}
-                                                >
-                                                    Next week
-                                                </IonButton>
-                                            </IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                    <IonItem className="editor-field due-input-field" lines="none">
-                                        <IonCol>
-                                            <IonNote className="field-label">Custom date</IonNote>
-                                            <IonButton
-                                                id="due-date-button"
-                                                className="due-calendar-select"
-                                                fill="outline"
-                                                expand="block"
-                                            >
-                                                <IonIcon icon={calendarOutline} slot="start" />
-                                                {dueTimestamp ? formatDueDate(dueTimestamp) : 'Pick a date'}
-                                            </IonButton>
-                                        </IonCol>
-                                    </IonItem>
-                                    <IonPopover
-                                        trigger="due-date-button"
-                                        triggerAction="click"
-                                        isOpen={isCalendarOpen}
-                                        onDidDismiss={handleCalendarCancel}
-                                    >
-                                        <IonDatetime
-                                            className="due-calendar-datetime"
-                                            presentation="date"
-                                            value={dueInputValue}
-                                            onIonChange={handleCalendarChange}
-                                        />
-                                    </IonPopover>
-                                </IonGrid>
-                            ) : section === 'priority' ? (
+                            return section === 'priority' ? (
                                 <IonGrid key="todo-editor-section-priority" className="editor-section" id="todo-editor-section-priority">
                                     <IonRow className="editor-section-heading">
                                         <IonCol>

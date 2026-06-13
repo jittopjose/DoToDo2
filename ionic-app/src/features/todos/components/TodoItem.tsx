@@ -33,7 +33,7 @@ import { formatDueDate } from '../utils/formatDueDate';
 import './TodoItem.css';
 import { TodoItemEditorSheet, EditorSection } from './TodoItemEditorSheet';
 import { typeIcons, priorityLabels } from './TodoItem.constants';
-import { getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
+import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
 
 interface Props {
     todo: Todo;
@@ -64,7 +64,8 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const handleDirectDueDateChange = (event: CustomEvent) => {
         const value = event.detail.value as string | undefined;
         if (value) {
-            const dueDate = new Date(value).setHours(0, 0, 0, 0);
+            const [year, month, day] = value.split('-').map(Number);
+            const dueDate = new Date(year, month - 1, day).setHours(0, 0, 0, 0);
             updateTodo(todo.id, { dueDate });
         }
         setIsDueCalendarOpen(false);
@@ -153,7 +154,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                 <div className="task-metadata-row">
                                     {todo.dueDate ? (
                                         <IonChip
-                                            id="due-chip-trigger"
                                             className={`task-chip task-chip--due ${overdue ? 'is-danger' : ''}`}
                                             onClick={handleDirectDueDateClick}
                                         >
@@ -263,19 +263,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     </IonItemOption>
                 </IonItemOptions>
             </IonItemSliding>
-            <IonPopover
-                trigger="due-chip-trigger"
-                triggerAction="click"
-                isOpen={isDueCalendarOpen}
-                onDidDismiss={() => setIsDueCalendarOpen(false)}
-            >
-                <IonDatetime
-                    className="due-calendar-datetime"
-                    presentation="date"
-                    value={todo.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : undefined}
-                    onIonChange={handleDirectDueDateChange}
-                />
-            </IonPopover>
             <TodoItemEditorSheet
                 todo={todo}
                 isOpen={isEditorOpen}
@@ -288,6 +275,17 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 onUpdate={updateTodo}
                 onSwitchToFull={() => openEditor(editorSection)}
             />
+            <IonPopover
+                isOpen={isDueCalendarOpen}
+                onDidDismiss={() => setIsDueCalendarOpen(false)}
+            >
+                <IonDatetime
+                    className="due-calendar-datetime"
+                    presentation="date"
+                    value={getDueDateInputValue(todo.dueDate)}
+                    onIonChange={handleDirectDueDateChange}
+                />
+            </IonPopover>
         </>
     );
 };
