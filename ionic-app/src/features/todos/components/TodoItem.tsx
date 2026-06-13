@@ -4,6 +4,7 @@ import {
     IonCheckbox,
     IonChip,
     IonCol,
+    IonDatetime,
     IonGrid,
     IonIcon,
     IonItem,
@@ -11,6 +12,7 @@ import {
     IonItemOptions,
     IonItemSliding,
     IonNote,
+    IonPopover,
     IonRow,
     IonTitle,
 } from '@ionic/react';
@@ -46,6 +48,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editorSection, setEditorSection] = useState<EditorSection>('details');
     const [quickMode, setQuickMode] = useState(false);
+    const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
 
     const openEditor = (section: EditorSection = 'details', quickModeParam?: boolean) => {
         setEditorSection(section);
@@ -58,6 +61,20 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         setQuickMode(false);
     };
 
+    const handleDirectDueDateChange = (event: CustomEvent) => {
+        const value = event.detail.value as string | undefined;
+        if (value) {
+            const dueDate = new Date(value).setHours(0, 0, 0, 0);
+            updateTodo(todo.id, { dueDate });
+        }
+        setIsDueCalendarOpen(false);
+    };
+
+    const handleDirectDueDateClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsDueCalendarOpen(true);
+    };
+
     const handleDelete = () => {
         deleteTodo(todo.id);
         closeEditor();
@@ -68,10 +85,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
 
     const quickActions = useMemo(() => {
         const actions: Array<{ label: string; icon: string; section: EditorSection }> = [];
-
-        if (!todo.dueDate) {
-            actions.push({ label: 'Add due', icon: calendarOutline, section: 'due' });
-        }
 
         if (!todo.priority) {
             actions.push({ label: 'Priority', icon: flagOutline, section: 'priority' });
@@ -138,16 +151,22 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                 </IonGrid>
 
                                 <div className="task-metadata-row">
-                                    {todo.dueDate && (
+                                    {todo.dueDate ? (
                                         <IonChip
+                                            id="due-chip-trigger"
                                             className={`task-chip task-chip--due ${overdue ? 'is-danger' : ''}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openEditor('due', true);
-                                            }}
+                                            onClick={handleDirectDueDateClick}
                                         >
                                             <IonIcon icon={overdue ? alertCircleOutline : calendarOutline} />
                                             <span>{formatDueDate(todo.dueDate)}</span>
+                                        </IonChip>
+                                    ) : (
+                                        <IonChip
+                                            className="task-chip task-chip--quick-add"
+                                            onClick={handleDirectDueDateClick}
+                                        >
+                                            <IonIcon icon={calendarOutline} />
+                                            <span>Add due</span>
                                         </IonChip>
                                     )}
 
@@ -233,7 +252,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     <IonItemOption color="primary" onClick={() => openEditor('details')} aria-label={`Edit ${todo.title}`}>
                         <IonIcon icon={documentTextOutline} />
                     </IonItemOption>
-                    <IonItemOption color="warning" onClick={() => openEditor('due', true)} aria-label={`Set due date for ${todo.title}`}>
+                    <IonItemOption color="warning" onClick={handleDirectDueDateClick} aria-label={`Set due date for ${todo.title}`}>
                         <IonIcon icon={calendarOutline} />
                     </IonItemOption>
                     <IonItemOption color="secondary" onClick={() => openEditor('priority', true)} aria-label={`Set priority for ${todo.title}`}>
@@ -244,6 +263,19 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     </IonItemOption>
                 </IonItemOptions>
             </IonItemSliding>
+            <IonPopover
+                trigger="due-chip-trigger"
+                triggerAction="click"
+                isOpen={isDueCalendarOpen}
+                onDidDismiss={() => setIsDueCalendarOpen(false)}
+            >
+                <IonDatetime
+                    className="due-calendar-datetime"
+                    presentation="date"
+                    value={todo.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : undefined}
+                    onIonChange={handleDirectDueDateChange}
+                />
+            </IonPopover>
             <TodoItemEditorSheet
                 todo={todo}
                 isOpen={isEditorOpen}
