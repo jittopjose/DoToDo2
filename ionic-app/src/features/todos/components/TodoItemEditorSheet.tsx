@@ -22,6 +22,7 @@ import { getDueDateInputValue, getDueTimestampFromInput, getDueTimestampFromDays
 import { EditorSection, priorityLabels, priorityLevels, sectionTitles, typeLabels } from './TodoItem.constants';
 import { getSubtaskProgress } from './TodoItem.utils';
 import './TodoItem.css';
+export type { EditorSection };
 
 interface EditorSheetProps {
     todo: Todo;
@@ -55,7 +56,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     const [price, setPrice] = useState(todo.price?.toString() ?? '');
     const [newSubtaskText, setNewSubtaskText] = useState('');
     const [dueTimestamp, setDueTimestamp] = useState<number | undefined>(todo.dueDate);
-    const [isCustomCalendarOpen, setIsCustomCalendarOpen] = useState(false);
+    const [showCustomCalendar, setShowCustomCalendar] = useState(false);
 
     const resetForm = () => {
         setTitle(todo.title);
@@ -65,6 +66,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         setPrice(todo.price?.toString() ?? '');
         setNewSubtaskText('');
         setDueTimestamp(todo.dueDate);
+        setShowCustomCalendar(false);
     };
 
     useEffect(() => {
@@ -86,7 +88,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     const close = () => onDismiss();
 
     const handleOpenCalendar = () => {
-        setIsCustomCalendarOpen(true);
+        setShowCustomCalendar(true);
     };
 
     const handleCalendarChange = (event: CustomEvent) => {
@@ -94,8 +96,12 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         const next = value ? getDueTimestampFromInput(value) : undefined;
         setDueTimestamp(next);
         onUpdate(todo.id, { dueDate: next });
-        setIsCustomCalendarOpen(false);
+        setShowCustomCalendar(false);
         if (quickMode) close();
+    };
+
+    const handleCalendarCancel = () => {
+        setShowCustomCalendar(false);
     };
 
     const handleSave = () => {
@@ -242,8 +248,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                                         <IonRow>
                                             <IonCol size="4">
                                                 <IonButton
-                                                    className={`due-quick-option ${isDueQuickSelected(todo, 0) ? 'is-selected' : ''}`}
-                                                    fill={isDueQuickSelected(todo, 0) ? 'solid' : 'outline'}
+                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 0) ? 'is-selected' : ''}`}
+                                                    fill={dueTimestamp && isDueQuickSelected(todo, 0) ? 'solid' : 'outline'}
                                                     onClick={() => handleDueQuickSelect(0)}
                                                 >
                                                     Today
@@ -251,8 +257,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                                             </IonCol>
                                             <IonCol size="4">
                                                 <IonButton
-                                                    className={`due-quick-option ${isDueQuickSelected(todo, 1) ? 'is-selected' : ''}`}
-                                                    fill={isDueQuickSelected(todo, 1) ? 'solid' : 'outline'}
+                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 1) ? 'is-selected' : ''}`}
+                                                    fill={dueTimestamp && isDueQuickSelected(todo, 1) ? 'solid' : 'outline'}
                                                     onClick={() => handleDueQuickSelect(1)}
                                                 >
                                                     Tomorrow
@@ -260,8 +266,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                                             </IonCol>
                                             <IonCol size="4">
                                                 <IonButton
-                                                    className={`due-quick-option ${isDueQuickSelected(todo, 7) ? 'is-selected' : ''}`}
-                                                    fill={isDueQuickSelected(todo, 7) ? 'solid' : 'outline'}
+                                                    className={`due-quick-option ${dueTimestamp && isDueQuickSelected(todo, 7) ? 'is-selected' : ''}`}
+                                                    fill={dueTimestamp && isDueQuickSelected(todo, 7) ? 'solid' : 'outline'}
                                                     onClick={() => handleDueQuickSelect(7)}
                                                 >
                                                     Next week
@@ -272,19 +278,38 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                                     <IonItem className="editor-field due-input-field" lines="none">
                                         <IonCol>
                                             <IonNote className="field-label">Custom date</IonNote>
-                                            <IonButton
-                                                className="due-calendar-select"
-                                                fill="outline"
-                                                expand="block"
-                                                onClick={handleOpenCalendar}
-                                            >
-                                                <IonIcon icon={calendarOutline} slot="start" />
-                                                {dueTimestamp ? formatDueDate(dueTimestamp) : 'Pick a date'}
-                                            </IonButton>
+                                            {showCustomCalendar ? (
+                                                <IonDatetime
+                                                    className="due-calendar-datetime"
+                                                    presentation="date"
+                                                    value={dueInputValue}
+                                                    onIonChange={handleCalendarChange}
+                                                />
+                                            ) : (
+                                                <IonButton
+                                                    className="due-calendar-select"
+                                                    fill="outline"
+                                                    expand="block"
+                                                    onClick={handleOpenCalendar}
+                                                >
+                                                    <IonIcon icon={calendarOutline} slot="start" />
+                                                    {dueTimestamp ? formatDueDate(dueTimestamp) : 'Pick a date'}
+                                                </IonButton>
+                                            )}
                                         </IonCol>
                                     </IonItem>
-                                    {todo.dueDate && (
-                                        <IonNote className="selected-due-note">Selected: {formatDueDate(todo.dueDate)}</IonNote>
+                                    {showCustomCalendar && (
+                                        <IonButton
+                                            className="calendar-cancel-button"
+                                            fill="clear"
+                                            expand="block"
+                                            onClick={handleCalendarCancel}
+                                        >
+                                            Cancel
+                                        </IonButton>
+                                    )}
+                                    {dueTimestamp && (
+                                        <IonNote className="selected-due-note">Selected: {formatDueDate(dueTimestamp)}</IonNote>
                                     )}
                                 </IonGrid>
                             ) : section === 'priority' ? (
@@ -411,28 +436,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                             </IonGrid>
                         )}
                     </IonGrid>
-                </IonContent>
-            </IonModal>
-            <IonModal
-                className="calendar-picker-modal"
-                isOpen={isCustomCalendarOpen}
-                onDidDismiss={() => setIsCustomCalendarOpen(false)}
-            >
-                <IonContent className="calendar-picker-content">
-                    <IonDatetime
-                        className="due-calendar-datetime"
-                        presentation="date"
-                        value={dueInputValue}
-                        onIonChange={handleCalendarChange}
-                    />
-                    <IonButton
-                        className="calendar-cancel-button"
-                        fill="clear"
-                        expand="block"
-                        onClick={() => setIsCustomCalendarOpen(false)}
-                    >
-                        Cancel
-                    </IonButton>
                 </IonContent>
             </IonModal>
         </>
