@@ -78,6 +78,11 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         setIsDueCalendarOpen(true);
     };
 
+    const handlePriorityClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setIsPriorityPopoverOpen(true);
+    };
+
     const handlePriorityChange = (priority: TodoPriority | undefined) => {
         updateTodo(todo.id, { priority });
         setIsPriorityPopoverOpen(false);
@@ -176,10 +181,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     {todo.priority && (
                                         <IonChip
                                             className={`task-chip task-chip--priority task-chip--priority-${todo.priority}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsPriorityPopoverOpen(true);
-                                            }}
+                                            onClick={handlePriorityClick}
                                         >
                                             <IonIcon icon={ellipse} />
                                             <span>{priorityLabels[todo.priority]}</span>
@@ -188,10 +190,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     {!todo.priority && (
                                         <IonChip
                                             className="task-chip task-chip--quick-add"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsPriorityPopoverOpen(true);
-                                            }}
+                                            onClick={handlePriorityClick}
                                         >
                                             <IonIcon icon={flagOutline} />
                                             <span>Priority</span>
