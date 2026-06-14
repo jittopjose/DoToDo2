@@ -63,12 +63,19 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     }, []);
 
     const handleDirectDueDateChange = useCallback((event: CustomEvent) => {
-        const value = event.detail.value as string | undefined;
-        if (value) {
-            const [year, month, day] = value.split('-').map(Number);
-            const dueDate = new Date(year, month - 1, day).setHours(0, 0, 0, 0);
-            updateTodo(todo.id, { dueDate });
+        const raw = event.detail.value as string | undefined;
+        if (!raw) {
+            setIsDueCalendarOpen(false);
+            return;
         }
+        const datePart = raw.includes('T') ? raw.split('T')[0] : raw;
+        const [year, month, day] = datePart.split('-').map(Number);
+        if (![year, month, day].every(Number.isFinite)) {
+            setIsDueCalendarOpen(false);
+            return;
+        }
+        const dueDate = new Date(year, month - 1, day).setHours(0, 0, 0, 0);
+        updateTodo(todo.id, { dueDate });
         setIsDueCalendarOpen(false);
     }, [todo.id, updateTodo]);
 

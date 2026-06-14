@@ -43,6 +43,18 @@
     opacity var(--dotodo-motion-fast),
     transform var(--dotodo-motion-fast);
   will-change: box-shadow, transform;
+  animation: taskEnter 0.35s ease both;
+}
+
+@keyframes taskEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .task-row:active {
