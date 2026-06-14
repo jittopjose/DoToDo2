@@ -518,6 +518,7 @@
   --background: var(--dotodo-card);
   --border-radius: 12px;
   padding: 8px;
+  min-width: 320px;
 }
 
 .priority-popover-content {

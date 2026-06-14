@@ -36,6 +36,12 @@ import { priorityLevels, priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
 
+const priorityColors = {
+    low: 'var(--ion-color-success)',
+    medium: 'var(--ion-color-warning)',
+    high: 'var(--ion-color-danger)'
+};
+
 interface Props {
     todo: Todo;
 }
@@ -50,7 +56,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [editorSection, setEditorSection] = useState<EditorSection>('details');
     const [quickMode, setQuickMode] = useState(false);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
-    const [isPriorityPopoverOpen, setIsPriorityPopoverOpen] = useState(false);
 
     const openEditor = (section: EditorSection = 'details', quickModeParam?: boolean) => {
         setEditorSection(section);
@@ -78,15 +83,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         setIsDueCalendarOpen(true);
     };
 
-    const handlePriorityClick = (e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        setIsPriorityPopoverOpen(true);
-    };
-
-    const handlePriorityChange = (priority: TodoPriority | undefined) => {
-        updateTodo(todo.id, { priority });
-        setIsPriorityPopoverOpen(false);
-    };
 
     const handleDelete = () => {
         deleteTodo(todo.id);
@@ -178,24 +174,33 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                         </IonChip>
                                     )}
 
-                                    {todo.priority && (
-                                        <IonChip
-                                            className={`task-chip task-chip--priority task-chip--priority-${todo.priority}`}
-                                            onClick={handlePriorityClick}
-                                        >
-                                            <IonIcon icon={ellipse} />
-                                            <span>{priorityLabels[todo.priority]}</span>
-                                        </IonChip>
-                                    )}
-                                    {!todo.priority && (
-                                        <IonChip
-                                            className="task-chip task-chip--quick-add"
-                                            onClick={handlePriorityClick}
-                                        >
-                                            <IonIcon icon={flagOutline} />
-                                            <span>Priority</span>
-                                        </IonChip>
-                                    )}
+                                    {/* Priority chip */}
+
+                                    <IonChip
+                                      className={todo.priority ? 
+                                        `task-chip task-chip--priority-${todo.priority}` : 
+                                        "task-chip task-chip--quick-add"
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const levels: Array<TodoPriority | undefined> = ['low', 'medium', 'high', undefined];
+                                        const currentIndex = levels.indexOf(todo.priority as any);
+                                        const nextPriority = levels[(currentIndex + 1) % levels.length];
+                                        updateTodo(todo.id, { priority: nextPriority });
+                                      }}
+                                    >
+                                      {todo.priority ? (
+                                        <>
+                                          <IonIcon icon={ellipse} style={{ marginRight: '4px', fontSize: '12px' }} />
+                                          <span>{priorityLabels[todo.priority]}</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <IonIcon icon={flagOutline} style={{ marginRight: '4px', fontSize: '12px' }} />
+                                          <span>Priority</span>
+                                        </>
+                                      )}
+                                    </IonChip>
 
                                     {subtaskProgress.total > 0 && (
                                         <IonChip
@@ -292,23 +297,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     value={getDueDateInputValue(todo.dueDate)}
                     onIonChange={handleDirectDueDateChange}
                 />
-            </IonPopover>
-            <IonPopover
-                isOpen={isPriorityPopoverOpen}
-                onDidDismiss={() => setIsPriorityPopoverOpen(false)}
-                className="priority-popover"
-            >
-                <div className="priority-popover-content">
-                    {priorityLevels.map((priority) => (
-                        <IonChip
-                            key={priority}
-                            className={`task-chip task-chip--priority${priority ? '-' + priority : ''} ${todo.priority === priority ? 'selected' : ''}`}
-                            onClick={() => handlePriorityChange(priority)}
-                        >
-                            <span>{priority ? priorityLabels[priority] : 'None'}</span>
-                        </IonChip>
-                    ))}
-                </div>
             </IonPopover>
         </>
     );
