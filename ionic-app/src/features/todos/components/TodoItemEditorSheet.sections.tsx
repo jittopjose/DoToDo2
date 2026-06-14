@@ -1,25 +1,20 @@
 import { memo, useCallback } from 'react';
 import {
     IonButton,
-    IonButtons,
     IonCol,
     IonGrid,
     IonIcon,
     IonInput,
-    IonItem,
     IonNote,
     IonRow,
     IonTextarea,
-    IonTitle,
 } from '@ionic/react';
 import {
     addOutline,
-    cartOutline,
     checkmarkDoneOutline,
     ellipse,
 } from 'ionicons/icons';
 import type { Todo } from '../types';
-import type { EditorSection } from './TodoItem.constants';
 
 interface EditorDetailsProps {
     title: string;
@@ -35,31 +30,27 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
     onDescriptionChange,
 }: EditorDetailsProps) {
     return (
-        <IonGrid className="editor-section" id="todo-editor-section-details">
-            <IonItem className="editor-field" lines="none">
-                <IonCol>
-                    <IonNote className="field-label">Title</IonNote>
-                    <IonInput
-                        className="editor-title-input"
-                        value={title}
-                        onIonInput={(event) => onTitleChange(event.detail.value ?? '')}
-                        placeholder="Task title"
-                    />
-                </IonCol>
-            </IonItem>
-            <IonItem className="editor-field" lines="none">
-                <IonCol>
-                    <IonNote className="field-label">Details</IonNote>
-                    <IonTextarea
-                        className="editor-description-input"
-                        value={description}
-                        onIonInput={(event) => onDescriptionChange(event.detail.value ?? '')}
-                        placeholder="Add notes, context, or instructions"
-                        rows={4}
-                    />
-                </IonCol>
-            </IonItem>
-        </IonGrid>
+        <div className="edit-fields">
+            <div className="edit-field">
+                <label className="edit-label">Title</label>
+                <IonInput
+                    className="edit-title-input"
+                    value={title}
+                    onIonInput={(event) => onTitleChange(event.detail.value ?? '')}
+                    placeholder="Task title"
+                />
+            </div>
+            <div className="edit-field">
+                <label className="edit-label">Description</label>
+                <IonTextarea
+                    className="edit-description-input"
+                    value={description}
+                    onIonInput={(event) => onDescriptionChange(event.detail.value ?? '')}
+                    placeholder="What needs to be done?"
+                    rows={4}
+                />
+            </div>
+        </div>
     );
 });
 
@@ -79,49 +70,47 @@ export const SubtasksSection = memo(function SubtasksSection({
     onToggleSubtask,
 }: SubtasksSectionProps) {
     const hasSubtasks = subtasks && subtasks.length > 0;
-    const progress = subtasks
-        ? {
-              total: subtasks.length,
-              completed: subtasks.filter((st) => st.isCompleted).length,
-          }
-        : { total: 0, completed: 0 };
+    const completed = subtasks
+        ? subtasks.filter((st) => st.isCompleted).length
+        : 0;
+    const total = subtasks?.length ?? 0;
+    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return (
-        <IonGrid className="editor-section" id="todo-editor-section-subtasks">
-            <IonRow className="editor-section-heading">
-                <IonCol>
+        <div className="edit-section" id="todo-editor-section-subtasks">
+            <div className="edit-section-header">
+                <div className="edit-section-title">
                     <IonIcon icon={checkmarkDoneOutline} />
-                    <IonTitle>Subtasks</IonTitle>
-                </IonCol>
-                {progress.total > 0 && (
-                    <IonCol size="auto">
-                        <IonNote className="subtask-progress-label">
-                            {progress.completed}/{progress.total}
-                        </IonNote>
-                    </IonCol>
+                    <span>Subtasks</span>
+                </div>
+                {total > 0 && (
+                    <div className="edit-section-meta">
+                        <span className="edit-progress-pill">{completed}/{total}</span>
+                        <div className="edit-progress-track">
+                            <div className="edit-progress-fill" style={{ width: `${progress}%` }} />
+                        </div>
+                    </div>
                 )}
-            </IonRow>
+            </div>
             {hasSubtasks && (
-                <IonGrid className="subtask-editor-list">
+                <div className="subtask-editor-list">
                     {subtasks!.map((subtask) => (
-                        <IonItem
+                        <div
                             key={subtask.id}
-                            className={`subtask-editor-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                            lines="none"
-                            button
-                            detail={false}
+                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
                             onClick={() => onToggleSubtask(subtask.id)}
                         >
-                            <IonIcon
-                                className="subtask-editor-icon"
-                                icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse}
-                            />
-                            <IonNote className="subtask-editor-title">{subtask.title}</IonNote>
-                        </IonItem>
+                            <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`}>
+                                {subtask.isCompleted && (
+                                    <IonIcon icon={checkmarkDoneOutline} />
+                                )}
+                            </div>
+                            <span className="subtask-text">{subtask.title}</span>
+                        </div>
                     ))}
-                </IonGrid>
+                </div>
             )}
-        </IonGrid>
+        </div>
     );
 });
 
@@ -139,76 +128,23 @@ export const AddSubtaskRow = memo(function AddSubtaskRow({
     isEnabled,
 }: AddSubtaskRowProps) {
     return (
-        <IonItem className="subtask-editor-add" lines="none">
+        <div className="subtask-add-row">
             <IonInput
-                className="subtask-editor-input"
+                className="subtask-add-input"
                 value={value}
                 onIonInput={(event) => onValueChange(event.detail.value ?? '')}
-                placeholder={isEnabled ? 'Add another subtask' : 'Add your first subtask'}
+                placeholder={isEnabled ? 'Add subtask' : 'Add your first subtask'}
             />
             <IonButton
-                className="subtask-editor-add-button"
-                fill="clear"
+                className="subtask-add-button"
+                fill="solid"
+                color="primary"
                 onClick={onSubmit}
                 disabled={!value.trim()}
             >
-                <IonIcon icon={addOutline} />
+                <IonIcon icon={addOutline} slot="start" />
+                Add
             </IonButton>
-        </IonItem>
-    );
-});
-
-interface ShoppingSectionProps {
-    quantity: string;
-    price: string;
-    onQuantityChange: (value: string) => void;
-    onPriceChange: (value: string) => void;
-    onBlur: () => void;
-}
-
-export const ShoppingSection = memo(function ShoppingSection({
-    quantity,
-    price,
-    onQuantityChange,
-    onPriceChange,
-    onBlur,
-}: ShoppingSectionProps) {
-    return (
-        <IonGrid className="editor-section" id="todo-editor-section-shopping">
-            <IonRow className="editor-section-heading">
-                <IonCol>
-                    <IonIcon icon={cartOutline} />
-                    <IonTitle>Shopping details</IonTitle>
-                </IonCol>
-            </IonRow>
-            <IonGrid className="shopping-editor-grid">
-                <IonRow>
-                    <IonCol>
-                        <IonNote className="field-label">Quantity</IonNote>
-                        <IonInput
-                            className="shopping-editor-input"
-                            type="number"
-                            inputMode="decimal"
-                            value={quantity}
-                            onIonInput={(event) => onQuantityChange(event.detail.value ?? '')}
-                            onBlur={onBlur}
-                            placeholder="12"
-                        />
-                    </IonCol>
-                    <IonCol>
-                        <IonNote className="field-label">Price</IonNote>
-                        <IonInput
-                            className="shopping-editor-input"
-                            type="number"
-                            inputMode="decimal"
-                            value={price}
-                            onIonInput={(event) => onPriceChange(event.detail.value ?? '')}
-                            onBlur={onBlur}
-                            placeholder="4.99"
-                        />
-                    </IonCol>
-                </IonRow>
-            </IonGrid>
-        </IonGrid>
+        </div>
     );
 });

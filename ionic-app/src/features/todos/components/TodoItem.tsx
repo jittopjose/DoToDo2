@@ -13,19 +13,18 @@ import {
 } from '@ionic/react';
 import {
     addOutline,
+    alertCircleOutline,
     calendarOutline,
     cartOutline,
     checkmarkDoneOutline,
-    documentTextOutline,
     ellipse,
     flagOutline,
-    alertCircleOutline,
 } from 'ionicons/icons';
 import { Todo, TodoPriority } from '../types';
 import { useTodoStore } from '../store/todoStore';
 import { formatDueDate } from '../utils/formatDueDate';
 import './TodoItem.css';
-import { TodoItemEditorSheet, EditorSection } from './TodoItemEditorSheet';
+import { TodoItemEditorSheet } from './TodoItemEditorSheet';
 import { priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
@@ -43,19 +42,14 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     const deleteTodo = useTodoStore((state) => state.deleteTodo);
     const updateTodo = useTodoStore((state) => state.updateTodo);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
-    const [editorSection, setEditorSection] = useState<EditorSection>('details');
-    const [quickMode, setQuickMode] = useState(false);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
 
-    const openEditor = useCallback((section: EditorSection = 'details', quickModeParam?: boolean) => {
-        setEditorSection(section);
-        setQuickMode(Boolean(quickModeParam));
+    const openEditor = useCallback(() => {
         setIsEditorOpen(true);
     }, []);
 
     const closeEditor = useCallback(() => {
         setIsEditorOpen(false);
-        setQuickMode(false);
     }, []);
 
     const handleDueCalendarDismiss = useCallback(() => {
@@ -88,10 +82,6 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         toggleTodo(todo.id);
     }, [todo.id, toggleTodo]);
 
-    const handleSwitchToFull = useCallback(() => {
-        openEditor(editorSection);
-    }, [editorSection, openEditor]);
-
     const handleDelete = useCallback(() => {
         deleteTodo(todo.id);
         closeEditor();
@@ -110,51 +100,30 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
 
     const handleSubtaskClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        openEditor('subtasks', true);
+        openEditor();
     }, [openEditor]);
 
     const handleShoppingClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        openEditor('shopping', true);
+        openEditor();
     }, [openEditor]);
 
     const handleItemClick = useCallback(() => {
         openEditor();
     }, [openEditor]);
 
-    const handleQuickActionClick = useCallback((action: { label: string; icon: string; section: EditorSection }) => (e: React.MouseEvent) => {
-        e.stopPropagation();
-        openEditor(action.section, true);
-    }, [openEditor]);
-
     const subtaskProgress = getSubtaskProgress(todo);
     const overdue = isOverdue(todo);
 
     const quickActions = useMemo(() => {
-        const actions: Array<{ label: string; icon: string; section: EditorSection }> = [];
-
-        if (!todo.description) {
-            actions.push({ label: 'Add note', icon: documentTextOutline, section: 'details' });
-        }
+        const actions: Array<{ label: string; icon: string }> = [];
 
         if (!todo.subtasks || todo.subtasks.length === 0) {
-            actions.push({
-                label: todo.itemType === 'shopping' ? '+ item' : '+ subtask',
-                icon: addOutline,
-                section: 'subtasks',
-            });
+            actions.push({ label: '+ subtask', icon: addOutline });
         }
 
-        if (todo.itemType === 'shopping' && todo.quantity === undefined) {
-            actions.push({ label: 'Qty', icon: cartOutline, section: 'shopping' });
-        }
-
-        if (todo.itemType === 'shopping' && todo.price === undefined) {
-            actions.push({ label: 'Price', icon: cartOutline, section: 'shopping' });
-        }
-
-        return actions.slice(0, 4);
-    }, [todo]);
+        return actions.slice(0, 2);
+    }, [todo.subtasks]);
 
 return (
         <>
@@ -263,25 +232,11 @@ return (
                                         </IonChip>
                                     )}
 
-                                    {todo.itemType === 'shopping' && (todo.quantity !== undefined || todo.price !== undefined) && (
-                                        <IonChip
-                                            className="task-chip task-chip--shopping"
-                                            onClick={handleShoppingClick}
-                                        >
-                                            <IonIcon icon={cartOutline} />
-                                            <span>
-                                                {todo.quantity !== undefined && <>Qty {todo.quantity}</>}
-                                                {todo.quantity !== undefined && todo.price !== undefined && <> · </>}
-                                                {todo.price !== undefined && <>${todo.price.toFixed(2)}</>}
-                                            </span>
-                                        </IonChip>
-                                    )}
-
                                     {quickActions.length > 0 && quickActions.map((action) => (
                                         <IonChip
-                                            key={`${action.section}-${action.label}`}
+                                            key={action.label}
                                             className="task-chip task-chip--quick"
-                                            onClick={handleQuickActionClick(action)}
+                                            onClick={() => {}}
                                         >
                                             <IonIcon icon={action.icon} />
                                             <span>{action.label}</span>
@@ -302,14 +257,11 @@ return (
             <TodoItemEditorSheet
                 todo={todo}
                 isOpen={isEditorOpen}
-                initialSection={editorSection}
-                quickMode={quickMode}
                 onDismiss={closeEditor}
                 onDelete={handleDelete}
                 onToggleSubtask={toggleSubtask}
                 onAddSubtask={addSubtask}
                 onUpdate={updateTodo}
-                onSwitchToFull={handleSwitchToFull}
             />
             <IonPopover
                 isOpen={isDueCalendarOpen}
