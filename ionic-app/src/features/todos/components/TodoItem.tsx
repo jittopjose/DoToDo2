@@ -27,12 +27,13 @@ import {
     alertCircleOutline,
     trashOutline,
 } from 'ionicons/icons';
-import { Todo } from '../types';
+import { Todo, TodoPriority } from '../types';
 import { useTodoStore } from '../store/todoStore';
 import { formatDueDate } from '../utils/formatDueDate';
 import './TodoItem.css';
 import { TodoItemEditorSheet, EditorSection } from './TodoItemEditorSheet';
-import { typeIcons, priorityLabels } from './TodoItem.constants';
+import { priorityLevels, priorityLabels } from './TodoItem.constants';
+import { typeIcons } from './TodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
 
 interface Props {
@@ -49,6 +50,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [editorSection, setEditorSection] = useState<EditorSection>('details');
     const [quickMode, setQuickMode] = useState(false);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
+    const [isPriorityPopoverOpen, setIsPriorityPopoverOpen] = useState(false);
 
     const openEditor = (section: EditorSection = 'details', quickModeParam?: boolean) => {
         setEditorSection(section);
@@ -76,6 +78,11 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         setIsDueCalendarOpen(true);
     };
 
+    const handlePriorityChange = (priority: TodoPriority | undefined) => {
+        updateTodo(todo.id, { priority });
+        setIsPriorityPopoverOpen(false);
+    };
+
     const handleDelete = () => {
         deleteTodo(todo.id);
         closeEditor();
@@ -86,10 +93,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
 
     const quickActions = useMemo(() => {
         const actions: Array<{ label: string; icon: string; section: EditorSection }> = [];
-
-        if (!todo.priority) {
-            actions.push({ label: 'Priority', icon: flagOutline, section: 'priority' });
-        }
 
         if (!todo.description) {
             actions.push({ label: 'Add note', icon: documentTextOutline, section: 'details' });
@@ -175,11 +178,23 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                             className={`task-chip task-chip--priority task-chip--priority-${todo.priority}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                openEditor('priority', true);
+                                                setIsPriorityPopoverOpen(true);
                                             }}
                                         >
                                             <IonIcon icon={ellipse} />
                                             <span>{priorityLabels[todo.priority]}</span>
+                                        </IonChip>
+                                    )}
+                                    {!todo.priority && (
+                                        <IonChip
+                                            className="task-chip task-chip--quick-add"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsPriorityPopoverOpen(true);
+                                            }}
+                                        >
+                                            <IonIcon icon={flagOutline} />
+                                            <span>Priority</span>
                                         </IonChip>
                                     )}
 
@@ -212,29 +227,25 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                             </span>
                                         </IonChip>
                                     )}
+
+                                    {quickActions.length > 0 && quickActions.map((action) => (
+                                        <IonChip
+                                            key={`${action.section}-${action.label}`}
+                                            className="task-chip task-chip--quick"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openEditor(action.section, true);
+                                            }}
+                                        >
+                                            <IonIcon icon={action.icon} />
+                                            <span>{action.label}</span>
+                                        </IonChip>
+                                    ))}
                                 </div>
 
-                                {subtaskProgress.total > 0 && (
+{subtaskProgress.total > 0 && (
                                     <div className="task-progress-track" aria-label={`${subtaskProgress.percent}% complete`}>
                                         <div className="task-progress-fill" style={{ width: `${subtaskProgress.percent}%` }} />
-                                    </div>
-                                )}
-
-                                {quickActions.length > 0 && (
-                                    <div className="task-quick-chips">
-                                        {quickActions.map((action) => (
-                                            <IonChip
-                                                key={`${action.section}-${action.label}`}
-                                                className="task-chip task-chip--quick"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    openEditor(action.section, true);
-                                                }}
-                                            >
-                                                <IonIcon icon={action.icon} />
-                                                <span>{action.label}</span>
-                                            </IonChip>
-                                        ))}
                                     </div>
                                 )}
                             </IonCol>
@@ -254,9 +265,6 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     </IonItemOption>
                     <IonItemOption color="warning" onClick={handleDirectDueDateClick} aria-label={`Set due date for ${todo.title}`}>
                         <IonIcon icon={calendarOutline} />
-                    </IonItemOption>
-                    <IonItemOption color="secondary" onClick={() => openEditor('priority', true)} aria-label={`Set priority for ${todo.title}`}>
-                        <IonIcon icon={flagOutline} />
                     </IonItemOption>
                     <IonItemOption color="danger" onClick={handleDelete} aria-label={`Delete ${todo.title}`}>
                         <IonIcon icon={trashOutline} />
@@ -285,6 +293,22 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                     value={getDueDateInputValue(todo.dueDate)}
                     onIonChange={handleDirectDueDateChange}
                 />
+            </IonPopover>
+            <IonPopover
+                isOpen={isPriorityPopoverOpen}
+                onDidDismiss={() => setIsPriorityPopoverOpen(false)}
+                className="priority-popover"
+            >
+                <div className="priority-popover-content">
+                    {priorityLevels.map((priority) => (
+                        <button
+                            key={priority}
+                            className={`priority-circle ${priority || 'no-priority'} ${todo.priority === priority ? 'selected' : ''}`}
+                            onClick={() => handlePriorityChange(priority)}
+                            aria-label={priority ? `${priorityLabels[priority]} priority` : 'No priority'}
+                        />
+                    ))}
+                </div>
             </IonPopover>
         </>
     );

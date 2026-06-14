@@ -16,10 +16,10 @@ import {
     IonTextarea,
     IonTitle,
 } from '@ionic/react';
-import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse, flagOutline } from 'ionicons/icons';
-import { Todo, TodoPriority } from '../types';
+import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse } from 'ionicons/icons';
+import { Todo } from '../types';
 import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
-import { EditorSection, priorityLabels, priorityLevels, sectionTitles, typeLabels } from './TodoItem.constants';
+import { EditorSection, sectionTitles, typeLabels } from './TodoItem.constants';
 import './TodoItem.css';
 export type { EditorSection };
 
@@ -50,7 +50,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
 }) => {
     const [title, setTitle] = useState(todo.title);
     const [description, setDescription] = useState(todo.description || '');
-    const [priority, setPriority] = useState<TodoPriority | undefined>(todo.priority);
     const [quantity, setQuantity] = useState(todo.quantity?.toString() ?? '');
     const [price, setPrice] = useState(todo.price?.toString() ?? '');
     const [newSubtaskText, setNewSubtaskText] = useState('');
@@ -58,7 +57,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     const resetForm = () => {
         setTitle(todo.title);
         setDescription(todo.description || '');
-        setPriority(todo.priority);
         setQuantity(todo.quantity?.toString() ?? '');
         setPrice(todo.price?.toString() ?? '');
         setNewSubtaskText('');
@@ -67,7 +65,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     useEffect(() => {
         if (!isOpen) return;
         resetForm();
-    }, [isOpen, todo.id, todo.title, todo.description, todo.priority, todo.quantity, todo.price]);
+    }, [isOpen, todo.id, todo.title, todo.description, todo.quantity, todo.price]);
 
     useEffect(() => {
         if (!isOpen || !initialSection) return;
@@ -86,17 +84,10 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         onUpdate(todo.id, {
             title: title.trim() || todo.title,
             description: description.trim() || undefined,
-            priority,
             quantity: parseOptionalNumber(quantity),
             price: parseOptionalNumber(price),
         });
         close();
-    };
-
-    const handlePrioritySelect = (nextPriority: TodoPriority | undefined) => {
-        setPriority(nextPriority);
-        onUpdate(todo.id, { priority: nextPriority });
-        if (quickMode) close();
     };
 
     const handleAddSubtask = () => {
@@ -189,34 +180,10 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
 
                         {(quickMode
                             ? [initialSection]
-                            : (['priority', 'subtasks'] as readonly EditorSection[])
+                            : (['subtasks'] as readonly EditorSection[])
                         ).map((section) => {
                             if (section === 'shopping' && todo.itemType !== 'shopping') return null;
-                            return section === 'priority' ? (
-                                <IonGrid key="todo-editor-section-priority" className="editor-section" id="todo-editor-section-priority">
-                                    <IonRow className="editor-section-heading">
-                                        <IonCol>
-                                            <IonIcon icon={flagOutline} />
-                                            <IonTitle>Priority</IonTitle>
-                                        </IonCol>
-                                    </IonRow>
-                                    <IonGrid className="priority-options">
-                                        <IonRow>
-                                            {priorityLevels.map((level) => (
-                                                <IonCol key={level ?? 'none'} size="6">
-                                                    <IonButton
-                                                        className={`priority-option ${priority === level ? 'is-selected' : ''}`}
-                                                        fill={priority === level ? 'solid' : 'outline'}
-                                                        onClick={() => handlePrioritySelect(level)}
-                                                    >
-                                                        {level ? priorityLabels[level] : 'None'}
-                                                    </IonButton>
-                                                </IonCol>
-                                            ))}
-                                        </IonRow>
-                                    </IonGrid>
-                                </IonGrid>
-                            ) : section === 'subtasks' ? (
+                            return section === 'subtasks' ? (
                                 <IonGrid key="todo-editor-section-subtasks" className="editor-section" id="todo-editor-section-subtasks">
                                     <IonRow className="editor-section-heading">
                                         <IonCol>
