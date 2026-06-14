@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
 import { documentTextOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
@@ -21,9 +21,32 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const todos = useTodoStore((state) => state.todos);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
     const searchTerm = useTodoStore((state) => state.searchTerm);
-    const getFilteredTodos = useTodoStore((state) => state.getFilteredTodos);
+    const filter = useTodoStore((state) => state.filter);
 
-    const filteredTodos = getFilteredTodos(list);
+    const filteredTodos = useMemo(() => {
+        let filtered = todos.filter((t) => t.list === list);
+
+        if (typeFilter && typeFilter !== 'all') {
+            filtered = filtered.filter((t) => t.itemType === typeFilter);
+        }
+
+        if (searchTerm && searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter((t) =>
+                t.title.toLowerCase().includes(term) ||
+                (t.description && t.description.toLowerCase().includes(term))
+            );
+        }
+
+        switch (filter) {
+            case 'active':
+                return filtered.filter((t) => !t.isCompleted);
+            case 'completed':
+                return filtered.filter((t) => t.isCompleted);
+            default:
+                return filtered;
+        }
+    }, [todos, list, typeFilter, searchTerm, filter]);
 
     const totalInFilteredList = todos.filter((todo) =>
         todo.list === list && (typeFilter === 'all' || todo.itemType === typeFilter)

@@ -82,6 +82,10 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         setIsDueCalendarOpen(true);
     }, []);
 
+    const handleToggle = useCallback(() => {
+        toggleTodo(todo.id);
+    }, [todo.id, toggleTodo]);
+
     const handleSwitchToFull = useCallback(() => {
         openEditor(editorSection);
     }, [editorSection, openEditor]);
@@ -112,9 +116,17 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         openEditor('shopping', true);
     }, [openEditor]);
 
+    const handleItemClick = useCallback(() => {
+        openEditor();
+    }, [openEditor]);
+
     const handleQuickActionClick = useCallback((action: { label: string; icon: string; section: EditorSection }) => (e: React.MouseEvent) => {
         e.stopPropagation();
         openEditor(action.section, true);
+    }, [openEditor]);
+
+    const handleEditSwipe = useCallback(() => {
+        openEditor('details');
     }, [openEditor]);
 
     const subtaskProgress = getSubtaskProgress(todo);
@@ -149,24 +161,24 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     return (
         <>
             <IonItemSliding className={`todo-item ${overdue ? 'is-overdue' : ''}`}>
-                <IonItem
-                    className={`task-row ${todo.isCompleted ? 'is-completed' : ''}`}
-                    lines="none"
-                    button
-                    detail={false}
-                    onClick={() => openEditor()}
-                    aria-label={`Open details for ${todo.title}`}
-                >
+<IonItem
+                                        className={`task-row ${todo.isCompleted ? 'is-completed' : ''}`}
+                                        lines="none"
+                                        button
+                                        detail={false}
+                                        onClick={handleItemClick}
+                                        aria-label={`Open details for ${todo.title}`}
+                                    >
                     <IonGrid className="task-row-grid">
                         <IonRow className="task-row-main">
                             <IonCol size="auto" className="task-checkbox-col">
-                                <IonCheckbox
-                                    className="task-checkbox"
-                                    checked={todo.isCompleted}
-                                    onIonChange={() => toggleTodo(todo.id)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
-                                />
+<IonCheckbox
+                                            className="task-checkbox"
+                                            checked={todo.isCompleted}
+                                            onIonChange={handleToggle}
+                                            onClick={(e) => e.stopPropagation()}
+                                            aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
+                                        />
                             </IonCol>
                             <IonCol className="task-content-stack">
                                 <IonGrid className="task-main-grid">
@@ -269,13 +281,13 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
                 </IonItem>
 
                 <IonItemOptions side="start" className="task-options task-options--complete">
-                    <IonItemOption color="success" onClick={() => toggleTodo(todo.id)} aria-label={`Complete ${todo.title}`}>
+                    <IonItemOption color="success" onClick={handleToggle} aria-label={`Complete ${todo.title}`}>
                         <IonIcon icon={checkmarkDoneOutline} />
                     </IonItemOption>
                 </IonItemOptions>
 
                 <IonItemOptions side="end" className="task-options">
-                    <IonItemOption color="primary" onClick={() => openEditor('details')} aria-label={`Edit ${todo.title}`}>
+                    <IonItemOption color="primary" onClick={handleEditSwipe} aria-label={`Edit ${todo.title}`}>
                         <IonIcon icon={documentTextOutline} />
                     </IonItemOption>
                     <IonItemOption color="warning" onClick={handleDirectDueDateClick} aria-label={`Set due date for ${todo.title}`}>

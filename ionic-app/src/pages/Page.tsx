@@ -1,6 +1,6 @@
 import { IonButton, IonButtons, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonMenuButton, IonNote, IonPage, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
 import { closeOutline, searchOutline } from 'ionicons/icons';
-import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useTodoStore } from '../features/todos/store/todoStore';
 import { TodoInput } from '../features/todos/components/TodoInput';
@@ -11,45 +11,79 @@ type SearchbarHandle = HTMLIonSearchbarElement;
 
 const Page: React.FC = () => {
 
-  const { name } = useParams<{ name: string; }>();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const searchbarRef = useRef<SearchbarHandle | null>(null);
-  const list = name || 'All Lists';
-  const searchTerm = useTodoStore((state) => state.searchTerm);
-  const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
-  const clearCompleted = useTodoStore((state) => state.clearCompleted);
-  const getFilteredTodos = useTodoStore((state) => state.getFilteredTodos);
+    const { name } = useParams<{ name: string; }>();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const searchbarRef = useRef<SearchbarHandle | null>(null);
+    const list = name || 'All Lists';
+    const searchTerm = useTodoStore((state) => state.searchTerm);
+    const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
+    const clearCompleted = useTodoStore((state) => state.clearCompleted);
+    const todos = useTodoStore((state) => state.todos);
+    const filter = useTodoStore((state) => state.filter);
+    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
 
-  const listTodos = getFilteredTodos(list);
-  const totalTasks = listTodos.length;
-  const completedTasks = listTodos.filter((t) => t.isCompleted).length;
-  const remainingTasks = totalTasks - completedTasks;
-  const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
-  const progressPercent = Math.round(progress * 100);
-  const focusSubtitle = totalTasks === 0
-    ? 'Start with one small step'
-    : remainingTasks === 0
-      ? 'Everything is complete'
-      : `${remainingTasks} task${remainingTasks > 1 ? 's' : ''} left`;
-  const progressStyle: CSSProperties & { '--progress-value': string } = {
-    '--progress-value': `${progressPercent}%`
-  };
-  const shouldShowSearch = isSearchOpen || searchTerm !== '';
+    const listTodos = useMemo(() => {
+        let filtered = todos.filter((t: typeof todos[0]) => t.list === list);
 
-  useEffect(() => {
-    if (!isSearchOpen) return;
-    const frame = requestAnimationFrame(() => searchbarRef.current?.setFocus());
-    return () => cancelAnimationFrame(frame);
-  }, [isSearchOpen]);
+        if (typeFilter && typeFilter !== 'all') {
+            filtered = filtered.filter((t: typeof todos[0]) => t.itemType === typeFilter);
+        }
 
-  const openSearch = () => {
-    setIsSearchOpen(true);
-  };
+        if (searchTerm && searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter((t: typeof todos[0]) =>
+                t.title.toLowerCase().includes(term) ||
+                (t.description && t.description.toLowerCase().includes(term))
+            );
+        }
 
-  const closeSearch = () => {
-    setSearchTerm('');
-    setIsSearchOpen(false);
-  };
+        switch (filter) {
+            case 'active':
+                return filtered.filter((t: typeof todos[0]) => !t.isCompleted);
+            case 'completed':
+                return filtered.filter((t: typeof todos[0]) => t.isCompleted);
+            default:
+                return filtered;
+        }
+    }, [todos, list, typeFilter, searchTerm, filter]);
+
+    const totalTasks = listTodos.length;
+    const completedTasks = listTodos.filter((t: typeof listTodos[0]) => t.isCompleted).length;
+    const remainingTasks = totalTasks - completedTasks;
+    const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
+    const progressPercent = Math.round(progress * 100);
+    const focusSubtitle = totalTasks === 0
+        ? 'Start with one small step'
+        : remainingTasks === 0
+            ? 'Everything is complete'
+            : `${remainingTasks} task${remainingTasks > 1 ? 's' : ''} left`;
+    const progressStyle: CSSProperties & { '--progress-value': string } = {
+        '--progress-value': `${progressPercent}%`
+    };
+    const shouldShowSearch = isSearchOpen || searchTerm !== '';
+
+    const handleSearchInput = useCallback((e: CustomEvent) => {
+        setSearchTerm(e.detail.value || '');
+    }, [setSearchTerm]);
+
+    const handleClearCompleted = useCallback(() => {
+        clearCompleted();
+    }, [clearCompleted]);
+
+    useEffect(() => {
+        if (!isSearchOpen) return;
+        const frame = requestAnimationFrame(() => searchbarRef.current?.setFocus());
+        return () => cancelAnimationFrame(frame);
+    }, [isSearchOpen]);
+
+    const openSearch = useCallback(() => {
+        setIsSearchOpen(true);
+    }, []);
+
+    const closeSearch = useCallback(() => {
+        setSearchTerm('');
+        setIsSearchOpen(false);
+    }, [setSearchTerm]);
 
   return (
     <IonPage>
@@ -60,9 +94,9 @@ const Page: React.FC = () => {
           </IonButtons>
 <IonTitle className="page-title">{list}</IonTitle>
             <IonButtons slot="end">
-              <IonButton className="clear-button" disabled={completedTasks === 0} onClick={clearCompleted}>
-                Clear completed
-              </IonButton>
+<IonButton className="clear-button" disabled={completedTasks === 0} onClick={handleClearCompleted}>
+                        Clear completed
+                    </IonButton>
             </IonButtons>
         </IonToolbar>
       </IonHeader>
@@ -94,15 +128,15 @@ const Page: React.FC = () => {
                     <IonGrid className={`progress-search-grid ${shouldShowSearch ? 'progress-search-grid--open' : ''}`}>
                       <IonRow>
                         <IonCol>
-                          <IonSearchbar
+<IonSearchbar
                             ref={searchbarRef}
                             disabled={!shouldShowSearch}
                             value={searchTerm || ''}
-                            onIonInput={(e) => setSearchTerm(e.detail.value || '')}
+                            onIonInput={handleSearchInput}
                             onIonCancel={closeSearch}
                             placeholder="Search todos..."
                             aria-label="Search todos"
-                          />
+                        />
                         </IonCol>
                       </IonRow>
                     </IonGrid>
