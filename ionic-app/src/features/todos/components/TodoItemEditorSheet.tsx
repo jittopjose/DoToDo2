@@ -14,7 +14,7 @@ import {
     IonTextarea,
     IonTitle,
 } from '@ionic/react';
-import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse } from 'ionicons/icons';
+import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse, trashOutline } from 'ionicons/icons';
 import { Todo } from '../types';
 import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
 import { EditorSection, sectionTitles, typeLabels } from './TodoItem.constants';
@@ -122,8 +122,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                 className="todo-editor-modal"
                 isOpen={isOpen}
                 onDidDismiss={onDismiss}
-                initialBreakpoint={quickMode ? 0.42 : 0.58}
-                breakpoints={quickMode ? [0.38, 0.55, 1] : [0.45, 0.72, 1]}
+                initialBreakpoint={quickMode ? 0.42 : 0.62}
+                breakpoints={quickMode ? [0.38, 0.55, 1] : [0.55, 0.78, 1]}
                 handle
             >
                 <IonContent className="editor-content">
@@ -135,6 +135,22 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                             </IonCol>
                             <IonCol size="auto">
                                 <IonButtons>
+                                    <IonButton
+                                        className="editor-header-action editor-delete-fab"
+                                        fill="clear"
+                                        onClick={onDelete}
+                                        aria-label="Delete task"
+                                    >
+                                        <IonIcon icon={trashOutline} />
+                                    </IonButton>
+                                    <IonButton
+                                        className="editor-header-action editor-done-fab"
+                                        fill="clear"
+                                        onClick={handleSave}
+                                        aria-label="Save and close"
+                                    >
+                                        <IonIcon icon={checkmarkDoneOutline} />
+                                    </IonButton>
                                     {quickMode && (
                                         <IonButton
                                             className="editor-text-button"
@@ -268,22 +284,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                             );
                         })}
 
-                        {!quickMode && (
-                            <IonGrid className="editor-actions">
-                                <IonRow>
-                                    <IonCol size="6">
-                                        <IonButton className="editor-delete-button" expand="block" fill="outline" onClick={onDelete}>
-                                            Delete
-                                        </IonButton>
-                                    </IonCol>
-                                    <IonCol size="6">
-                                        <IonButton className="editor-done-button" expand="block" onClick={handleSave}>
-                                            Done
-                                        </IonButton>
-                                    </IonCol>
-                                </IonRow>
-                            </IonGrid>
-                        )}
                     </IonGrid>
                 </IonContent>
             </IonModal>
