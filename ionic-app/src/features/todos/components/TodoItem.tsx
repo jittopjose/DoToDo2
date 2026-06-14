@@ -174,12 +174,12 @@ return (
                                             icon={typeIcons[todo.itemType]}
                                         />
                                         </IonCol>
-                                        <IonCol className="task-title-col">
-                                            <IonTitle className="task-title-text">{todo.title}</IonTitle>
-                                            {todo.description && (
-                                                <IonNote className="task-description">{truncateText(todo.description)}</IonNote>
-                                            )}
-                                        </IonCol>
+                                    <IonCol className="task-title-col">
+                                        <div className="task-title-text">{todo.title}</div>
+                                        {todo.description && (
+                                            <IonNote className="task-description">{truncateText(todo.description)}</IonNote>
+                                        )}
+                                    </IonCol>
                                     </IonRow>
                                 </IonGrid>
 
