@@ -7,9 +7,6 @@ import {
     IonGrid,
     IonIcon,
     IonItem,
-    IonItemOption,
-    IonItemOptions,
-    IonItemSliding,
     IonNote,
     IonPopover,
     IonRow,
@@ -24,7 +21,6 @@ import {
     ellipse,
     flagOutline,
     alertCircleOutline,
-    trashOutline,
 } from 'ionicons/icons';
 import { Todo, TodoPriority } from '../types';
 import { useTodoStore } from '../store/todoStore';
@@ -125,10 +121,6 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         openEditor(action.section, true);
     }, [openEditor]);
 
-    const handleEditSwipe = useCallback(() => {
-        openEditor('details');
-    }, [openEditor]);
-
     const subtaskProgress = getSubtaskProgress(todo);
     const overdue = isOverdue(todo);
 
@@ -158,17 +150,16 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         return actions.slice(0, 4);
     }, [todo]);
 
-    return (
+return (
         <>
-            <IonItemSliding className={`todo-item ${overdue ? 'is-overdue' : ''}`}>
-<IonItem
-                                        className={`task-row ${todo.isCompleted ? 'is-completed' : ''}`}
-                                        lines="none"
-                                        button
-                                        detail={false}
-                                        onClick={handleItemClick}
-                                        aria-label={`Open details for ${todo.title}`}
-                                    >
+            <IonItem
+                className={`task-row ${todo.isCompleted ? 'is-completed' : ''}`}
+                lines="none"
+                button
+                detail={false}
+                onClick={handleItemClick}
+                aria-label={`Open details for ${todo.title}`}
+            >
                     <IonGrid className="task-row-grid">
                         <IonRow className="task-row-main">
                             <IonCol size="auto" className="task-checkbox-col">
@@ -280,24 +271,6 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
                     </IonGrid>
                 </IonItem>
 
-                <IonItemOptions side="start" className="task-options task-options--complete">
-                    <IonItemOption color="success" onClick={handleToggle} aria-label={`Complete ${todo.title}`}>
-                        <IonIcon icon={checkmarkDoneOutline} />
-                    </IonItemOption>
-                </IonItemOptions>
-
-                <IonItemOptions side="end" className="task-options">
-                    <IonItemOption color="primary" onClick={handleEditSwipe} aria-label={`Edit ${todo.title}`}>
-                        <IonIcon icon={documentTextOutline} />
-                    </IonItemOption>
-                    <IonItemOption color="warning" onClick={handleDirectDueDateClick} aria-label={`Set due date for ${todo.title}`}>
-                        <IonIcon icon={calendarOutline} />
-                    </IonItemOption>
-                    <IonItemOption color="danger" onClick={handleDelete} aria-label={`Delete ${todo.title}`}>
-                        <IonIcon icon={trashOutline} />
-                    </IonItemOption>
-                </IonItemOptions>
-            </IonItemSliding>
             <TodoItemEditorSheet
                 todo={todo}
                 isOpen={isEditorOpen}
