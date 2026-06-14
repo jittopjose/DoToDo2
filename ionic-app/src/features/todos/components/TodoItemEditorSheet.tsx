@@ -6,18 +6,21 @@ import {
     IonContent,
     IonGrid,
     IonIcon,
-    IonInput,
-    IonItem,
     IonModal,
     IonNote,
     IonRow,
-    IonTextarea,
     IonTitle,
 } from '@ionic/react';
-import { addOutline, cartOutline, checkmarkDoneOutline, closeOutline, ellipse, trashOutline } from 'ionicons/icons';
+import { checkmarkDoneOutline, closeOutline, trashOutline } from 'ionicons/icons';
 import { Todo } from '../types';
 import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
 import { EditorSection, sectionTitles, typeLabels } from './TodoItem.constants';
+import {
+    EditorDetailsSection,
+    SubtasksSection,
+    AddSubtaskRow,
+    ShoppingSection,
+} from './TodoItemEditorSheet.sections';
 import './TodoItem.css';
 export type { EditorSection };
 
@@ -169,31 +172,12 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                         </IonRow>
 
                         {!quickMode && (
-                            <IonGrid className="editor-section" id="todo-editor-section-details">
-                                <IonItem className="editor-field" lines="none">
-                                    <IonCol>
-                                        <IonNote className="field-label">Title</IonNote>
-                                        <IonInput
-                                            className="editor-title-input"
-                                            value={title}
-                                            onIonInput={(event) => setTitle(event.detail.value ?? '')}
-                                            placeholder="Task title"
-                                        />
-                                    </IonCol>
-                                </IonItem>
-                                <IonItem className="editor-field" lines="none">
-                                    <IonCol>
-                                        <IonNote className="field-label">Details</IonNote>
-                                        <IonTextarea
-                                            className="editor-description-input"
-                                            value={description}
-                                            onIonInput={(event) => setDescription(event.detail.value ?? '')}
-                                            placeholder="Add notes, context, or instructions"
-                                            rows={4}
-                                        />
-                                    </IonCol>
-                                </IonItem>
-                            </IonGrid>
+                            <EditorDetailsSection
+                                title={title}
+                                description={description}
+                                onTitleChange={setTitle}
+                                onDescriptionChange={setDescription}
+                            />
                         )}
 
                         {(quickMode
@@ -203,84 +187,26 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                             if (section === 'shopping' && todo.itemType !== 'shopping') return null;
                             return section === 'subtasks' ? (
                                 <IonGrid key="todo-editor-section-subtasks" className="editor-section" id="todo-editor-section-subtasks">
-                                    <IonRow className="editor-section-heading">
-                                        <IonCol>
-                                            <IonIcon icon={checkmarkDoneOutline} />
-                                            <IonTitle>Subtasks</IonTitle>
-                                        </IonCol>
-                                        {subtaskProgress.total > 0 && (
-                                            <IonCol size="auto">
-                                                <IonNote className="subtask-progress-label">{subtaskProgress.completed}/{subtaskProgress.total}</IonNote>
-                                            </IonCol>
-                                        )}
-                                    </IonRow>
-                                    {todo.subtasks && todo.subtasks.length > 0 && (
-                                        <IonGrid className="subtask-editor-list">
-                                            {todo.subtasks.map((subtask) => (
-                                                <IonItem
-                                                    key={subtask.id}
-                                                    className={`subtask-editor-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                                                    lines="none"
-                                                    button
-                                                    detail={false}
-                                                    onClick={() => handleToggleSubtask(subtask.id)}
-                                                >
-                                                    <IonIcon className="subtask-editor-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
-                                                    <IonNote className="subtask-editor-title">{subtask.title}</IonNote>
-                                                </IonItem>
-                                            ))}
-                                        </IonGrid>
-                                    )}
-                                    <IonItem className="subtask-editor-add" lines="none">
-                                        <IonInput
-                                            className="subtask-editor-input"
-                                            value={newSubtaskText}
-                                            onIonInput={(event) => setNewSubtaskText(event.detail.value ?? '')}
-                                            onKeyUp={handleSubtaskKeyPress}
-                                            placeholder={todo.subtasks && todo.subtasks.length > 0 ? 'Add another subtask' : 'Add your first subtask'}
-                                        />
-                                        <IonButton className="subtask-editor-add-button" fill="clear" onClick={handleAddSubtask} disabled={!newSubtaskText.trim()}>
-                                            <IonIcon icon={addOutline} />
-                                        </IonButton>
-                                    </IonItem>
+                                    <SubtasksSection
+                                        subtasks={todo.subtasks}
+                                        onToggleSubtask={handleToggleSubtask}
+                                    />
+                                    <AddSubtaskRow
+                                        value={newSubtaskText}
+                                        onValueChange={setNewSubtaskText}
+                                        onSubmit={handleAddSubtask}
+                                        isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
+                                    />
                                 </IonGrid>
                             ) : (
-                                <IonGrid key="todo-editor-section-shopping" className="editor-section" id="todo-editor-section-shopping">
-                                    <IonRow className="editor-section-heading">
-                                        <IonCol>
-                                            <IonIcon icon={cartOutline} />
-                                            <IonTitle>Shopping details</IonTitle>
-                                        </IonCol>
-                                    </IonRow>
-                                    <IonGrid className="shopping-editor-grid">
-                                        <IonRow>
-                                            <IonCol>
-                                                <IonNote className="field-label">Quantity</IonNote>
-                                                <IonInput
-                                                    className="shopping-editor-input"
-                                                    type="number"
-                                                    inputMode="decimal"
-                                                    value={quantity}
-                                                    onIonInput={(event) => setQuantity(event.detail.value ?? '')}
-                                                    onBlur={handleShoppingChange}
-                                                    placeholder="12"
-                                                />
-                                            </IonCol>
-                                            <IonCol>
-                                                <IonNote className="field-label">Price</IonNote>
-                                                <IonInput
-                                                    className="shopping-editor-input"
-                                                    type="number"
-                                                    inputMode="decimal"
-                                                    value={price}
-                                                    onIonInput={(event) => setPrice(event.detail.value ?? '')}
-                                                    onBlur={handleShoppingChange}
-                                                    placeholder="4.99"
-                                                />
-                                            </IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                </IonGrid>
+                                <ShoppingSection
+                                    key="todo-editor-section-shopping"
+                                    quantity={quantity}
+                                    price={price}
+                                    onQuantityChange={setQuantity}
+                                    onPriceChange={setPrice}
+                                    onBlur={handleShoppingChange}
+                                />
                             );
                         })}
 
