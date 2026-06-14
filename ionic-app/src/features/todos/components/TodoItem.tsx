@@ -300,12 +300,13 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
             >
                 <div className="priority-popover-content">
                     {priorityLevels.map((priority) => (
-                        <button
+                        <IonChip
                             key={priority}
-                            className={`priority-circle ${priority || 'no-priority'} ${todo.priority === priority ? 'selected' : ''}`}
+                            className={`task-chip task-chip--priority${priority ? '-' + priority : ''} ${todo.priority === priority ? 'selected' : ''}`}
                             onClick={() => handlePriorityChange(priority)}
-                            aria-label={priority ? `${priorityLabels[priority]} priority` : 'No priority'}
-                        />
+                        >
+                            <span>{priority ? priorityLabels[priority] : 'None'}</span>
+                        </IonChip>
                     ))}
                 </div>
             </IonPopover>

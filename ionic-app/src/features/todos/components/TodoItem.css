@@ -516,46 +516,36 @@
 
 .priority-popover-content {
   display: flex;
-  gap: 8px;
-  padding: 4px;
+  gap: 6px;
+  padding: 6px;
 }
 
-.priority-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-  flex-shrink: 0;
+.priority-popover .task-chip {
+  min-height: 26px;
+  font-size: 11px;
 }
 
-.priority-circle:hover {
-  transform: scale(1.1);
+.priority-popover .task-chip ion-icon {
+  margin-right: 3px;
+  font-size: 13px;
 }
 
-.priority-circle.no-priority {
-  background: var(--dotodo-muted);
-  opacity: 0.4;
+.priority-popover .task-chip.task-chip--priority-low {
+  --background: rgba(var(--dotodo-success-rgb), 0.1);
+  --color: var(--dotodo-success);
 }
 
-.priority-circle.low {
-  background: var(--dotodo-success);
+.priority-popover .task-chip.task-chip--priority-medium {
+  --background: rgba(var(--dotodo-warning-rgb), 0.12);
+  --color: var(--dotodo-warning);
 }
 
-.priority-circle.medium {
-  background: var(--dotodo-warning);
+.priority-popover .task-chip.task-chip--priority-high {
+  --background: rgba(var(--dotodo-danger-rgb), 0.1);
+  --color: var(--dotodo-danger);
 }
 
-.priority-circle.high {
-  background: var(--dotodo-danger);
-}
-
-.priority-circle.selected {
-  border-color: var(--dotodo-primary);
-  transform: scale(1.15);
-}
-
-.priority-circle.selected:hover {
-  transform: scale(1.25);
+.priority-popover .task-chip.selected {
+  --background: var(--dotodo-primary);
+  --color: var(--dotodo-primary-contrast);
 }
