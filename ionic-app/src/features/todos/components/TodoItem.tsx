@@ -153,7 +153,7 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
 return (
         <>
             <IonItem
-                className={`task-row ${todo.isCompleted ? 'is-completed' : ''}`}
+                className={`task-row ${todo.isCompleted ? 'is-completed' : ''} ${overdue ? 'is-overdue' : ''}`}
                 lines="none"
                 button
                 detail={false}
