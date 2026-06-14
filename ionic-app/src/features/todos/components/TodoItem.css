@@ -1,5 +1,27 @@
 .task-row.is-overdue {
   border-left-color: rgba(var(--dotodo-danger-rgb), 0.55);
+  background: linear-gradient(90deg, rgba(var(--dotodo-danger-rgb), 0.09) 0%, var(--dotodo-card) 28%);
+}
+
+.task-row.is-overdue::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 98% -10%, rgba(var(--dotodo-danger-rgb), 0.14), transparent 50%);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.dark .task-row.is-overdue,
+[data-theme="dark"] .task-row.is-overdue {
+  background: linear-gradient(90deg, rgba(var(--dotodo-danger-rgb), 0.14) 0%, var(--dotodo-card) 32%);
+}
+
+.dark .task-row.is-overdue::after,
+[data-theme="dark"] .task-row.is-overdue::after {
+  background: radial-gradient(circle at 98% -10%, rgba(var(--dotodo-danger-rgb), 0.22), transparent 58%);
+  mix-blend-mode: screen;
 }
 
 .task-row {
@@ -17,13 +39,26 @@
   transition:
     background var(--dotodo-motion-fast),
     border-color var(--dotodo-motion-fast),
-    box-shadow var(--dotodo-motion-fast),
+    box-shadow var(--dotodo-motion-medium),
     opacity var(--dotodo-motion-fast),
     transform var(--dotodo-motion-fast);
+  will-change: box-shadow, transform;
 }
 
 .task-row:active {
-  transform: scale(0.992);
+  transform: scale(0.998);
+  box-shadow: var(--dotodo-shadow-pressed);
+}
+
+.task-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(circle at var(--press-x, 50%) var(--press-y, 50%), rgba(var(--dotodo-primary-rgb), 0.06), transparent 55%);
+  transition: opacity var(--dotodo-motion-fast);
+  pointer-events: none;
 }
 
 .task-row.is-completed {
@@ -113,16 +148,20 @@
   overflow-wrap: anywhere;
   margin: 0;
   color: var(--dotodo-text);
-  font-size: 16px;
-  font-weight: 850;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .task-row.is-completed .task-title-text {
   color: var(--dotodo-muted);
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.45);
+  transition:
+    color var(--dotodo-motion-medium),
+    text-decoration-color var(--dotodo-motion-medium);
 }
 
 .task-description {
@@ -144,19 +183,33 @@
 .task-quick-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 9px;
+  gap: 5px;
+  margin-top: 8px;
 }
 
 .task-chip {
   --background: rgba(var(--dotodo-primary-rgb), 0.08);
   --color: var(--dotodo-muted);
-  min-height: 26px;
+  min-height: 28px;
   max-width: 100%;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    transform var(--dotodo-motion-fast),
+    box-shadow var(--dotodo-motion-fast),
+    background var(--dotodo-motion-fast);
+  will-change: transform;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.task-chip:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.12);
+  --background: rgba(var(--dotodo-primary-rgb), 0.18);
 }
 
 .task-chip ion-icon {
