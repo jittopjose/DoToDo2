@@ -1,11 +1,7 @@
 import {
-    addOutline,
-    calendarOutline,
     cartOutline,
     checkmarkDoneOutline,
     documentTextOutline,
-    ellipse,
-    flagOutline,
     listOutline,
 } from 'ionicons/icons';
 import { TodoPriority } from '../types';

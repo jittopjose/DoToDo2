@@ -1,4 +1,4 @@
-import { Todo, TodoPriority } from '../types';
+import { Todo } from '../types';
 
 export const parseOptionalNumber = (value: string) => {
     const trimmed = value.trim();

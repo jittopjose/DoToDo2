@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
-    IonButton,
     IonCheckbox,
     IonChip,
     IonCol,
@@ -32,21 +31,17 @@ import { useTodoStore } from '../store/todoStore';
 import { formatDueDate } from '../utils/formatDueDate';
 import './TodoItem.css';
 import { TodoItemEditorSheet, EditorSection } from './TodoItemEditorSheet';
-import { priorityLevels, priorityLabels } from './TodoItem.constants';
+import { priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
-
-const priorityColors = {
-    low: 'var(--ion-color-success)',
-    medium: 'var(--ion-color-warning)',
-    high: 'var(--ion-color-danger)'
-};
 
 interface Props {
     todo: Todo;
 }
 
-export const TodoItem: React.FC<Props> = ({ todo }) => {
+const priorityLevelValues: Array<TodoPriority | undefined> = ['low', 'medium', 'high', undefined];
+
+export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     const toggleTodo = useTodoStore((state) => state.toggleTodo);
     const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
     const addSubtask = useTodoStore((state) => state.addSubtask);
@@ -57,18 +52,22 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     const [quickMode, setQuickMode] = useState(false);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
 
-    const openEditor = (section: EditorSection = 'details', quickModeParam?: boolean) => {
+    const openEditor = useCallback((section: EditorSection = 'details', quickModeParam?: boolean) => {
         setEditorSection(section);
         setQuickMode(Boolean(quickModeParam));
         setIsEditorOpen(true);
-    };
+    }, []);
 
-    const closeEditor = () => {
+    const closeEditor = useCallback(() => {
         setIsEditorOpen(false);
         setQuickMode(false);
-    };
+    }, []);
 
-    const handleDirectDueDateChange = (event: CustomEvent) => {
+    const handleDueCalendarDismiss = useCallback(() => {
+        setIsDueCalendarOpen(false);
+    }, []);
+
+    const handleDirectDueDateChange = useCallback((event: CustomEvent) => {
         const value = event.detail.value as string | undefined;
         if (value) {
             const [year, month, day] = value.split('-').map(Number);
@@ -76,18 +75,47 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
             updateTodo(todo.id, { dueDate });
         }
         setIsDueCalendarOpen(false);
-    };
+    }, [todo.id, updateTodo]);
 
-    const handleDirectDueDateClick = (e: React.MouseEvent) => {
+    const handleDirectDueDateClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         setIsDueCalendarOpen(true);
-    };
+    }, []);
 
+    const handleSwitchToFull = useCallback(() => {
+        openEditor(editorSection);
+    }, [editorSection, openEditor]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         deleteTodo(todo.id);
         closeEditor();
-    };
+    }, [todo.id, deleteTodo, closeEditor]);
+
+    const handlePriorityCycle = useCallback(() => {
+        const currentIndex = priorityLevelValues.indexOf(todo.priority as TodoPriority);
+        const nextPriority = priorityLevelValues[(currentIndex + 1) % priorityLevelValues.length];
+        updateTodo(todo.id, { priority: nextPriority });
+    }, [todo.id, todo.priority, updateTodo]);
+
+    const handlePriorityClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        handlePriorityCycle();
+    }, [handlePriorityCycle]);
+
+    const handleSubtaskClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        openEditor('subtasks', true);
+    }, [openEditor]);
+
+    const handleShoppingClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        openEditor('shopping', true);
+    }, [openEditor]);
+
+    const handleQuickActionClick = useCallback((action: { label: string; icon: string; section: EditorSection }) => (e: React.MouseEvent) => {
+        e.stopPropagation();
+        openEditor(action.section, true);
+    }, [openEditor]);
 
     const subtaskProgress = getSubtaskProgress(todo);
     const overdue = isOverdue(todo);
@@ -174,41 +202,30 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                         </IonChip>
                                     )}
 
-                                    {/* Priority chip */}
-
                                     <IonChip
-                                      className={todo.priority ? 
-                                        `task-chip task-chip--priority-${todo.priority}` : 
-                                        "task-chip task-chip--quick-add"
-                                      }
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const levels: Array<TodoPriority | undefined> = ['low', 'medium', 'high', undefined];
-                                        const currentIndex = levels.indexOf(todo.priority as any);
-                                        const nextPriority = levels[(currentIndex + 1) % levels.length];
-                                        updateTodo(todo.id, { priority: nextPriority });
-                                      }}
+                                        className={todo.priority ? 
+                                            `task-chip task-chip--priority-${todo.priority}` : 
+                                            "task-chip task-chip--quick-add"
+                                        }
+                                        onClick={handlePriorityClick}
                                     >
-                                      {todo.priority ? (
-                                        <>
-                                          <IonIcon icon={ellipse} style={{ marginRight: '4px', fontSize: '12px' }} />
-                                          <span>{priorityLabels[todo.priority]}</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <IonIcon icon={flagOutline} style={{ marginRight: '4px', fontSize: '12px' }} />
-                                          <span>Priority</span>
-                                        </>
-                                      )}
+                                        {todo.priority ? (
+                                            <>
+                                                <IonIcon icon={ellipse} style={{ marginRight: '4px', fontSize: '12px' }} />
+                                                <span>{priorityLabels[todo.priority]}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <IonIcon icon={flagOutline} style={{ marginRight: '4px', fontSize: '12px' }} />
+                                                <span>Priority</span>
+                                            </>
+                                        )}
                                     </IonChip>
 
                                     {subtaskProgress.total > 0 && (
                                         <IonChip
                                             className="task-chip task-chip--subtasks"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openEditor('subtasks', true);
-                                            }}
+                                            onClick={handleSubtaskClick}
                                         >
                                             <IonIcon icon={checkmarkDoneOutline} />
                                             <span>{subtaskProgress.completed}/{subtaskProgress.total}</span>
@@ -218,10 +235,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     {todo.itemType === 'shopping' && (todo.quantity !== undefined || todo.price !== undefined) && (
                                         <IonChip
                                             className="task-chip task-chip--shopping"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openEditor('shopping', true);
-                                            }}
+                                            onClick={handleShoppingClick}
                                         >
                                             <IonIcon icon={cartOutline} />
                                             <span>
@@ -236,10 +250,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                         <IonChip
                                             key={`${action.section}-${action.label}`}
                                             className="task-chip task-chip--quick"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openEditor(action.section, true);
-                                            }}
+                                            onClick={handleQuickActionClick(action)}
                                         >
                                             <IonIcon icon={action.icon} />
                                             <span>{action.label}</span>
@@ -247,7 +258,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                                     ))}
                                 </div>
 
-{subtaskProgress.total > 0 && (
+                                {subtaskProgress.total > 0 && (
                                     <div className="task-progress-track" aria-label={`${subtaskProgress.percent}% complete`}>
                                         <div className="task-progress-fill" style={{ width: `${subtaskProgress.percent}%` }} />
                                     </div>
@@ -285,19 +296,21 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
                 onToggleSubtask={toggleSubtask}
                 onAddSubtask={addSubtask}
                 onUpdate={updateTodo}
-                onSwitchToFull={() => openEditor(editorSection)}
+                onSwitchToFull={handleSwitchToFull}
             />
             <IonPopover
                 isOpen={isDueCalendarOpen}
-                onDidDismiss={() => setIsDueCalendarOpen(false)}
+                onDidDismiss={handleDueCalendarDismiss}
             >
-                <IonDatetime
-                    className="due-calendar-datetime"
-                    presentation="date"
-                    value={getDueDateInputValue(todo.dueDate)}
-                    onIonChange={handleDirectDueDateChange}
-                />
+                {isDueCalendarOpen && (
+                    <IonDatetime
+                        className="due-calendar-datetime"
+                        presentation="date"
+                        value={getDueDateInputValue(todo.dueDate)}
+                        onIonChange={handleDirectDueDateChange}
+                    />
+                )}
             </IonPopover>
         </>
     );
-};
+});

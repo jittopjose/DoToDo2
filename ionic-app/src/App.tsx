@@ -35,7 +35,9 @@ import '@ionic/react/css/palettes/dark.system.css';
 /* Theme variables */
 import './theme/variables.css';
 
-setupIonicReact();
+setupIonicReact({
+    mode: 'md',
+});
 
 const history = createMemoryHistory();
 

@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import {
     IonButton,
     IonButtons,
     IonCol,
     IonContent,
-    IonDatetime,
     IonGrid,
     IonIcon,
     IonInput,
     IonItem,
     IonModal,
     IonNote,
-    IonPopover,
     IonRow,
     IonTextarea,
     IonTitle,
@@ -36,7 +34,7 @@ interface EditorSheetProps {
     onSwitchToFull: () => void;
 }
 
-export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
+export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
     todo,
     isOpen,
     initialSection,
@@ -54,18 +52,18 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
     const [price, setPrice] = useState(todo.price?.toString() ?? '');
     const [newSubtaskText, setNewSubtaskText] = useState('');
 
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setTitle(todo.title);
         setDescription(todo.description || '');
         setQuantity(todo.quantity?.toString() ?? '');
         setPrice(todo.price?.toString() ?? '');
         setNewSubtaskText('');
-    };
+    }, [todo.title, todo.description, todo.quantity, todo.price]);
 
     useEffect(() => {
         if (!isOpen) return;
         resetForm();
-    }, [isOpen, todo.id, todo.title, todo.description, todo.quantity, todo.price]);
+    }, [isOpen, todo.id, resetForm]);
 
     useEffect(() => {
         if (!isOpen || !initialSection) return;
@@ -78,9 +76,9 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
         return () => cancelAnimationFrame(frame);
     }, [isOpen, initialSection]);
 
-    const close = () => onDismiss();
+    const close = useCallback(() => onDismiss(), [onDismiss]);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
         onUpdate(todo.id, {
             title: title.trim() || todo.title,
             description: description.trim() || undefined,
@@ -88,29 +86,33 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
             price: parseOptionalNumber(price),
         });
         close();
-    };
+    }, [todo.id, todo.title, title, description, quantity, price, onUpdate, close]);
 
-    const handleAddSubtask = () => {
+    const handleAddSubtask = useCallback(() => {
         const trimmed = newSubtaskText.trim();
         if (!trimmed) return;
         onAddSubtask(todo.id, trimmed);
         setNewSubtaskText('');
         if (quickMode) close();
-    };
+    }, [todo.id, newSubtaskText, onAddSubtask, quickMode, close]);
 
-    const handleSubtaskKeyPress = (event: React.KeyboardEvent) => {
+    const handleSubtaskKeyPress = useCallback((event: React.KeyboardEvent) => {
         if (event.key === 'Enter') {
             handleAddSubtask();
         }
-    };
+    }, [handleAddSubtask]);
 
-    const handleShoppingChange = () => {
+    const handleShoppingChange = useCallback(() => {
         onUpdate(todo.id, {
             quantity: parseOptionalNumber(quantity),
             price: parseOptionalNumber(price),
         });
         if (quickMode) close();
-    };
+    }, [todo.id, quantity, price, onUpdate, quickMode, close]);
+
+    const handleToggleSubtask = useCallback((subtaskId: string) => {
+        onToggleSubtask(todo.id, subtaskId);
+    }, [todo.id, onToggleSubtask]);
 
     const subtaskProgress = getSubtaskProgress(todo);
 
@@ -205,7 +207,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
                                                     lines="none"
                                                     button
                                                     detail={false}
-                                                    onClick={() => onToggleSubtask(todo.id, subtask.id)}
+                                                    onClick={() => handleToggleSubtask(subtask.id)}
                                                 >
                                                     <IonIcon className="subtask-editor-icon" icon={subtask.isCompleted ? checkmarkDoneOutline : ellipse} />
                                                     <IonNote className="subtask-editor-title">{subtask.title}</IonNote>
@@ -287,4 +289,4 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = ({
             </IonModal>
         </>
     );
-};
+});
