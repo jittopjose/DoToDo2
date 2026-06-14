@@ -62,8 +62,42 @@
 }
 
 .task-row.is-completed {
-  background: var(--dotodo-surface);
-  opacity: 0.78;
+  background: linear-gradient(90deg, rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.09) 0%, var(--dotodo-card) 30%);
+  border-color: rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.16);
+  opacity: 0.88;
+  animation: completionPulse 0.55s ease both;
+}
+
+.task-row.is-completed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 0% 60%, rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.22), transparent 45%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  animation: completionGlow 0.9s 0.05s ease both;
+}
+
+.task-row.is-completed .task-title-text,
+.task-row.is-completed .task-description {
+  color: var(--dotodo-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.55);
+}
+
+.task-row.is-completed .task-chip {
+  --background: rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.08);
+  --color: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.6);
+  opacity: 0.75;
+  transform: scale(0.98);
+}
+
+.task-row.is-completed .task-type-icon {
+  background: rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.18) !important;
+  color: var(--dotodo-success) !important;
 }
 
 .task-row-grid {
@@ -80,6 +114,53 @@
 
 .task-row-main > .ion-col {
   padding: 0;
+}
+
+.custom-checkbox {
+  --size: 24px;
+  display: grid;
+  width: var(--size);
+  height: var(--size);
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 2px solid rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.38);
+  background: transparent;
+  color: var(--dotodo-success);
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.custom-checkbox:active {
+  transform: scale(1.18);
+}
+
+.custom-checkbox[aria-checked="true"] {
+  background: #059669;
+  border-color: #059669;
+}
+
+.custom-checkbox__tick {
+  font-size: 13px;
+  color: #ffffff;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0.5px 0 rgba(0 0 0, 0.18));
+}
+
+.dark .custom-checkbox {
+  border-color: rgba(var(--dotodo-muted-rgb, 154, 163, 178), 0.45);
+}
+
+.dark .custom-checkbox[aria-checked="true"] {
+  background: #059669;
+  border-color: #059669;
+  box-shadow: 0 0 10px rgba(var(--dotodo-success-rgb), 0.25);
 }
 
 .task-checkbox-col {
@@ -289,14 +370,6 @@
   transition: width var(--dotodo-motion-soft);
 }
 
-.task-checkbox {
-  --size: 23px;
-  --border-radius: 8px;
-  --checkbox-background: transparent;
-  --background-checked: var(--dotodo-primary);
-  --border-color: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.42);
-  --checkmark-color: var(--dotodo-primary-contrast);
-}
 
 .task-options {
   --background: var(--dotodo-card);
@@ -607,4 +680,35 @@
 .priority-popover .task-chip.selected {
   --background: var(--dotodo-primary);
   --color: var(--dotodo-primary-contrast);
+}
+
+@keyframes completionPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  45% {
+    transform: scale(1.008);
+    opacity: 0.92;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.88;
+  }
+}
+
+@keyframes completionGlow {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+    filter: blur(0);
+  }
 }

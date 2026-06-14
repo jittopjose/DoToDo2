@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
-    IonCheckbox,
     IonChip,
     IonCol,
     IonDatetime,
@@ -163,19 +162,41 @@ return (
                     <IonGrid className="task-row-grid">
                         <IonRow className="task-row-main">
                             <IonCol size="auto" className="task-checkbox-col">
-<IonCheckbox
-                                            className="task-checkbox"
-                                            checked={todo.isCompleted}
-                                            onIonChange={handleToggle}
-                                            onClick={(e) => e.stopPropagation()}
-                                            aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
+                                <div
+                                    className="custom-checkbox"
+                                    role="checkbox"
+                                    aria-checked={todo.isCompleted}
+                                    aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
+                                    tabIndex={0}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleToggle();
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleToggle();
+                                        }
+                                    }}
+                                >
+                                    {todo.isCompleted && (
+                                        <IonIcon
+                                            className="custom-checkbox__tick"
+                                            icon={checkmarkDoneOutline}
                                         />
+                                    )}
+                                </div>
                             </IonCol>
                             <IonCol className="task-content-stack">
                                 <IonGrid className="task-main-grid">
                                     <IonRow className="task-title-row">
                                         <IonCol size="auto">
-                                            <IonIcon className={`task-type-icon task-type-icon--${todo.itemType}`} icon={typeIcons[todo.itemType]} />
+                                        <IonIcon
+                                            slot="start"
+                                            className={`task-type-icon task-type-icon--${todo.itemType}`}
+                                            icon={typeIcons[todo.itemType]}
+                                        />
                                         </IonCol>
                                         <IonCol className="task-title-col">
                                             <IonTitle className="task-title-text">{todo.title}</IonTitle>
