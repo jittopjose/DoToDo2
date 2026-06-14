@@ -133,11 +133,27 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                     <IonGrid className="editor-grid">
                         <IonRow className="editor-header-row">
                             <IonCol>
-                                <IonTitle className="editor-title">{quickMode ? sectionTitles[initialSection] : 'Task details'}</IonTitle>
-                                {!quickMode && <IonNote className="editor-subtitle">{typeLabels[todo.itemType]}</IonNote>}
+                                {quickMode ? (
+                                    <div className="editor-section-label">{sectionTitles[initialSection]}</div>
+                                ) : (
+                                    <>
+                                        <IonTitle className="editor-title">Task details</IonTitle>
+                                        <IonNote className="editor-subtitle">{typeLabels[todo.itemType]}</IonNote>
+                                    </>
+                                )}
                             </IonCol>
                             <IonCol size="auto">
                                 <IonButtons>
+                                    {quickMode && (
+                                        <IonButton
+                                            className="editor-text-button"
+                                            fill="clear"
+                                            size="small"
+                                            onClick={onSwitchToFull}
+                                        >
+                                            Edit full
+                                        </IonButton>
+                                    )}
                                     <IonButton
                                         className="editor-header-action editor-delete-fab"
                                         fill="clear"
@@ -154,16 +170,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                                     >
                                         <IonIcon icon={checkmarkDoneOutline} />
                                     </IonButton>
-                                    {quickMode && (
-                                        <IonButton
-                                            className="editor-text-button"
-                                            fill="clear"
-                                            size="small"
-                                            onClick={onSwitchToFull}
-                                        >
-                                            Edit full
-                                        </IonButton>
-                                    )}
                                     <IonButton className="editor-close-button" fill="clear" onClick={close} aria-label="Close task details">
                                         <IonIcon icon={closeOutline} />
                                     </IonButton>

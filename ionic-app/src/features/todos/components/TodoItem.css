@@ -410,8 +410,9 @@
 
 .editor-header-row {
   align-items: center;
-  margin: 0 0 14px;
-  padding: 0;
+  margin: 0 0 16px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--dotodo-card-border);
 }
 
 .editor-header-row > .ion-col {
@@ -421,18 +422,29 @@
 .editor-title {
   margin: 0;
   color: var(--dotodo-text);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.editor-section-label {
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
 }
 
 .editor-subtitle {
   display: block;
-  margin-top: 2px;
+  margin-top: 4px;
   color: var(--dotodo-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 750;
   text-transform: capitalize;
+  letter-spacing: 0.01em;
 }
 
 .editor-close-button {
