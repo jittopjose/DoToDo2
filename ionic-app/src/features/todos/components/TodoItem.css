@@ -536,6 +536,17 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 12px 14px;
+  background: transparent;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  transition: background 0.1s ease, border-color 0.1s ease;
+  touch-action: manipulation;
+}
+
+.edit-field:focus-within {
+  background: rgba(var(--dotodo-primary-rgb), 0.03);
+  border-color: rgba(var(--dotodo-primary-rgb), 0.18);
 }
 
 .edit-label {
@@ -545,6 +556,11 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding-left: 2px;
+  transition: color 0.1s ease;
+}
+
+.edit-field:focus-within .edit-label {
+  color: var(--dotodo-primary);
 }
 
 .edit-title-input {
@@ -558,8 +574,18 @@
   letter-spacing: -0.02em;
   border-bottom: 1px solid var(--dotodo-card-border);
   --border-radius: 0;
-  --highlight-color-focused: transparent;
+  --highlight-color-focused: var(--dotodo-primary);
   margin-bottom: 4px;
+  transition: border-color 0.1s ease;
+}
+
+.edit-title-input::part(placeholder) {
+  color: var(--dotodo-muted);
+  opacity: 0.7;
+}
+
+.edit-title-input:focus-within {
+  border-bottom-color: var(--dotodo-primary);
 }
 
 .edit-description-input {
@@ -571,7 +597,12 @@
   color: var(--dotodo-text);
   line-height: 1.5;
   --border-radius: 0;
-  --highlight-color-focused: transparent;
+  --highlight-color-focused: var(--dotodo-primary);
+}
+
+.edit-description-input::part(placeholder) {
+  color: var(--dotodo-muted);
+  opacity: 0.7;
 }
 
 .edit-section {
