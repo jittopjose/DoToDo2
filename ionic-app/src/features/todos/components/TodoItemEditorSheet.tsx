@@ -89,7 +89,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                     <div className="editor-header-row">
                         <div className="editor-header-left">
                             <h2 className="editor-title">Edit task</h2>
-                            <p className="editor-subtitle">Task</p>
                         </div>
                         <div className="editor-header-actions">
                             <IonButton
@@ -108,7 +107,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                             >
                                 <IonIcon icon={checkmarkDoneOutline} />
                             </IonButton>
-                            <IonButton className="editor-close-button" fill="clear" onClick={close} aria-label="Close">
+                            <IonButton className="editor-header-action editor-close-button" fill="clear" onClick={close} aria-label="Close">
                                 <IonIcon icon={closeOutline} />
                             </IonButton>
                         </div>

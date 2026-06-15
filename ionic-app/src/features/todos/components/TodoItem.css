@@ -481,12 +481,18 @@
 }
 
 .editor-close-button {
-  --color: var(--dotodo-muted);
-  --border-radius: 999px;
-  min-height: 36px;
-  width: 36px;
-  padding-inline: 0;
+  --color: var(--dotodo-text);
+  --background: rgba(var(--dotodo-text-rgb), 0.08);
+  --background-hover: rgba(var(--dotodo-text-rgb), 0.14);
+  --border-radius: 12px;
+  opacity: 0.9;
 }
+
+.editor-close-button:active {
+  transform: scale(0.88);
+  opacity: 1;
+}
+
 
 .editor-header-action {
   --border-radius: 12px;
