@@ -47,7 +47,8 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
                     value={description}
                     onIonInput={(event) => onDescriptionChange(event.detail.value ?? '')}
                     placeholder="What needs to be done?"
-                    rows={4}
+                    rows={1}
+                    autoGrow
                 />
             </div>
         </div>

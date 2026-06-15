@@ -431,7 +431,21 @@
 }
 
 .editor-content {
-  --background: var(--dotodo-card);
+  --background: transparent;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  height: 100%;
+  contain: style paint size;
+  will-change: transform;
+}
+
+.editor-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 18px 18px;
 }
 
 .editor-grid {
