@@ -80,8 +80,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
             className="todo-editor-modal"
             isOpen={isOpen}
             onDidDismiss={onDismiss}
-            initialBreakpoint={0.72}
-            breakpoints={[0.55, 0.72, 1]}
+            initialBreakpoint={0.45}
+            breakpoints={[0.45, 0.72, 1]}
             handle
         >
             <IonContent className="editor-content">
