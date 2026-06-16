@@ -758,10 +758,11 @@
   --padding-bottom: 10px;
   --background: var(--dotodo-surface-strong);
   --border-radius: 11px;
-  --highlight-color-focused: transparent;
+  --highlight-color-focused: var(--dotodo-primary);
   font-size: 14px;
   border: 1px solid var(--dotodo-card-border);
   min-height: 42px;
+  caret-color: currentColor;
 }
 
 .subtask-add-button {

@@ -81,7 +81,7 @@ export const SubtasksSection = memo(function SubtasksSection({
         <div className="edit-section" id="todo-editor-section-subtasks">
             <div className="edit-section-header">
                 <div className="edit-section-title">
-                    <IonIcon icon={checkmarkDoneOutline} />
+                    {total > 0 && <IonIcon icon={checkmarkDoneOutline} />}
                 </div>
                 {total > 0 && (
                     <div className="edit-section-meta">
