@@ -1,8 +1,9 @@
 import { IonButton, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonIcon, IonNote, IonPage, IonRow, IonSearchbar } from '@ionic/react';
-import { closeOutline, searchOutline } from 'ionicons/icons';
+import { cartOutline, checkmarkDoneOutline, documentTextOutline, listOutline, closeOutline, searchOutline } from 'ionicons/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useTodoStore } from '../features/todos/store/todoStore';
+import { TodoTypeFilter } from '../features/todos/types';
 import { TodoInput } from '../features/todos/components/TodoInput';
 import { TodoList } from '../features/todos/components/TodoList';
 import './Page.css';
@@ -27,6 +28,13 @@ const getGreeting = (date = new Date()) => {
     return 'Good night';
 };
 
+const typeFilterButtons = [
+    { label: 'Task', value: 'todo', icon: listOutline },
+    { label: 'Shop', value: 'shopping', icon: cartOutline },
+    { label: 'Note', value: 'note', icon: documentTextOutline },
+    { label: 'Check', value: 'checklist', icon: checkmarkDoneOutline },
+] as const;
+
 const Page: React.FC = () => {
 
     const { name } = useParams<{ name: string; }>();
@@ -36,6 +44,7 @@ const Page: React.FC = () => {
     const list = name || 'All Lists';
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
+    const setTypeFilter = useTodoStore((state) => state.setTypeFilter);
     const todos = useTodoStore((state) => state.todos);
     const filter = useTodoStore((state) => state.filter);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
@@ -99,6 +108,11 @@ const Page: React.FC = () => {
         setIsSearchOpen(false);
     }, [setSearchTerm]);
 
+    const handleTypeFilterSelect = useCallback((nextTypeFilter: TodoTypeFilter) => {
+        setTypeFilter(nextTypeFilter);
+        setSearchTerm('');
+    }, [setSearchTerm, setTypeFilter]);
+
   return (
     <IonPage>
       <IonContent className="page-content">
@@ -150,6 +164,30 @@ const Page: React.FC = () => {
                   </IonGrid>
                 </IonCardContent>
               </IonCard>
+            </IonCol>
+          </IonRow>
+          <IonRow className="type-filter-row">
+            <IonCol>
+              <IonGrid className="type-filter-grid">
+                <IonRow className="type-filter-row-scroll">
+                  {typeFilterButtons.map((button) => {
+                    const isActive = typeFilter === button.value;
+
+                    return (
+                      <IonButton
+                        key={button.value}
+                        className={`type-filter-button type-filter-button--${button.value} ${isActive ? 'is-active' : ''}`}
+                        fill="clear"
+                        onClick={() => handleTypeFilterSelect(typeFilter === button.value ? 'all' : button.value)}
+                        aria-pressed={isActive}
+                      >
+                        <IonIcon icon={button.icon} />
+                        <span className="type-filter-label">{button.label}</span>
+                      </IonButton>
+                    );
+                  })}
+                </IonRow>
+              </IonGrid>
             </IonCol>
           </IonRow>
           <IonRow className="composer-row">

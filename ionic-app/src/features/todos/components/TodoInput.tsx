@@ -3,16 +3,14 @@ import {
     IonButton,
     IonCard,
     IonCardContent,
-    IonChip,
     IonCol,
     IonGrid,
     IonIcon,
     IonInput,
     IonRow
 } from '@ionic/react';
-import { addOutline, checkmarkDoneOutline, documentTextOutline, listOutline, cartOutline } from 'ionicons/icons';
+import { addOutline } from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
-import { TodoTypeFilter } from '../types';
 import './TodoInput.css';
 
 type TodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
@@ -23,7 +21,6 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const addTodo = useTodoStore((state) => state.addTodo);
     const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
     const typeFilter = useTodoStore((state) => state.typeFilter);
-    const setTypeFilter = useTodoStore((state) => state.setTypeFilter);
     const activeTypeFilter = typeFilter || 'all';
 
     useEffect(() => {
@@ -50,53 +47,10 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
         }
     };
 
-    const handleTypeSelect = (type: TodoItemType) => {
-        const nextTypeFilter: TodoTypeFilter = activeTypeFilter === type ? 'all' : type;
-        setTypeFilter(nextTypeFilter);
-        setSearchTerm('');
-        setItemType(nextTypeFilter === 'all' ? type : nextTypeFilter);
-    };
-
     return (
         <IonCard className="composer-card">
             <IonCardContent className="composer-content">
                 <IonGrid className="composer-input-grid">
-                    <IonGrid className="composer-type-scroll">
-                        <IonRow className="composer-type-row">
-                            <IonChip
-                                className={`composer-type-chip composer-type-chip--todo ${activeTypeFilter === 'todo' ? 'is-active' : ''}`}
-                                onClick={() => handleTypeSelect('todo')}
-                                aria-label="Task type"
-                            >
-                                <IonIcon icon={listOutline} />
-                                <span className="composer-type-label">Task</span>
-                            </IonChip>
-                            <IonChip
-                                className={`composer-type-chip composer-type-chip--shopping ${activeTypeFilter === 'shopping' ? 'is-active' : ''}`}
-                                onClick={() => handleTypeSelect('shopping')}
-                                aria-label="Shopping type"
-                            >
-                                <IonIcon icon={cartOutline} />
-                                <span className="composer-type-label">Shop</span>
-                            </IonChip>
-                            <IonChip
-                                className={`composer-type-chip composer-type-chip--note ${activeTypeFilter === 'note' ? 'is-active' : ''}`}
-                                onClick={() => handleTypeSelect('note')}
-                                aria-label="Note type"
-                            >
-                                <IonIcon icon={documentTextOutline} />
-                                <span className="composer-type-label">Note</span>
-                            </IonChip>
-                            <IonChip
-                                className={`composer-type-chip composer-type-chip--checklist ${activeTypeFilter === 'checklist' ? 'is-active' : ''}`}
-                                onClick={() => handleTypeSelect('checklist')}
-                                aria-label="Checklist type"
-                            >
-                                <IonIcon icon={checkmarkDoneOutline} />
-                                <span className="composer-type-label">Check</span>
-                            </IonChip>
-                        </IonRow>
-                    </IonGrid>
                     <IonRow className="composer-input-row">
                         <IonCol className="composer-input-col">
                             <IonInput

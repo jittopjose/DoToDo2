@@ -46,6 +46,104 @@
   padding: 0;
 }
 
+.type-filter-row {
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+.type-filter-grid {
+  margin: 0;
+  padding: 0;
+}
+
+.type-filter-row-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.type-filter-row-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.type-filter-button {
+  --background: rgba(255, 255, 255, 0.035);
+  --border: 1px solid var(--dotodo-card-border);
+  --color: var(--dotodo-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 40px;
+  border: var(--border);
+  border-radius: 999px;
+  color: var(--color);
+  opacity: 0.72;
+  padding: 0;
+  transition:
+    background var(--dotodo-motion-soft),
+    border-color var(--dotodo-motion-soft),
+    box-shadow var(--dotodo-motion-soft),
+    color var(--dotodo-motion-soft),
+    opacity var(--dotodo-motion-soft),
+    transform var(--dotodo-motion-fast);
+}
+
+.type-filter-button::part(native) {
+  border-radius: inherit;
+  padding: 0 12px;
+}
+
+.type-filter-button:active {
+  transform: scale(0.98);
+}
+
+.type-filter-button ion-icon,
+.type-filter-label {
+  color: var(--color);
+  transition:
+    color var(--dotodo-motion-soft),
+    opacity var(--dotodo-motion-soft);
+}
+
+.type-filter-button ion-icon {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+.type-filter-label {
+  display: inline-block;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-filter-button.is-active {
+  --background: rgba(var(--dotodo-secondary-rgb), 0.1);
+  --border: 1px solid rgba(139, 92, 246, 0.4);
+  --color: var(--dotodo-secondary);
+  box-shadow:
+    0 0 0 1px rgba(var(--dotodo-secondary-rgb), 0.12),
+    0 10px 24px rgba(var(--dotodo-secondary-rgb), 0.16),
+    inset 0 0 0 1px rgba(var(--dotodo-secondary-rgb), 0.06);
+  opacity: 1;
+}
+
 .panel-card {
   --border-radius: var(--dotodo-radius-lg);
   --background: var(--dotodo-card);
@@ -60,7 +158,7 @@
   height: 112px;
   margin: 0;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 28px;
   will-change: height, background;
   transition:
     height var(--dotodo-motion-soft),
