@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonMenuButton, IonNote, IonPage, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonIcon, IonNote, IonPage, IonRow, IonSearchbar } from '@ionic/react';
 import { closeOutline, searchOutline } from 'ionicons/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
@@ -9,15 +9,33 @@ import './Page.css';
 
 type SearchbarHandle = HTMLIonSearchbarElement;
 
+const getGreeting = (date = new Date()) => {
+    const hour = date.getHours();
+
+    if (hour < 12) {
+        return 'Good morning';
+    }
+
+    if (hour < 17) {
+        return 'Good afternoon';
+    }
+
+    if (hour < 21) {
+        return 'Good evening';
+    }
+
+    return 'Good night';
+};
+
 const Page: React.FC = () => {
 
     const { name } = useParams<{ name: string; }>();
+    const [greeting] = useState(() => getGreeting());
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchbarRef = useRef<SearchbarHandle | null>(null);
     const list = name || 'All Lists';
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
-    const clearCompleted = useTodoStore((state) => state.clearCompleted);
     const todos = useTodoStore((state) => state.todos);
     const filter = useTodoStore((state) => state.filter);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
@@ -66,10 +84,6 @@ const Page: React.FC = () => {
         setSearchTerm(e.detail.value || '');
     }, [setSearchTerm]);
 
-    const handleClearCompleted = useCallback(() => {
-        clearCompleted();
-    }, [clearCompleted]);
-
     useEffect(() => {
         if (!isSearchOpen) return;
         const frame = requestAnimationFrame(() => searchbarRef.current?.setFocus());
@@ -87,21 +101,14 @@ const Page: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader className="page-header">
-        <IonToolbar className="top-toolbar">
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-<IonTitle className="page-title">{list}</IonTitle>
-            <IonButtons slot="end">
-<IonButton className="clear-button" disabled={completedTasks === 0} onClick={handleClearCompleted}>
-                        Clear completed
-                    </IonButton>
-            </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-
       <IonContent className="page-content">
+        <div className="greeting-section">
+          <div className="greeting-copy">
+            <h1 className="greeting-title">{greeting}</h1>
+            <p className="greeting-subtitle">Let's get things done!</p>
+          </div>
+        </div>
+
         <IonGrid className="page-grid">
           <IonRow className="progress-row">
             <IonCol>

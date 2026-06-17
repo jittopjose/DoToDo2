@@ -1,8 +1,7 @@
-import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
+import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { Redirect, Route } from 'react-router-dom';
-import Menu from './components/Menu';
 import Page from './pages/Page';
 
 /* Core CSS required for Ionic components to work properly */
@@ -45,9 +44,7 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter history={history}>
-        <IonSplitPane contentId="main">
-          <Menu />
-          <IonRouterOutlet id="main">
+        <IonRouterOutlet id="main">
             <Route path="/" exact={true}>
               <Redirect to="/list/All Lists" />
             </Route>
@@ -55,7 +52,6 @@ const App: React.FC = () => {
               <Page />
             </Route>
           </IonRouterOutlet>
-        </IonSplitPane>
       </IonReactRouter>
     </IonApp>
   );
