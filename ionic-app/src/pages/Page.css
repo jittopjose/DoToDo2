@@ -60,6 +60,7 @@
   height: 112px;
   margin: 0;
   overflow: hidden;
+  border-radius: 12px;
   will-change: height, background;
   transition:
     height var(--dotodo-motion-soft),
