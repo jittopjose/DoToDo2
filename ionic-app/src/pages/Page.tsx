@@ -48,6 +48,7 @@ const Page: React.FC = () => {
     const todos = useTodoStore((state) => state.todos);
     const filter = useTodoStore((state) => state.filter);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
+    const normalizedSearchTerm = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
 
     const listTodos = useMemo(() => {
         let filtered = todos.filter((t: typeof todos[0]) => t.list === list);
@@ -56,11 +57,10 @@ const Page: React.FC = () => {
             filtered = filtered.filter((t: typeof todos[0]) => t.itemType === typeFilter);
         }
 
-        if (searchTerm && searchTerm.trim()) {
-            const term = searchTerm.toLowerCase();
+        if (normalizedSearchTerm) {
             filtered = filtered.filter((t: typeof todos[0]) =>
-                t.title.toLowerCase().includes(term) ||
-                (t.description && t.description.toLowerCase().includes(term))
+                t.title.toLowerCase().includes(normalizedSearchTerm) ||
+                (t.description && t.description.toLowerCase().includes(normalizedSearchTerm))
             );
         }
 
@@ -72,10 +72,10 @@ const Page: React.FC = () => {
             default:
                 return filtered;
         }
-    }, [todos, list, typeFilter, searchTerm, filter]);
+    }, [todos, list, typeFilter, normalizedSearchTerm, filter]);
 
     const totalTasks = listTodos.length;
-    const completedTasks = listTodos.filter((t: typeof listTodos[0]) => t.isCompleted).length;
+    const completedTasks = listTodos.reduce((count, todo) => count + (todo.isCompleted ? 1 : 0), 0);
     const remainingTasks = totalTasks - completedTasks;
     const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
     const progressPercent = Math.round(progress * 100);
@@ -109,9 +109,19 @@ const Page: React.FC = () => {
     }, [setSearchTerm]);
 
     const handleTypeFilterSelect = useCallback((nextTypeFilter: TodoTypeFilter) => {
-        setTypeFilter(nextTypeFilter);
+        setTypeFilter(typeFilter === nextTypeFilter ? 'all' : nextTypeFilter);
         setSearchTerm('');
-    }, [setSearchTerm, setTypeFilter]);
+    }, [setSearchTerm, setTypeFilter, typeFilter]);
+
+    const handleTypeFilterSelectClick = useCallback((event: React.MouseEvent) => {
+        const target = event.target as HTMLElement | null;
+        const button = target?.closest<HTMLIonButtonElement>('.type-filter-button');
+        const value = button?.dataset.typeFilter as TodoTypeFilter | undefined;
+
+        if (!value) return;
+
+        handleTypeFilterSelect(value);
+    }, [handleTypeFilterSelect]);
 
   return (
     <IonPage>
@@ -168,7 +178,7 @@ const Page: React.FC = () => {
           </IonRow>
           <IonRow className="type-filter-row">
             <IonCol>
-              <IonGrid className="type-filter-grid">
+              <IonGrid className="type-filter-grid" onClick={handleTypeFilterSelectClick}>
                 <IonRow className="type-filter-row-scroll">
                   {typeFilterButtons.map((button) => {
                     const isActive = typeFilter === button.value;
@@ -178,7 +188,7 @@ const Page: React.FC = () => {
                         key={button.value}
                         className={`type-filter-button type-filter-button--${button.value} ${isActive ? 'is-active' : ''}`}
                         fill="clear"
-                        onClick={() => handleTypeFilterSelect(typeFilter === button.value ? 'all' : button.value)}
+                        data-type-filter={button.value}
                         aria-pressed={isActive}
                       >
                         <span className="type-filter-label">{button.label}</span>
