@@ -1,5 +1,5 @@
 import { IonButton, IonCard, IonCardContent, IonCardTitle, IonCol, IonContent, IonGrid, IonIcon, IonNote, IonPage, IonRow, IonSearchbar } from '@ionic/react';
-import { cartOutline, checkmarkDoneOutline, documentTextOutline, listOutline, closeOutline, searchOutline } from 'ionicons/icons';
+import { closeOutline, searchOutline } from 'ionicons/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useTodoStore } from '../features/todos/store/todoStore';
@@ -29,10 +29,10 @@ const getGreeting = (date = new Date()) => {
 };
 
 const typeFilterButtons = [
-    { label: 'Task', value: 'todo', icon: listOutline },
-    { label: 'Shop', value: 'shopping', icon: cartOutline },
-    { label: 'Note', value: 'note', icon: documentTextOutline },
-    { label: 'Check', value: 'checklist', icon: checkmarkDoneOutline },
+    { label: 'Task', value: 'todo' },
+    { label: 'Shop', value: 'shopping' },
+    { label: 'Note', value: 'note' },
+    { label: 'Check', value: 'checklist' },
 ] as const;
 
 const Page: React.FC = () => {
@@ -181,7 +181,6 @@ const Page: React.FC = () => {
                         onClick={() => handleTypeFilterSelect(typeFilter === button.value ? 'all' : button.value)}
                         aria-pressed={isActive}
                       >
-                        <IonIcon icon={button.icon} />
                         <span className="type-filter-label">{button.label}</span>
                       </IonButton>
                     );
