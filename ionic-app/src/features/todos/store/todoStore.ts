@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { Todo, TodoFilter, TodoPriority, TodoSubtask, TodoTypeFilter } from '../types';
+import { getDefaultDueTimestamp } from '../components/TodoItem.utils';
 
 const defaultLists = ['All Lists'];
 
@@ -147,6 +148,7 @@ export const useTodoStore = create<TodoState>()(
 
             addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists') => {
                 const typeFilterOrDefault = get().typeFilter || 'all';
+                const defaultDueDate = getDefaultDueTimestamp();
                 set((state) => ({
                     todos: [
                         {
@@ -156,8 +158,8 @@ export const useTodoStore = create<TodoState>()(
                             createdAt: Date.now(),
                             list,
                             itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
+                            dueDate: dueDate ?? defaultDueDate,
                             ...(description !== undefined && { description }),
-                            ...(dueDate !== undefined && { dueDate }),
                             ...(priority !== undefined && { priority }),
                             ...(quantity !== undefined && { quantity }),
                             ...(price !== undefined && { price }),

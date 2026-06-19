@@ -35,6 +35,14 @@ export const getDueTimestampFromDays = (daysFromNow: number) => {
     return normalizeToEndOfDay(date.getTime());
 };
 
+export const getDefaultDueTimestamp = (now = new Date()) => {
+    const date = new Date(now);
+    if (date.getHours() >= 18) {
+        date.setDate(date.getDate() + 1);
+    }
+    return normalizeToEndOfDay(date.getTime());
+};
+
 export const isDueQuickSelected = (todo: Todo, daysFromNow: number) => {
     if (!todo.dueDate) return false;
     const dueDay = startOfDay(new Date(todo.dueDate));
