@@ -3,6 +3,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { Redirect, Route } from 'react-router-dom';
 import Page from './pages/Page';
+import TodoEditPage from './pages/TodoEditPage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -50,6 +51,9 @@ const App: React.FC = () => {
             </Route>
             <Route path="/list/:name" exact={true}>
               <Page />
+            </Route>
+            <Route path="/task/:id/edit" exact={true}>
+              <TodoEditPage />
             </Route>
           </IonRouterOutlet>
       </IonReactRouter>

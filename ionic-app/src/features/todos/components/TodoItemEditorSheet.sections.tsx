@@ -1,20 +1,14 @@
-import { memo, useCallback } from 'react';
+import { memo, type KeyboardEvent } from 'react';
 import {
     IonButton,
-    IonCol,
-    IonGrid,
     IonIcon,
     IonInput,
-    IonNote,
-    IonRow,
     IonTextarea,
 } from '@ionic/react';
 import {
     addOutline,
     checkmarkDoneOutline,
-    ellipse,
 } from 'ionicons/icons';
-import type { Todo } from '../types';
 
 interface EditorDetailsProps {
     title: string;
@@ -118,6 +112,7 @@ interface AddSubtaskRowProps {
     value: string;
     onValueChange: (value: string) => void;
     onSubmit: () => void;
+    onKeyPress?: (event: KeyboardEvent) => void;
     isEnabled: boolean;
 }
 
@@ -125,6 +120,7 @@ export const AddSubtaskRow = memo(function AddSubtaskRow({
     value,
     onValueChange,
     onSubmit,
+    onKeyPress,
     isEnabled,
 }: AddSubtaskRowProps) {
     return (
@@ -133,6 +129,7 @@ export const AddSubtaskRow = memo(function AddSubtaskRow({
                 className="subtask-add-input"
                 value={value}
                 onIonInput={(event) => onValueChange(event.detail.value ?? '')}
+                onKeyPress={onKeyPress}
                 placeholder={isEnabled ? 'Add subtask' : 'Add your first subtask'}
             />
             <IonButton

@@ -9,22 +9,20 @@ import {
     IonNote,
     IonPopover,
     IonRow,
-    IonTitle,
 } from '@ionic/react';
 import {
     addOutline,
     alertCircleOutline,
     calendarOutline,
-    cartOutline,
     checkmarkDoneOutline,
     ellipse,
     flagOutline,
 } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 import { Todo, TodoPriority } from '../types';
 import { useTodoStore } from '../store/todoStore';
 import { formatDueDate } from '../utils/formatDueDate';
 import './TodoItem.css';
-import { TodoItemEditorSheet } from './TodoItemEditorSheet';
 import { priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
@@ -36,27 +34,20 @@ interface Props {
 const priorityLevelValues: Array<TodoPriority | undefined> = ['low', 'medium', 'high', undefined];
 
 export const TodoItem: React.FC<Props> = memo(({ todo }) => {
+    const history = useHistory();
     const toggleTodo = useTodoStore((state) => state.toggleTodo);
-    const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
-    const addSubtask = useTodoStore((state) => state.addSubtask);
-    const deleteTodo = useTodoStore((state) => state.deleteTodo);
     const updateTodo = useTodoStore((state) => state.updateTodo);
-    const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
-
-    const openEditor = useCallback(() => {
-        setIsEditorOpen(true);
-    }, []);
-
-    const closeEditor = useCallback(() => {
-        setIsEditorOpen(false);
-    }, []);
 
     const handleDueCalendarDismiss = useCallback(() => {
         setIsDueCalendarOpen(false);
     }, []);
 
-    const handleDirectDueDateChange = useCallback((event: CustomEvent) => {
+    const openEditor = useCallback(() => {
+        history.push(`/task/${encodeURIComponent(todo.id)}/edit`);
+    }, [history, todo.id]);
+
+    const handleDueDateChange = useCallback((event: CustomEvent) => {
         const raw = event.detail.value as string | undefined;
         if (!raw) {
             setIsDueCalendarOpen(false);
@@ -82,11 +73,6 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
         toggleTodo(todo.id);
     }, [todo.id, toggleTodo]);
 
-    const handleDelete = useCallback(() => {
-        deleteTodo(todo.id);
-        closeEditor();
-    }, [todo.id, deleteTodo, closeEditor]);
-
     const handlePriorityCycle = useCallback(() => {
         const currentIndex = priorityLevelValues.indexOf(todo.priority as TodoPriority);
         const nextPriority = priorityLevelValues[(currentIndex + 1) % priorityLevelValues.length];
@@ -99,11 +85,6 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     }, [handlePriorityCycle]);
 
     const handleSubtaskClick = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        openEditor();
-    }, [openEditor]);
-
-    const handleShoppingClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         openEditor();
     }, [openEditor]);
@@ -254,15 +235,6 @@ return (
                     </IonGrid>
                 </IonItem>
 
-            <TodoItemEditorSheet
-                todo={todo}
-                isOpen={isEditorOpen}
-                onDismiss={closeEditor}
-                onDelete={handleDelete}
-                onToggleSubtask={toggleSubtask}
-                onAddSubtask={addSubtask}
-                onUpdate={updateTodo}
-            />
             <IonPopover
                 isOpen={isDueCalendarOpen}
                 onDidDismiss={handleDueCalendarDismiss}
@@ -272,7 +244,7 @@ return (
                         className="due-calendar-datetime"
                         presentation="date"
                         value={getDueDateInputValue(todo.dueDate)}
-                        onIonChange={handleDirectDueDateChange}
+                        onIonChange={handleDueDateChange}
                     />
                 )}
             </IonPopover>

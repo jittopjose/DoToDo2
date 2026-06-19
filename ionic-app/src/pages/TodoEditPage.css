@@ -1,0 +1,165 @@
+.todo-edit-page {
+  --background: var(--dotodo-card);
+}
+
+.todo-edit-header {
+  --background: var(--dotodo-card);
+  --border-color: var(--dotodo-card-border);
+  border-bottom: 1px solid var(--dotodo-card-border);
+}
+
+.todo-edit-toolbar-title {
+  color: var(--dotodo-text);
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.todo-edit-content {
+  --background: var(--dotodo-card);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.todo-edit-grid {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 20px 34px;
+}
+
+.todo-edit-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--dotodo-surface-strong);
+  color: var(--dotodo-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.todo-edit-summary-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dotodo-primary);
+}
+
+.todo-edit-summary-dot--shopping {
+  background: var(--dotodo-shopping);
+}
+
+.todo-edit-summary-dot--note {
+  background: var(--dotodo-note);
+}
+
+.todo-edit-summary-dot--checklist {
+  background: var(--dotodo-checklist);
+}
+
+.todo-edit-section {
+  margin: 0 0 10px;
+}
+
+.todo-edit-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.todo-edit-section-title {
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.todo-edit-progress-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--dotodo-muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.todo-edit-progress-track {
+  width: 56px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--dotodo-card-border);
+  overflow: hidden;
+}
+
+.todo-edit-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dotodo-primary);
+  transition: width 0.3s var(--dotodo-motion-soft);
+}
+
+.todo-edit-toolbar-action {
+  --border-radius: 12px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --padding-top: 9px;
+  --padding-bottom: 9px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s var(--dotodo-motion-soft), opacity 0.2s var(--dotodo-motion-soft);
+  will-change: transform;
+  opacity: 0.85;
+}
+
+.todo-edit-toolbar-action:active {
+  transform: scale(0.88);
+  opacity: 1;
+}
+
+.todo-edit-toolbar-action--done {
+  --color: var(--dotodo-primary);
+  --background-hover: var(--dotodo-primary-soft);
+}
+
+.todo-edit-toolbar-action--delete {
+  --color: var(--dotodo-danger);
+  --background-hover: rgba(var(--dotodo-danger-rgb), 0.12);
+}
+
+.todo-edit-empty {
+  display: grid;
+  place-items: center;
+  min-height: 42vh;
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.todo-edit-empty-title {
+  margin: 0 0 8px;
+  color: var(--dotodo-text);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.todo-edit-empty-copy {
+  margin: 0;
+  color: var(--dotodo-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
