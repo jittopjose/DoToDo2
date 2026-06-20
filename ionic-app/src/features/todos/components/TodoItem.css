@@ -648,6 +648,14 @@
   color: var(--dotodo-primary);
 }
 
+.edit-section--subtasks .edit-section-title ion-icon {
+  color: var(--dotodo-success);
+}
+
+.edit-section--subtasks .edit-progress-fill {
+  background: var(--dotodo-success);
+}
+
 .edit-section-meta {
   display: flex;
   align-items: center;
@@ -683,17 +691,25 @@
   gap: 6px;
 }
 
+.subtask-list-item {
+  width: 100%;
+}
+
 .subtask-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 14px;
   background: var(--dotodo-surface-strong);
-  border-radius: 12px;
   border: 1px solid var(--dotodo-card-border);
+  border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.2s var(--dotodo-motion-soft), transform 0.15s var(--dotodo-motion-soft);
+  transition: opacity 0.2s var(--dotodo-motion-soft), transform 0.15s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
   transform: scale(1);
 }
 
@@ -702,9 +718,52 @@
   opacity: 0.8;
 }
 
+.subtask-row:focus-visible {
+  outline: none;
+  border-color: rgba(var(--dotodo-primary-rgb), 0.42);
+  box-shadow: 0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.14);
+}
+
 .subtask-row.is-completed .subtask-text {
   color: var(--dotodo-muted);
   text-decoration: line-through;
+}
+
+.subtask-empty-state {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  border: 1px dashed rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.28);
+  border-radius: 16px;
+  background: rgba(var(--dotodo-primary-rgb), 0.025);
+  text-align: center;
+}
+
+.subtask-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(var(--dotodo-success-rgb), 0.1);
+  color: var(--dotodo-success);
+  font-size: 22px;
+}
+
+.subtask-empty-title {
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.subtask-empty-copy {
+  margin: 0;
+  color: var(--dotodo-muted);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .subtask-check {

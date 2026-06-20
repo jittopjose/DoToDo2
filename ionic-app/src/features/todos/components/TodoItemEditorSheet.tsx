@@ -120,16 +120,17 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                         onDescriptionChange={setDescription}
                     />
 
+                    <SubtasksSection
+                        subtasks={todo.subtasks}
+                        onToggleSubtask={handleToggleSubtask}
+                        progress={getSubtaskProgress(todo)}
+                    />
+
                     <AddSubtaskRow
                         value={newSubtaskText}
                         onValueChange={setNewSubtaskText}
                         onSubmit={handleAddSubtask}
                         isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
-                    />
-
-                    <SubtasksSection
-                        subtasks={todo.subtasks}
-                        onToggleSubtask={handleToggleSubtask}
                     />
                 </IonGrid>
             </IonContent>

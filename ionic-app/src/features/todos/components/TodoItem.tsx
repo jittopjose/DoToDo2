@@ -97,14 +97,14 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     const overdue = isOverdue(todo);
 
     const quickActions = useMemo(() => {
-        const actions: Array<{ label: string; icon: string }> = [];
+        const actions: Array<{ label: string; icon: string; onAction?: () => void }> = [];
 
         if (!todo.subtasks || todo.subtasks.length === 0) {
-            actions.push({ label: '+ subtask', icon: addOutline });
+            actions.push({ label: '+ subtask', icon: addOutline, onAction: openEditor });
         }
 
         return actions.slice(0, 2);
-    }, [todo.subtasks]);
+    }, [openEditor, todo.subtasks]);
 
 return (
         <>
@@ -207,6 +207,7 @@ return (
                                         <IonChip
                                             className="task-chip task-chip--subtasks"
                                             onClick={handleSubtaskClick}
+                                            aria-label={`${subtaskProgress.completed} of ${subtaskProgress.total} subtasks completed`}
                                         >
                                             <IonIcon icon={checkmarkDoneOutline} />
                                             <span>{subtaskProgress.completed}/{subtaskProgress.total}</span>
@@ -217,7 +218,11 @@ return (
                                         <IonChip
                                             key={action.label}
                                             className="task-chip task-chip--quick"
-                                            onClick={() => {}}
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                action.onAction?.();
+                                            }}
+                                            aria-label={action.label === '+ subtask' ? 'Add subtask' : action.label}
                                         >
                                             <IonIcon icon={action.icon} />
                                             <span>{action.label}</span>

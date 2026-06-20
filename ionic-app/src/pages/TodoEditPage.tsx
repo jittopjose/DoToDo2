@@ -147,19 +147,11 @@ const TodoEditPage: React.FC = () => {
                         onDescriptionChange={setDescription}
                     />
 
-                    <div className="todo-edit-section">
-                        <div className="todo-edit-section-heading">
-                            <h2 className="todo-edit-section-title">Subtasks</h2>
-                            {subtaskProgress.total > 0 && (
-                                <div className="todo-edit-progress-meta">
-                                    <span>{subtaskProgress.completed}/{subtaskProgress.total}</span>
-                                    <div className="todo-edit-progress-track">
-                                        <div className="todo-edit-progress-fill" style={{ width: `${subtaskProgress.percent}%` }} />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <SubtasksSection
+                        subtasks={todo.subtasks}
+                        onToggleSubtask={handleToggleSubtask}
+                        progress={subtaskProgress}
+                    />
 
                     <AddSubtaskRow
                         value={newSubtaskText}
@@ -167,11 +159,6 @@ const TodoEditPage: React.FC = () => {
                         onSubmit={handleAddSubtask}
                         onKeyPress={handleSubtaskKeyPress}
                         isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
-                    />
-
-                    <SubtasksSection
-                        subtasks={todo.subtasks}
-                        onToggleSubtask={handleToggleSubtask}
                     />
                 </IonGrid>
             </IonContent>

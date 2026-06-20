@@ -8,6 +8,7 @@ import {
 import {
     addOutline,
     checkmarkDoneOutline,
+    listOutline,
 } from 'ionicons/icons';
 
 interface EditorDetailsProps {
@@ -55,38 +56,85 @@ interface Subtask {
     isCompleted: boolean;
 }
 
+interface SubtaskProgress {
+    completed: number;
+    total: number;
+    percent: number;
+}
+
 interface SubtasksSectionProps {
     subtasks: Subtask[] | undefined;
     onToggleSubtask: (subtaskId: string) => void;
+    progress: SubtaskProgress;
 }
 
 export const SubtasksSection = memo(function SubtasksSection({
     subtasks,
     onToggleSubtask,
+    progress,
 }: SubtasksSectionProps) {
-    const hasSubtasks = subtasks && subtasks.length > 0;
+    const subtaskList = subtasks ?? [];
+    const hasSubtasks = subtaskList.length > 0;
+    const progressLabel = progress.total > 0 ? `${progress.completed}/${progress.total}` : '0/0';
 
     return (
-        <div className="edit-section" id="todo-editor-section-subtasks">
-            {hasSubtasks && (
-                <div className="subtask-editor-list">
-                    {subtasks!.map((subtask) => (
+        <section className="edit-section edit-section--subtasks" id="todo-editor-section-subtasks" aria-labelledby="todo-editor-section-subtasks-title">
+            <div className="edit-section-heading">
+                <h2 id="todo-editor-section-subtasks-title" className="edit-section-title">
+                    <IonIcon icon={listOutline} aria-hidden="true" />
+                    <span>Subtasks</span>
+                </h2>
+                <div
+                    className="edit-section-meta"
+                    aria-label={progress.total > 0 ? `${progress.completed} of ${progress.total} subtasks completed` : 'No subtasks'}
+                >
+                    <span className="edit-progress-pill">{progressLabel}</span>
+                    {progress.total > 0 && (
                         <div
-                            key={subtask.id}
-                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                            onClick={() => onToggleSubtask(subtask.id)}
+                            className="edit-progress-track"
+                            role="progressbar"
+                            aria-valuenow={progress.percent}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`${progress.percent}% complete`}
                         >
-                            <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`}>
-                                {subtask.isCompleted && (
-                                    <IonIcon icon={checkmarkDoneOutline} />
-                                )}
-                            </div>
-                            <span className="subtask-text">{subtask.title}</span>
+                            <div className="edit-progress-fill" style={{ width: `${progress.percent}%` }} />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {hasSubtasks ? (
+                <div className="subtask-editor-list" role="list" aria-label="Subtasks">
+                    {subtaskList.map((subtask) => (
+                        <div key={subtask.id} className="subtask-list-item" role="listitem">
+                            <button
+                                type="button"
+                                className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                                onClick={() => onToggleSubtask(subtask.id)}
+                                aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
+                                aria-pressed={subtask.isCompleted}
+                            >
+                                <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`} aria-hidden="true">
+                                    {subtask.isCompleted && (
+                                        <IonIcon icon={checkmarkDoneOutline} />
+                                    )}
+                                </div>
+                                <span className="subtask-text">{subtask.title}</span>
+                            </button>
                         </div>
                     ))}
                 </div>
+            ) : (
+                <div className="subtask-empty-state" role="status">
+                    <div className="subtask-empty-icon" aria-hidden="true">
+                        <IonIcon icon={listOutline} />
+                    </div>
+                    <h3 className="subtask-empty-title">No subtasks yet</h3>
+                    <p className="subtask-empty-copy">Break this task into smaller steps.</p>
+                </div>
             )}
-        </div>
+        </section>
     );
 });
 
