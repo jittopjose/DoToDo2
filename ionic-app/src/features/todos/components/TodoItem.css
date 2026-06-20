@@ -551,9 +551,9 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  background: transparent;
+  background: rgba(var(--dotodo-primary-rgb), 0.025);
   border-radius: 14px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(var(--dotodo-primary-rgb), 0.08);
   transition: background 0.1s ease, border-color 0.1s ease;
   touch-action: manipulation;
 }
