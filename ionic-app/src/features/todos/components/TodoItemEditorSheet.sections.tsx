@@ -65,27 +65,9 @@ export const SubtasksSection = memo(function SubtasksSection({
     onToggleSubtask,
 }: SubtasksSectionProps) {
     const hasSubtasks = subtasks && subtasks.length > 0;
-    const completed = subtasks
-        ? subtasks.filter((st) => st.isCompleted).length
-        : 0;
-    const total = subtasks?.length ?? 0;
-    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return (
         <div className="edit-section" id="todo-editor-section-subtasks">
-            <div className="edit-section-header">
-                <div className="edit-section-title">
-                    {total > 0 && <IonIcon icon={checkmarkDoneOutline} />}
-                </div>
-                {total > 0 && (
-                    <div className="edit-section-meta">
-                        <span className="edit-progress-pill">{completed}/{total}</span>
-                        <div className="edit-progress-track">
-                            <div className="edit-progress-fill" style={{ width: `${progress}%` }} />
-                        </div>
-                    </div>
-                )}
-            </div>
             {hasSubtasks && (
                 <div className="subtask-editor-list">
                     {subtasks!.map((subtask) => (
