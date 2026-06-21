@@ -63,5 +63,9 @@ export const getSubtaskProgress = (todo: Todo) => {
 };
 
 export const isOverdue = (todo: Todo): boolean => {
-    return todo.dueDate !== undefined && todo.dueDate < Date.now() && !todo.isCompleted;
+    if (todo.dueDate === undefined || todo.isCompleted) return false;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dueDay = startOfDay(new Date(todo.dueDate));
+    return dueDay.getTime() < startOfToday.getTime();
 };

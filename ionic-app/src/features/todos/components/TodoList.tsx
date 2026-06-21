@@ -1,11 +1,28 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IonBadge, IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
-import { documentTextOutline } from 'ionicons/icons';
+import {
+    alertCircleOutline,
+    calendarOutline,
+    checkmarkCircleOutline,
+    chevronDownOutline,
+    documentTextOutline,
+    sunnyOutline,
+    timeOutline,
+} from 'ionicons/icons';
 import { useTodoStore } from '../store/todoStore';
 import { TodoTypeFilter, Todo } from '../types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
 import './TodoList.css';
+
+const groupConfig: Record<string, { icon: string; className: string }> = {
+    Overdue: { icon: alertCircleOutline, className: 'group--overdue' },
+    Today: { icon: sunnyOutline, className: 'group--today' },
+    Tomorrow: { icon: calendarOutline, className: 'group--tomorrow' },
+    Upcoming: { icon: calendarOutline, className: 'group--upcoming' },
+    Later: { icon: timeOutline, className: 'group--later' },
+    Completed: { icon: checkmarkCircleOutline, className: 'group--completed' },
+};
 
 interface TodoListProps {
     list: string;
@@ -23,11 +40,26 @@ interface TaskGroup {
     todos: Todo[];
 }
 
+const defaultExpanded = new Set(['Overdue', 'Today']);
+
 export const TodoList: React.FC<TodoListProps> = ({ list }) => {
+    const [expanded, setExpanded] = useState<Set<string>>(defaultExpanded);
     const todos = useTodoStore((state) => state.todos);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const filter = useTodoStore((state) => state.filter);
+
+    const toggleGroup = useCallback((title: string) => {
+        setExpanded((prev) => {
+            const next = new Set(prev);
+            if (next.has(title)) {
+                next.delete(title);
+            } else {
+                next.add(title);
+            }
+            return next;
+        });
+    }, []);
 
     const filteredTodos = useMemo(() => {
         let filtered = todos.filter((t) => t.list === list);
@@ -117,17 +149,32 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
 
     return (
         <IonList className="todo-list" lines="none">
-            {groupedTodos.map((group) => (
-                <React.Fragment key={group.title}>
-                    <div className="todo-group-header">
-                        <h2 className="todo-group-title">{group.title}</h2>
-                        <IonBadge color="medium" className="todo-group-badge">{group.todos.length}</IonBadge>
-                    </div>
-                    {group.todos.map((todo) => (
-                        <TodoItem key={todo.id} todo={todo} />
-                    ))}
-                </React.Fragment>
-            ))}
+            {groupedTodos.map((group) => {
+                const cfg = groupConfig[group.title];
+                const isExpanded = expanded.has(group.title);
+                return (
+                    <React.Fragment key={group.title}>
+                        <div
+                            className={`todo-group-header ${cfg?.className ?? ''}`}
+                            onClick={() => toggleGroup(group.title)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup(group.title); } }}
+                            aria-expanded={isExpanded}
+                        >
+                            {cfg && <IonIcon icon={cfg.icon} className="todo-group-icon" />}
+                            <h2 className="todo-group-title">{group.title}</h2>
+                            <IonBadge className="todo-group-badge">{group.todos.length}</IonBadge>
+                            <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
+                        </div>
+                        <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''}`}>
+                            {group.todos.map((todo) => (
+                                <TodoItem key={todo.id} todo={todo} />
+                            ))}
+                        </div>
+                    </React.Fragment>
+                );
+            })}
             {!hasAnyGroup && (
                 <IonCard className={`empty-card ${isSearchActive ? 'is-searching' : ''}`}>
                     <IonCardContent className="ion-padding empty-content">
