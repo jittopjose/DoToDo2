@@ -1,15 +1,16 @@
 .composer-card {
   --border: 1px solid rgba(255, 255, 255, 0.05);
-  --border-radius: var(--dotodo-radius-lg);
+  --border-radius: 15px;
   --background: var(--dotodo-card);
   margin: 0;
   border: var(--dotodo-card-border);
+  border-radius: 15px;
   box-shadow: var(--dotodo-shadow-card);
   backdrop-filter: blur(18px);
 }
 
 .composer-content {
-  padding: 12px !important;
+  padding: 10px var(--dotodo-card-padding) !important;
 }
 
 .composer-input-grid {
@@ -204,6 +205,6 @@
 
 @media (max-width: 640px) {
   .composer-content {
-    padding: 10px !important;
+    padding: 8px var(--dotodo-card-padding) !important;
   }
 }
