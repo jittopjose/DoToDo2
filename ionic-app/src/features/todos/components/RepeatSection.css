@@ -1,0 +1,84 @@
+.repeat-frequency-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.repeat-chip {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(var(--dotodo-primary-rgb), 0.08);
+  color: var(--dotodo-muted);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background var(--dotodo-motion-fast), color var(--dotodo-motion-fast), transform var(--dotodo-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.repeat-chip:active {
+  transform: scale(0.95);
+}
+
+.repeat-chip--active {
+  background: var(--dotodo-primary);
+  color: var(--dotodo-primary-contrast, #fff);
+}
+
+.repeat-end-section {
+  margin-bottom: 14px;
+}
+
+.repeat-end-section .edit-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.repeat-end-options {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.repeat-count-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  --background: var(--dotodo-surface-strong);
+  --border-radius: 11px;
+  --highlight-color-focused: var(--dotodo-primary);
+  font-size: 14px;
+  border: 1px solid var(--dotodo-card-border);
+  min-height: 42px;
+  max-width: 120px;
+}
+
+.repeat-remove-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(var(--dotodo-danger-rgb), 0.08);
+  color: var(--dotodo-danger);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background var(--dotodo-motion-fast), transform var(--dotodo-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.repeat-remove-button:active {
+  transform: scale(0.95);
+  background: rgba(var(--dotodo-danger-rgb), 0.14);
+}
+
+.dark .repeat-chip--active,
+[data-theme="dark"] .repeat-chip--active {
+  color: #fff;
+}

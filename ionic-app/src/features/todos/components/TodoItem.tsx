@@ -17,11 +17,13 @@ import {
     checkmarkDoneOutline,
     ellipse,
     flagOutline,
+    repeatOutline,
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { Todo, TodoPriority } from '../types';
 import { useTodoStore } from '../store/todoStore';
 import { formatDueDate } from '../utils/formatDueDate';
+import { formatRecurrenceSummary } from '../utils/recurrence';
 import './TodoItem.css';
 import { priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';
@@ -211,6 +213,16 @@ return (
                                         >
                                             <IonIcon icon={checkmarkDoneOutline} />
                                             <span>{subtaskProgress.completed}/{subtaskProgress.total}</span>
+                                        </IonChip>
+                                    )}
+
+                                    {todo.recurrence && (
+                                        <IonChip
+                                            className="task-chip task-chip--repeat"
+                                            onClick={handleSubtaskClick}
+                                        >
+                                            <IonIcon icon={repeatOutline} />
+                                            <span>{formatRecurrenceSummary(todo.recurrence)}</span>
                                         </IonChip>
                                     )}
 

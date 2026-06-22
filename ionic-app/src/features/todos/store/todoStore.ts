@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { Todo, TodoFilter, TodoPriority, TodoSubtask, TodoTypeFilter } from '../types';
+import { Recurrence, Todo, TodoFilter, TodoPriority, TodoSubtask, TodoTypeFilter } from '../types';
 import { getDefaultDueTimestamp } from '../components/TodoItem.utils';
+import { getNextDueDate } from '../utils/recurrence';
 
 const defaultLists = ['All Lists'];
 
@@ -19,6 +20,7 @@ type PersistedTodo = {
     subtasks?: Array<Partial<TodoSubtask> & { id?: string; title?: string; isCompleted?: boolean }>;
     dueDate?: number;
     priority?: unknown;
+    recurrence?: unknown;
 };
 
 type PersistedState = Partial<TodoState> & {
@@ -29,6 +31,19 @@ type PersistedState = Partial<TodoState> & {
 const isTodoFilter = (filter: unknown): filter is TodoFilter => filter === 'all' || filter === 'active' || filter === 'completed';
 const isTodoTypeFilter = (filter: unknown): filter is TodoTypeFilter => filter === 'all' || filter === 'todo' || filter === 'shopping' || filter === 'note' || filter === 'checklist';
 const isTodoPriority = (priority: unknown): priority is TodoPriority => priority === 'low' || priority === 'medium' || priority === 'high';
+
+const isValidFrequency = (f: unknown): f is Recurrence['frequency'] =>
+  f === 'daily' || f === 'weekdays' || f === 'weekly' || f === 'biweekly' || f === 'monthly' || f === 'yearly';
+
+const isRecurrence = (r: unknown): r is Recurrence => {
+  if (!r || typeof r !== 'object') return false;
+  const obj = r as Record<string, unknown>;
+  return (
+    isValidFrequency(obj.frequency) &&
+    typeof obj.interval === 'number' && Number.isFinite(obj.interval) &&
+    typeof obj.originDate === 'number'
+  );
+};
 
 const normalizePersistedSubtasks = (subtasks: unknown): TodoSubtask[] | undefined => {
     if (!Array.isArray(subtasks)) return undefined;
@@ -60,6 +75,7 @@ const normalizePersistedTodo = (todo: unknown): Todo => {
         ...(subtasks && { subtasks }),
         ...(typeof item.dueDate === 'number' && { dueDate: item.dueDate }),
         ...(isTodoPriority(item.priority) && { priority: item.priority }),
+    ...(isRecurrence(item.recurrence) && { recurrence: item.recurrence }),
     };
 };
 
@@ -88,12 +104,12 @@ interface TodoState {
     customLists: string[];
 
     // Actions
-    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string) => void;
+    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string, recurrence?: Recurrence) => void;
     addSubtask: (todoId: string, title: string) => void;
     toggleTodo: (id: string) => void;
     toggleSubtask: (todoId: string, subtaskId: string) => void;
     deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks'>>) => void;
+    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence'>>) => void;
     setFilter: (filter: TodoFilter) => void;
     setTypeFilter: (typeFilter: TodoTypeFilter) => void;
     setSearchTerm: (term: string) => void;
@@ -146,7 +162,7 @@ export const useTodoStore = create<TodoState>()(
             searchTerm: '',
             customLists: [],
 
-            addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists') => {
+            addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists', recurrence) => {
                 const typeFilterOrDefault = get().typeFilter || 'all';
                 const defaultDueDate = getDefaultDueTimestamp();
                 set((state) => ({
@@ -164,17 +180,56 @@ export const useTodoStore = create<TodoState>()(
                             ...(quantity !== undefined && { quantity }),
                             ...(price !== undefined && { price }),
                             ...(subtasks !== undefined && { subtasks }),
+                            ...(recurrence !== undefined && { recurrence }),
                         },
                         ...state.todos,
                     ],
                 }));
             },
 
-            toggleTodo: (id) => set((state) => ({
-                todos: state.todos.map((todo) =>
-                    todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
-                ),
-            })),
+            toggleTodo: (id) => set((state) => {
+                const todo = state.todos.find(t => t.id === id);
+                if (!todo) return state;
+
+                if (!todo.isCompleted && todo.recurrence) {
+                    const nextDue = getNextDueDate(todo);
+                    if (nextDue) {
+                        const isLast = todo.recurrence.endType === 'after' &&
+                                       todo.recurrence.endCount !== undefined &&
+                                       todo.recurrence.endCount <= 1;
+
+                        const clone: Todo = {
+                            ...todo,
+                            id: uuidv4(),
+                            isCompleted: false,
+                            createdAt: Date.now(),
+                            dueDate: nextDue,
+                            subtasks: todo.subtasks?.map(s => ({ ...s, isCompleted: false })),
+                            recurrence: isLast ? undefined : {
+                                ...todo.recurrence,
+                                ...(todo.recurrence.endType === 'after' && todo.recurrence.endCount !== undefined
+                                    ? { endCount: todo.recurrence.endCount - 1 }
+                                    : {}),
+                            },
+                        };
+
+                        return {
+                            todos: [
+                                clone,
+                                ...state.todos.map(t =>
+                                    t.id === id ? { ...t, isCompleted: true, recurrence: undefined } : t
+                                ),
+                            ],
+                        };
+                    }
+                }
+
+                return {
+                    todos: state.todos.map(t =>
+                        t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
+                    ),
+                };
+            }),
 
             toggleSubtask: (todoId, subtaskId) => set((state) => ({
                 todos: state.todos.map((todo) => {
@@ -244,7 +299,7 @@ export const useTodoStore = create<TodoState>()(
         }),
         {
             name: 'todo-storage',
-            version: 1,
+            version: 2,
             merge: (persisted, current) => ({
                 ...current,
                 ...normalizePersistedState(persisted),

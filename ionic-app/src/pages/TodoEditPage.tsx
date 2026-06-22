@@ -14,9 +14,12 @@ import {
 import { arrowBackOutline, checkmarkDoneOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/todos/components/TodoItemEditorSheet.sections';
+import { RepeatSection } from '../features/todos/components/RepeatSection';
+import { Todo } from '../features/todos/types';
 import { useTodoStore } from '../features/todos/store/todoStore';
 import { getSubtaskProgress } from '../features/todos/components/TodoItem.utils';
 import '../features/todos/components/TodoItem.css';
+import '../features/todos/components/RepeatSection.css';
 import './TodoEditPage.css';
 
 const TodoEditPage: React.FC = () => {
@@ -30,13 +33,15 @@ const TodoEditPage: React.FC = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [newSubtaskText, setNewSubtaskText] = useState('');
+    const [recurrence, setRecurrence] = useState<Todo['recurrence']>(undefined);
 
     useEffect(() => {
         if (!todo) return;
         setTitle(todo.title);
         setDescription(todo.description || '');
+        setRecurrence(todo.recurrence || undefined);
         setNewSubtaskText('');
-    }, [todo, todo?.id, todo?.title, todo?.description]);
+    }, [todo, todo?.id, todo?.title, todo?.description, todo?.recurrence]);
 
     const goBack = useCallback(() => {
         history.goBack();
@@ -47,9 +52,10 @@ const TodoEditPage: React.FC = () => {
         updateTodo(todo.id, {
             title: title.trim() || todo.title,
             description: description.trim() || undefined,
+            recurrence: recurrence,
         });
         goBack();
-    }, [description, goBack, title, todo, updateTodo]);
+    }, [description, goBack, recurrence, title, todo, updateTodo]);
 
     const handleDelete = useCallback(() => {
         if (!todo) return;
@@ -146,6 +152,14 @@ const TodoEditPage: React.FC = () => {
                         onTitleChange={setTitle}
                         onDescriptionChange={setDescription}
                     />
+
+                    {todo.itemType === 'todo' && (
+                        <RepeatSection
+                            value={recurrence}
+                            dueDate={todo.dueDate}
+                            onChange={setRecurrence}
+                        />
+                    )}
 
                     <SubtasksSection
                         subtasks={todo.subtasks}

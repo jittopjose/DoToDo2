@@ -1,5 +1,14 @@
 export type TodoPriority = 'low' | 'medium' | 'high';
 
+export interface Recurrence {
+  frequency: 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
+  interval: number
+  dayOfMonth?: number
+  endType?: 'never' | 'after'
+  endCount?: number
+  originDate: number
+}
+
 export interface Todo {
     id: string;
     title: string;
@@ -13,6 +22,7 @@ export interface Todo {
     subtasks?: TodoSubtask[];
     dueDate?: number;
     priority?: TodoPriority;
+    recurrence?: Recurrence;
 }
 
 export interface TodoSubtask {

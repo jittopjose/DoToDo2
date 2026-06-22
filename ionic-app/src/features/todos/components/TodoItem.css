@@ -399,6 +399,11 @@
   --color: var(--dotodo-muted);
 }
 
+.task-chip--repeat {
+  --background: rgba(var(--dotodo-primary-rgb), 0.08);
+  --color: var(--dotodo-primary);
+}
+
 .task-progress-track {
   overflow: hidden;
   height: 3px;
