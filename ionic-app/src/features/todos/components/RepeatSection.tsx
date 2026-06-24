@@ -393,15 +393,6 @@ export const RepeatSection = memo(function RepeatSection({
         </div>
       )}
 
-      {value && value.endType === 'until' && value.endDate && (
-        <div className="repeat-end-preview">
-          <IonIcon icon={calendarOutline} />
-          <IonText color="medium">
-            Repeats until {formatDate(value.endDate)}
-          </IonText>
-        </div>
-      )}
-
       {value && (
         <IonButton
           fill="clear"
