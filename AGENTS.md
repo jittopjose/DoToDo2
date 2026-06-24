@@ -53,6 +53,12 @@ clickable desktop   # from root dir
 - `manifest.json.in` uses CMake-configured `@CLICK_ARCH@` / `@CLICK_FRAMEWORK@`.
 - `dotodo2.apparmor` is the AppArmor profile for the Click package.
 
+## UI conventions
+
+- **Prefer Ionic components over custom CSS.** Use `IonButton`, `IonToggle`, `IonPopover`, `IonDatetime`, `IonModal`, `IonChip`, etc. instead of styling raw elements with CSS. Custom CSS should be a last resort for layout tweaks that Ionic doesn't provide a prop for.
+- **Follow the patterns in `TodoItem.tsx`** — it's the most mature component and sets the precedent for how to use Ionic (e.g., `IonPopover` + `IonDatetime` for calendar picking).
+- **Ionic CSS variables** (e.g., `--dotodo-primary`, `--dotodo-muted`, `--dotodo-surface-strong`) are available for minor color/spacing adjustments when needed.
+
 ## Existing agent instructions
 
 - `.kilo/CONTEXT.md` — maintained project context (nvm, ionic dir, useful commands)
