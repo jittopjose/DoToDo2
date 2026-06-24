@@ -4,6 +4,7 @@ export interface Recurrence {
   frequency: 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
   interval: number
   dayOfMonth?: number
+  weekdays?: number[]
   endType?: 'never' | 'after'
   endCount?: number
   originDate: number
