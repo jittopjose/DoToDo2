@@ -110,8 +110,10 @@ export function formatRecurrenceSummary(r: Recurrence): string {
     }
   }
 
-  if (r.endType === 'after' && r.endCount !== undefined && r.endCount > 0) {
-    label += ` · ${r.endCount} left`;
+  if (r.endType === 'until' && r.endDate !== undefined) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = new Date(r.endDate);
+    label += ` · until ${months[d.getMonth()]} ${d.getDate()}`;
   }
 
   return label;

@@ -194,9 +194,9 @@ export const useTodoStore = create<TodoState>()(
                 if (!todo.isCompleted && todo.recurrence) {
                     const nextDue = getNextDueDate(todo);
                     if (nextDue) {
-                        const isLast = todo.recurrence.endType === 'after' &&
-                                       todo.recurrence.endCount !== undefined &&
-                                       todo.recurrence.endCount <= 1;
+                        const isPastEnd = todo.recurrence.endType === 'until' &&
+                                          todo.recurrence.endDate !== undefined &&
+                                          nextDue > todo.recurrence.endDate;
 
                         const clone: Todo = {
                             ...todo,
@@ -205,12 +205,7 @@ export const useTodoStore = create<TodoState>()(
                             createdAt: Date.now(),
                             dueDate: nextDue,
                             subtasks: todo.subtasks?.map(s => ({ ...s, isCompleted: false })),
-                            recurrence: isLast ? undefined : {
-                                ...todo.recurrence,
-                                ...(todo.recurrence.endType === 'after' && todo.recurrence.endCount !== undefined
-                                    ? { endCount: todo.recurrence.endCount - 1 }
-                                    : {}),
-                            },
+                            recurrence: isPastEnd ? undefined : { ...todo.recurrence },
                         };
 
                         return {

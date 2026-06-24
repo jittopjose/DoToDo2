@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { IonButton, IonChip, IonIcon, IonInput, IonLabel, IonSelect, IonSelectOption, IonSegment, IonSegmentButton, IonText } from '@ionic/react';
+import { IonButton, IonChip, IonIcon, IonLabel, IonPopover, IonSelect, IonSelectOption, IonText, IonToggle, IonDatetime } from '@ionic/react';
 import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline } from 'ionicons/icons';
 import { Recurrence } from '../types';
 import { formatRecurrenceSummary } from '../utils/recurrence';
@@ -43,6 +43,15 @@ export const RepeatSection = memo(function RepeatSection({
   const [customMode, setCustomMode] = useState(false);
   const [customUnit, setCustomUnit] = useState<Recurrence['frequency']>('weekly');
   const [customInterval, setCustomInterval] = useState(2);
+  const [isEndCalendarOpen, setIsEndCalendarOpen] = useState(false);
+
+  const openEndCalendar = useCallback(() => {
+    setIsEndCalendarOpen(true);
+  }, []);
+
+  const handleEndCalendarDismiss = useCallback(() => {
+    setIsEndCalendarOpen(false);
+  }, []);
 
   const isCustomActive = customMode && value != null;
 
@@ -61,7 +70,7 @@ export const RepeatSection = memo(function RepeatSection({
         interval: 1,
         weekdays: [defaultDay],
         endType: value?.endType ?? 'never',
-        endCount: value?.endType === 'after' ? value.endCount : undefined,
+        endDate: value?.endType === 'until' ? value.endDate : undefined,
         originDate: dueDate ?? Date.now(),
       });
       return;
@@ -72,7 +81,7 @@ export const RepeatSection = memo(function RepeatSection({
       interval: 1,
       dayOfMonth: freq === 'monthly' && dueDate ? new Date(dueDate).getDate() : undefined,
       endType: value?.endType ?? 'never',
-      endCount: value?.endType === 'after' ? value.endCount : undefined,
+      endDate: value?.endType === 'until' ? value.endDate : undefined,
       originDate: dueDate ?? Date.now(),
     });
   }, [value, dueDate, onChange, customMode]);
@@ -89,7 +98,7 @@ export const RepeatSection = memo(function RepeatSection({
       interval: customInterval,
       dayOfMonth: customUnit === 'monthly' && dueDate ? new Date(dueDate).getDate() : undefined,
       endType: value?.endType ?? 'never',
-      endCount: value?.endType === 'after' ? value.endCount : undefined,
+      endDate: value?.endType === 'until' ? value.endDate : undefined,
       originDate: dueDate ?? Date.now(),
     });
   }, [isCustomActive, customUnit, customInterval, dueDate, value, onChange]);
@@ -124,22 +133,55 @@ export const RepeatSection = memo(function RepeatSection({
     }
   }, [customInterval, isCustomActive, value, onChange]);
 
-  const handleEndChange = useCallback((endType: 'never' | 'after') => {
+  function getDefaultEndDate(): number {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    return d.getTime();
+  }
+
+  function formatDate(ts: number): string {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = new Date(ts);
+    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+  const handleToggleChange = useCallback((e: CustomEvent) => {
     if (!value) return;
+    const isOn = e.detail.checked;
     onChange({
       ...value,
-      endType,
-      endCount: endType === 'after' ? (value.endCount ?? 10) : undefined,
+      endType: isOn ? 'until' : 'never',
+      endDate: isOn ? (value.endDate ?? getDefaultEndDate()) : undefined,
     });
   }, [value, onChange]);
 
-  const handleEndCountChange = useCallback((e: CustomEvent) => {
+  const handleEndDateChange = useCallback((e: CustomEvent) => {
     if (!value) return;
-    const count = parseInt(e.detail.value ?? '', 10);
-    if (Number.isFinite(count) && count >= 1) {
-      onChange({ ...value, endCount: count });
+    const isoStr = e.detail.value as string | undefined;
+    if (!isoStr) {
+      setIsEndCalendarOpen(false);
+      return;
     }
+    const datePart = isoStr.split('T')[0];
+    const [y, m, d] = datePart.split('-').map(Number);
+    const timestamp = new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
+    if (Number.isFinite(timestamp)) {
+      onChange({ ...value, endDate: timestamp });
+    }
+    setIsEndCalendarOpen(false);
   }, [value, onChange]);
+
+  const todayIsoString = new Date().toISOString().split('T')[0];
+
+  function getEndDateValue(ts?: number): string {
+    const d = ts ? new Date(ts) : new Date();
+    if (!ts) d.setMonth(d.getMonth() + 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
 
   const handleRemove = useCallback(() => {
     setCustomMode(false);
@@ -314,27 +356,32 @@ export const RepeatSection = memo(function RepeatSection({
 
       {value && (
         <div className="repeat-end-section">
-          <IonLabel color="medium" className="ion-padding-bottom ion-display-block">Ends</IonLabel>
-          <IonSegment
-            value={value.endType === 'after' ? 'after' : 'never'}
-            onIonChange={(e) => handleEndChange(e.detail.value as 'never' | 'after')}
-          >
-            <IonSegmentButton value="never">
-              <IonLabel>Forever</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="after">
-              <IonLabel>After</IonLabel>
-            </IonSegmentButton>
-          </IonSegment>
-          {value.endType === 'after' && (
-            <IonInput
-              className="repeat-count-input"
-              type="number"
-              min={1}
-              value={value.endCount ?? 10}
-              onIonInput={handleEndCountChange}
-              placeholder="Count"
+          <div className="repeat-end-toggle-row">
+            <IonLabel>Repeat until date</IonLabel>
+            <IonToggle
+              checked={value.endType === 'until'}
+              onIonChange={handleToggleChange}
             />
+          </div>
+          {value.endType === 'until' && (
+            <div className="repeat-end-date-row">
+              <IonButton fill="clear" size="small" onClick={openEndCalendar}>
+                Ends {formatDate(value.endDate!)}
+              </IonButton>
+              <IonPopover
+                isOpen={isEndCalendarOpen}
+                onDidDismiss={handleEndCalendarDismiss}
+              >
+                {isEndCalendarOpen && (
+                  <IonDatetime
+                    presentation="date"
+                    value={getEndDateValue(value.endDate)}
+                    onIonChange={handleEndDateChange}
+                    min={todayIsoString}
+                  />
+                )}
+              </IonPopover>
+            </div>
           )}
         </div>
       )}
@@ -343,6 +390,15 @@ export const RepeatSection = memo(function RepeatSection({
         <div className="repeat-preview">
           <IonIcon icon={calendarOutline} />
           <IonText color="medium">Next: {formatPreview(nextOccurrence)}</IonText>
+        </div>
+      )}
+
+      {value && value.endType === 'until' && value.endDate && (
+        <div className="repeat-end-preview">
+          <IonIcon icon={calendarOutline} />
+          <IonText color="medium">
+            Repeats until {formatDate(value.endDate)}
+          </IonText>
         </div>
       )}
 

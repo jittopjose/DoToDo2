@@ -5,8 +5,8 @@ export interface Recurrence {
   interval: number
   dayOfMonth?: number
   weekdays?: number[]
-  endType?: 'never' | 'after'
-  endCount?: number
+  endType: 'never' | 'until'
+  endDate?: number
   originDate: number
 }
 
