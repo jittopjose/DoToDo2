@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { IonIcon, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonButton, IonChip, IonIcon, IonInput, IonLabel, IonSelect, IonSelectOption, IonSegment, IonSegmentButton, IonText } from '@ionic/react';
 import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline } from 'ionicons/icons';
 import { Recurrence } from '../types';
 import { formatRecurrenceSummary } from '../utils/recurrence';
@@ -222,29 +222,33 @@ export const RepeatSection = memo(function RepeatSection({
         </h2>
         {value && (
           <div className="edit-section-meta">
-            <span className="repeat-summary-chip">
+            <IonChip color="primary" outline className="repeat-summary-chip">
               {formatRecurrenceSummary(value)}
-            </span>
+            </IonChip>
           </div>
         )}
       </div>
 
       <div className="repeat-frequency-grid">
         {FREQUENCIES.map((f) => (
-          <button
+          <IonChip
             key={f.value}
-            className={`repeat-chip ${value?.frequency === f.value && !customMode ? 'repeat-chip--active' : ''}`}
+            className={`repeat-chip${value?.frequency === f.value && !customMode ? ' is-active' : ''}`}
+            outline={!(value?.frequency === f.value && !customMode)}
+            color={value?.frequency === f.value && !customMode ? 'primary' : undefined}
             onClick={() => handleFrequencyClick(f.value)}
           >
             {f.label}
-          </button>
+          </IonChip>
         ))}
-        <button
-          className={`repeat-chip ${customMode ? 'repeat-chip--active' : ''}`}
+        <IonChip
+          className={`repeat-chip${customMode ? ' is-active' : ''}`}
+          outline={!customMode}
+          color={customMode ? 'primary' : undefined}
           onClick={handleCustomClick}
         >
           Custom
-        </button>
+        </IonChip>
       </div>
 
       {value?.frequency === 'weekly' && !customMode && (
@@ -252,14 +256,16 @@ export const RepeatSection = memo(function RepeatSection({
           {WEEKDAY_LABELS.map((label, i) => {
             const selected = value.weekdays?.includes(i) ?? false;
             return (
-              <button
+              <IonChip
                 key={i}
-                className={`repeat-weekday ${selected ? 'repeat-weekday--selected' : ''}`}
+                className={`repeat-weekday${selected ? ' is-active' : ''}`}
+                outline={!selected}
+                color={selected ? 'primary' : undefined}
                 onClick={() => handleWeekdayToggle(i)}
                 aria-label={WEEKDAY_FULL[i]}
               >
                 {label}
-              </button>
+              </IonChip>
             );
           })}
         </div>
@@ -268,25 +274,27 @@ export const RepeatSection = memo(function RepeatSection({
       {isCustomActive && (
         <div className="repeat-custom-panel">
           <div className="repeat-custom-row">
-            <span className="repeat-custom-label">Every</span>
+            <IonLabel color="medium">Every</IonLabel>
             <div className="repeat-interval-stepper">
-              <button
-                className="repeat-stepper-btn"
+              <IonButton
+                fill="clear"
+                size="small"
                 onClick={() => handleIntervalChange(-1)}
                 disabled={customInterval <= 1}
                 aria-label="Decrease interval"
               >
-                <IonIcon icon={removeOutline} />
-              </button>
+                <IonIcon icon={removeOutline} slot="icon-only" />
+              </IonButton>
               <span className="repeat-interval-value">{customInterval}</span>
-              <button
-                className="repeat-stepper-btn"
+              <IonButton
+                fill="clear"
+                size="small"
                 onClick={() => handleIntervalChange(1)}
                 disabled={customInterval >= MAX_INTERVAL}
                 aria-label="Increase interval"
               >
-                <IonIcon icon={addOutline} />
-              </button>
+                <IonIcon icon={addOutline} slot="icon-only" />
+              </IonButton>
             </div>
             <div className="repeat-custom-unit">
               <IonSelect
@@ -306,50 +314,48 @@ export const RepeatSection = memo(function RepeatSection({
 
       {value && (
         <div className="repeat-end-section">
-          <label className="edit-label">Ends</label>
-          <div className="repeat-end-options">
-            <button
-              className={`repeat-chip ${value.endType !== 'after' ? 'repeat-chip--active' : ''}`}
-              onClick={() => handleEndChange('never')}
-            >
-              Forever
-            </button>
-            <button
-              className={`repeat-chip ${value.endType === 'after' ? 'repeat-chip--active' : ''}`}
-              onClick={() => handleEndChange('after')}
-            >
-              After
-            </button>
-            {value.endType === 'after' && (
-              <IonInput
-                className="repeat-count-input"
-                type="number"
-                min={1}
-                value={value.endCount ?? 10}
-                onIonInput={handleEndCountChange}
-                placeholder="Count"
-              />
-            )}
-          </div>
+          <IonLabel color="medium" className="ion-padding-bottom ion-display-block">Ends</IonLabel>
+          <IonSegment
+            value={value.endType === 'after' ? 'after' : 'never'}
+            onIonChange={(e) => handleEndChange(e.detail.value as 'never' | 'after')}
+          >
+            <IonSegmentButton value="never">
+              <IonLabel>Forever</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="after">
+              <IonLabel>After</IonLabel>
+            </IonSegmentButton>
+          </IonSegment>
+          {value.endType === 'after' && (
+            <IonInput
+              className="repeat-count-input"
+              type="number"
+              min={1}
+              value={value.endCount ?? 10}
+              onIonInput={handleEndCountChange}
+              placeholder="Count"
+            />
+          )}
         </div>
       )}
 
       {value && nextOccurrence && (
         <div className="repeat-preview">
           <IonIcon icon={calendarOutline} />
-          <span>Next: {formatPreview(nextOccurrence)}</span>
+          <IonText color="medium">Next: {formatPreview(nextOccurrence)}</IonText>
         </div>
       )}
 
       {value && (
-        <button
-          className="repeat-remove-button"
-          type="button"
+        <IonButton
+          fill="clear"
+          color="danger"
+          size="small"
           onClick={handleRemove}
         >
-          <IonIcon icon={closeOutline} />
+          <IonIcon icon={closeOutline} slot="start" />
           Remove repeat
-        </button>
+        </IonButton>
       )}
     </section>
   );

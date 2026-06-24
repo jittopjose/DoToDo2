@@ -3,10 +3,12 @@ import {
     IonBackButton,
     IonButton,
     IonButtons,
+    IonChip,
     IonContent,
     IonGrid,
     IonHeader,
     IonIcon,
+    IonLabel,
     IonPage,
     IonTitle,
     IonToolbar,
@@ -141,10 +143,10 @@ const TodoEditPage: React.FC = () => {
 
             <IonContent className="todo-edit-content">
                 <IonGrid className="todo-edit-grid">
-                    <div className="todo-edit-summary">
+                    <IonChip color="medium" className="todo-edit-summary">
                         <span className={`todo-edit-summary-dot todo-edit-summary-dot--${todo.itemType}`} />
-                        <span>{todo.isCompleted ? 'Completed task' : 'Active task'}</span>
-                    </div>
+                        <IonLabel>{todo.isCompleted ? 'Completed task' : 'Active task'}</IonLabel>
+                    </IonChip>
 
                     <EditorDetailsSection
                         title={title}

@@ -1,8 +1,13 @@
-import { memo, type KeyboardEvent } from 'react';
+import { memo, useCallback, type KeyboardEvent } from 'react';
 import {
+    IonBadge,
     IonButton,
     IonIcon,
     IonInput,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonProgressBar,
     IonTextarea,
 } from '@ionic/react';
 import {
@@ -18,26 +23,42 @@ interface EditorDetailsProps {
     onDescriptionChange: (value: string) => void;
 }
 
+const setNativeCaretColor = (el: HTMLIonInputElement | HTMLIonTextareaElement | null) => {
+    if (!el) return;
+    const timer = setInterval(async () => {
+        const native = await el.getInputElement();
+        if (native) {
+            native.style.caretColor = 'var(--dotodo-primary)';
+            clearInterval(timer);
+        }
+    }, 50);
+};
+
 export const EditorDetailsSection = memo(function EditorDetailsSection({
     title,
     description,
     onTitleChange,
     onDescriptionChange,
 }: EditorDetailsProps) {
+    const titleRef = useCallback((el: HTMLIonInputElement | null) => setNativeCaretColor(el), []);
+    const descRef = useCallback((el: HTMLIonTextareaElement | null) => setNativeCaretColor(el), []);
+
     return (
-        <div className="edit-fields">
-            <div className="edit-field">
-                <label className="edit-label">Title</label>
+        <IonList lines="none" className="edit-fields">
+            <IonItem lines="none" className="edit-field">
+                <IonLabel position="stacked">Title</IonLabel>
                 <IonInput
+                    ref={titleRef}
                     className="edit-title-input"
                     value={title}
                     onIonInput={(event) => onTitleChange(event.detail.value ?? '')}
                     placeholder="Task title"
                 />
-            </div>
-            <div className="edit-field">
-                <label className="edit-label">Description</label>
+            </IonItem>
+            <IonItem lines="none" className="edit-field">
+                <IonLabel position="stacked">Description</IonLabel>
                 <IonTextarea
+                    ref={descRef}
                     className="edit-description-input"
                     value={description}
                     onIonInput={(event) => onDescriptionChange(event.detail.value ?? '')}
@@ -45,8 +66,8 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
                     rows={1}
                     autoGrow
                 />
-            </div>
-        </div>
+            </IonItem>
+        </IonList>
     );
 });
 
@@ -88,43 +109,40 @@ export const SubtasksSection = memo(function SubtasksSection({
                     className="edit-section-meta"
                     aria-label={progress.total > 0 ? `${progress.completed} of ${progress.total} subtasks completed` : 'No subtasks'}
                 >
-                    <span className="edit-progress-pill">{progressLabel}</span>
+                    <IonBadge color="medium" className="edit-progress-pill">{progressLabel}</IonBadge>
                     {progress.total > 0 && (
-                        <div
-                            className="edit-progress-track"
-                            role="progressbar"
-                            aria-valuenow={progress.percent}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
+                        <IonProgressBar
+                            value={progress.percent / 100}
+                            color="primary"
+                            className="edit-progress-bar"
                             aria-label={`${progress.percent}% complete`}
-                        >
-                            <div className="edit-progress-fill" style={{ width: `${progress.percent}%` }} />
-                        </div>
+                        />
                     )}
                 </div>
             </div>
 
             {hasSubtasks ? (
-                <div className="subtask-editor-list" role="list" aria-label="Subtasks">
+                <IonList lines="none" className="subtask-editor-list" aria-label="Subtasks">
                     {subtaskList.map((subtask) => (
-                        <div key={subtask.id} className="subtask-list-item" role="listitem">
-                            <button
-                                type="button"
-                                className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                                onClick={() => onToggleSubtask(subtask.id)}
-                                aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
-                                aria-pressed={subtask.isCompleted}
-                            >
-                                <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`} aria-hidden="true">
-                                    {subtask.isCompleted && (
-                                        <IonIcon icon={checkmarkDoneOutline} />
-                                    )}
-                                </div>
-                                <span className="subtask-text">{subtask.title}</span>
-                            </button>
-                        </div>
+                        <IonItem
+                            key={subtask.id}
+                            button
+                            detail={false}
+                            lines="none"
+                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
+                            onClick={() => onToggleSubtask(subtask.id)}
+                            aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
+                            aria-pressed={subtask.isCompleted}
+                        >
+                            <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`} slot="start" aria-hidden="true">
+                                {subtask.isCompleted && (
+                                    <IonIcon icon={checkmarkDoneOutline} />
+                                )}
+                            </div>
+                            <IonLabel className="subtask-text">{subtask.title}</IonLabel>
+                        </IonItem>
                     ))}
-                </div>
+                </IonList>
             ) : (
                 <div className="subtask-empty-state" role="status">
                     <div className="subtask-empty-icon" aria-hidden="true">

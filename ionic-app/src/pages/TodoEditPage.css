@@ -1,9 +1,9 @@
 .todo-edit-page {
-  --background: var(--dotodo-card);
+  --background: var(--dotodo-bg);
 }
 
 .todo-edit-header {
-  --background: var(--dotodo-card);
+  --background: var(--dotodo-bg);
   --border-color: var(--dotodo-card-border);
   border-bottom: 1px solid var(--dotodo-card-border);
 }
@@ -17,7 +17,7 @@
 }
 
 .todo-edit-content {
-  --background: var(--dotodo-card);
+  --background: var(--dotodo-bg);
   --padding-top: 0;
   --padding-bottom: 0;
   --padding-start: 0;
@@ -32,14 +32,8 @@
 }
 
 .todo-edit-summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 18px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: var(--dotodo-surface-strong);
-  color: var(--dotodo-muted);
+  --color: var(--dotodo-muted);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;

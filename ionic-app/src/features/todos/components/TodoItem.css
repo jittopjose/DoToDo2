@@ -549,37 +549,54 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
+  --background: transparent;
+  background: transparent;
+  padding: 0;
 }
 
 .edit-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  background: rgba(var(--dotodo-primary-rgb), 0.025);
-  border-radius: 14px;
-  border: 1px solid rgba(var(--dotodo-primary-rgb), 0.08);
-  transition: background 0.1s ease, border-color 0.1s ease;
-  touch-action: manipulation;
+  --background: var(--dotodo-card);
+  --background-hover: var(--dotodo-card);
+  --border-radius: 14px;
+  --border-color: var(--dotodo-card-border);
+  --border-style: solid;
+  --border-width: 1px;
+  --min-height: 0;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --inner-padding-top: 0;
+  --inner-padding-bottom: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  transition: border-color 0.15s ease;
 }
 
-.edit-field:focus-within {
-  background: rgba(var(--dotodo-primary-rgb), 0.03);
-  border-color: rgba(var(--dotodo-primary-rgb), 0.18);
-}
-
-.edit-label {
+.edit-field ion-label[slot="stacked"] {
   color: var(--dotodo-muted);
   font-size: 12px;
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  margin-bottom: 4px;
   padding-left: 2px;
-  transition: color 0.1s ease;
+  transition: color 0.15s ease;
 }
 
-.edit-field:focus-within .edit-label {
+.edit-field:focus-within {
+  --background: var(--dotodo-primary-soft);
+  border-color: var(--dotodo-primary);
+}
+
+.edit-field:focus-within ion-label[slot="stacked"] {
   color: var(--dotodo-primary);
+}
+
+.edit-field ion-input,
+.edit-field ion-textarea {
+  --padding-start: 0;
+  --padding-end: 0;
 }
 
 .edit-title-input {
@@ -593,7 +610,7 @@
   letter-spacing: -0.02em;
   border-bottom: 1px solid var(--dotodo-card-border);
   --border-radius: 0;
-  --highlight-color-focused: var(--dotodo-primary);
+  --highlight-color-focused: transparent;
   margin-bottom: 4px;
   transition: border-color 0.1s ease;
 }
@@ -616,7 +633,7 @@
   color: var(--dotodo-text);
   line-height: 1.5;
   --border-radius: 0;
-  --highlight-color-focused: var(--dotodo-primary);
+  --highlight-color-focused: transparent;
 }
 
 .edit-description-input::part(placeholder) {
@@ -657,8 +674,11 @@
   color: var(--dotodo-success);
 }
 
-.edit-section--subtasks .edit-progress-fill {
-  background: var(--dotodo-success);
+.edit-section--subtasks ion-progress-bar {
+  --background: var(--dotodo-card-border);
+  height: 3px;
+  border-radius: 999px;
+  width: 56px;
 }
 
 .edit-section-meta {
@@ -669,67 +689,40 @@
 }
 
 .edit-progress-pill {
-  color: var(--dotodo-muted);
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.01em;
-}
-
-.edit-progress-track {
-  width: 56px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--dotodo-card-border);
-  overflow: hidden;
-}
-
-.edit-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--dotodo-primary);
-  transition: width 0.3s var(--dotodo-motion-soft);
 }
 
 .subtask-editor-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  --background: transparent;
 }
 
-.subtask-list-item {
-  width: 100%;
-}
-
-.subtask-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--dotodo-surface-strong);
-  border: 1px solid var(--dotodo-card-border);
-  border-radius: 12px;
-  color: inherit;
-  font: inherit;
-  text-align: left;
+.subtask-editor-list ion-item {
+  --background: var(--dotodo-surface-strong);
+  --border-radius: 12px;
+  --border-color: var(--dotodo-card-border);
+  --border-style: solid;
+  --border-width: 1px;
+  --min-height: 0;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --padding-start: 14px;
+  --padding-end: 14px;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.2s var(--dotodo-motion-soft), transform 0.15s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
   transform: scale(1);
+  transition: opacity 0.2s var(--dotodo-motion-soft), transform 0.15s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
 }
 
-.subtask-row:active {
+.subtask-editor-list ion-item:active {
   transform: scale(0.97);
   opacity: 0.8;
 }
 
-.subtask-row:focus-visible {
-  outline: none;
-  border-color: rgba(var(--dotodo-primary-rgb), 0.42);
-  box-shadow: 0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.14);
-}
-
-.subtask-row.is-completed .subtask-text {
+.subtask-editor-list ion-item.is-completed .subtask-text {
   color: var(--dotodo-muted);
   text-decoration: line-through;
 }
@@ -796,15 +789,10 @@
 }
 
 .subtask-text {
-  flex: 1;
-  min-width: 0;
-  color: var(--dotodo-text);
+  --color: var(--dotodo-text);
   font-size: 15px;
   font-weight: 650;
   line-height: 1.35;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .subtask-add-row {
