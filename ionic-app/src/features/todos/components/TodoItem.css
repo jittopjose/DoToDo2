@@ -699,10 +699,12 @@
   flex-direction: column;
   gap: 6px;
   --background: transparent;
+  background: none;
 }
 
 .subtask-editor-list ion-item {
-  --background: var(--dotodo-surface-strong);
+  --background: transparent;
+  background: none;
   --border-radius: 12px;
   --border-color: var(--dotodo-card-border);
   --border-style: solid;
@@ -714,13 +716,9 @@
   --padding-end: 14px;
   cursor: pointer;
   transform: scale(1);
-  transition: opacity 0.2s var(--dotodo-motion-soft), transform 0.15s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
+  transition: opacity 0.2s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
 }
 
-.subtask-editor-list ion-item:active {
-  transform: scale(0.97);
-  opacity: 0.8;
-}
 
 .subtask-editor-list ion-item.is-completed .subtask-text {
   color: var(--dotodo-muted);
@@ -795,6 +793,54 @@
   line-height: 1.35;
 }
 
+.subtask-row.is-editing {
+  border-color: var(--dotodo-primary);
+  --background: var(--dotodo-primary-soft);
+}
+
+.subtask-edit-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: transparent;
+  --border-radius: 0;
+  --highlight-color-focused: transparent;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--dotodo-text);
+  caret-color: var(--dotodo-primary);
+  min-height: 0;
+}
+
+.subtask-edit-input::part(placeholder) {
+  color: var(--dotodo-muted);
+  opacity: 0.7;
+}
+
+.subtask-delete-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.subtask-delete-button:active {
+  opacity: 1;
+}
+
+.subtask-row:hover .subtask-delete-button,
+.subtask-row:focus-within .subtask-delete-button {
+  opacity: 0.7;
+}
+
 .subtask-add-row {
   display: flex;
   align-items: center;
@@ -808,7 +854,8 @@
   --padding-end: 12px;
   --padding-top: 10px;
   --padding-bottom: 10px;
-  --background: var(--dotodo-surface-strong);
+  --background: transparent;
+  background: none;
   --border-radius: 11px;
   --highlight-color-focused: var(--dotodo-primary);
   font-size: 14px;

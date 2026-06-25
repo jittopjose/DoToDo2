@@ -29,6 +29,8 @@ const TodoEditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const todo = useTodoStore((state) => state.todos.find((item) => item.id === id));
     const addSubtask = useTodoStore((state) => state.addSubtask);
+    const updateSubtask = useTodoStore((state) => state.updateSubtask);
+    const deleteSubtask = useTodoStore((state) => state.deleteSubtask);
     const deleteTodo = useTodoStore((state) => state.deleteTodo);
     const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
     const updateTodo = useTodoStore((state) => state.updateTodo);
@@ -84,6 +86,16 @@ const TodoEditPage: React.FC = () => {
         if (!todo) return;
         toggleSubtask(todo.id, subtaskId);
     }, [todo, toggleSubtask]);
+
+    const handleUpdateSubtask = useCallback((subtaskId: string, title: string) => {
+        if (!todo) return;
+        updateSubtask(todo.id, subtaskId, title);
+    }, [todo, updateSubtask]);
+
+    const handleDeleteSubtask = useCallback((subtaskId: string) => {
+        if (!todo) return;
+        deleteSubtask(todo.id, subtaskId);
+    }, [todo, deleteSubtask]);
 
     if (!todo || !id) {
         return (
@@ -166,6 +178,8 @@ const TodoEditPage: React.FC = () => {
                     <SubtasksSection
                         subtasks={todo.subtasks}
                         onToggleSubtask={handleToggleSubtask}
+                        onUpdateSubtask={handleUpdateSubtask}
+                        onDeleteSubtask={handleDeleteSubtask}
                         progress={subtaskProgress}
                     />
 

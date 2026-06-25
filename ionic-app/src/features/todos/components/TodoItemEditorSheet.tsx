@@ -20,6 +20,8 @@ interface EditorSheetProps {
     onDelete: () => void;
     onToggleSubtask: (todoId: string, subtaskId: string) => void;
     onAddSubtask: (todoId: string, title: string) => void;
+    onUpdateSubtask: (todoId: string, subtaskId: string, title: string) => void;
+    onDeleteSubtask: (todoId: string, subtaskId: string) => void;
     onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description'>>) => void;
 }
 
@@ -30,6 +32,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
     onDelete,
     onToggleSubtask,
     onAddSubtask,
+    onUpdateSubtask,
+    onDeleteSubtask,
     onUpdate,
 }) => {
     const [title, setTitle] = useState(todo.title);
@@ -74,6 +78,14 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
     const handleToggleSubtask = useCallback((subtaskId: string) => {
         onToggleSubtask(todo.id, subtaskId);
     }, [todo.id, onToggleSubtask]);
+
+    const handleUpdateSubtask = useCallback((subtaskId: string, title: string) => {
+        onUpdateSubtask(todo.id, subtaskId, title);
+    }, [todo.id, onUpdateSubtask]);
+
+    const handleDeleteSubtask = useCallback((subtaskId: string) => {
+        onDeleteSubtask(todo.id, subtaskId);
+    }, [todo.id, onDeleteSubtask]);
 
     return (
         <IonModal
@@ -123,6 +135,8 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                     <SubtasksSection
                         subtasks={todo.subtasks}
                         onToggleSubtask={handleToggleSubtask}
+                        onUpdateSubtask={handleUpdateSubtask}
+                        onDeleteSubtask={handleDeleteSubtask}
                         progress={getSubtaskProgress(todo)}
                     />
 
@@ -130,6 +144,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                         value={newSubtaskText}
                         onValueChange={setNewSubtaskText}
                         onSubmit={handleAddSubtask}
+                        onKeyPress={handleSubtaskKeyPress}
                         isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
                     />
                 </IonGrid>

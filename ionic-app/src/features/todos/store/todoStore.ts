@@ -106,6 +106,8 @@ interface TodoState {
     // Actions
     addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string, recurrence?: Recurrence) => void;
     addSubtask: (todoId: string, title: string) => void;
+    updateSubtask: (todoId: string, subtaskId: string, title: string) => void;
+    deleteSubtask: (todoId: string, subtaskId: string) => void;
     toggleTodo: (id: string) => void;
     toggleSubtask: (todoId: string, subtaskId: string) => void;
     deleteTodo: (id: string) => void;
@@ -248,6 +250,30 @@ export const useTodoStore = create<TodoState>()(
                         subtasks: [...(todo.subtasks || []), newSubtask]
                     };
                 })
+            })),
+
+            updateSubtask: (todoId, subtaskId, title) => set((state) => ({
+                todos: state.todos.map((todo) => {
+                    if (todo.id !== todoId) return todo;
+                    if (!todo.subtasks) return todo;
+                    return {
+                        ...todo,
+                        subtasks: todo.subtasks.map((subtask) =>
+                            subtask.id === subtaskId ? { ...subtask, title } : subtask
+                        )
+                    };
+                }),
+            })),
+
+            deleteSubtask: (todoId, subtaskId) => set((state) => ({
+                todos: state.todos.map((todo) => {
+                    if (todo.id !== todoId) return todo;
+                    if (!todo.subtasks) return todo;
+                    return {
+                        ...todo,
+                        subtasks: todo.subtasks.filter((subtask) => subtask.id !== subtaskId)
+                    };
+                }),
             })),
 
             deleteTodo: (id) => set((state) => ({

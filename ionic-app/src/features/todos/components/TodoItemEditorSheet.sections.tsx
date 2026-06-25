@@ -1,4 +1,4 @@
-import { memo, useCallback, type KeyboardEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import {
     IonBadge,
     IonButton,
@@ -14,7 +14,9 @@ import {
     addOutline,
     checkmarkDoneOutline,
     listOutline,
+    trashOutline,
 } from 'ionicons/icons';
+import { TodoSubtask } from '../types';
 
 interface EditorDetailsProps {
     title: string;
@@ -71,32 +73,72 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
     );
 });
 
-interface Subtask {
-    id: string;
-    title: string;
-    isCompleted: boolean;
-}
-
-interface SubtaskProgress {
-    completed: number;
-    total: number;
-    percent: number;
-}
-
 interface SubtasksSectionProps {
-    subtasks: Subtask[] | undefined;
+    subtasks: TodoSubtask[] | undefined;
     onToggleSubtask: (subtaskId: string) => void;
-    progress: SubtaskProgress;
+    onUpdateSubtask: (subtaskId: string, title: string) => void;
+    onDeleteSubtask: (subtaskId: string) => void;
+    progress: { completed: number; total: number; percent: number };
 }
 
 export const SubtasksSection = memo(function SubtasksSection({
     subtasks,
     onToggleSubtask,
+    onUpdateSubtask,
+    onDeleteSubtask,
     progress,
 }: SubtasksSectionProps) {
     const subtaskList = subtasks ?? [];
     const hasSubtasks = subtaskList.length > 0;
     const progressLabel = progress.total > 0 ? `${progress.completed}/${progress.total}` : '0/0';
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState('');
+    const editInputRef = useRef<HTMLIonInputElement | null>(null);
+
+    const startEditing = useCallback((subtask: TodoSubtask) => {
+        setEditingId(subtask.id);
+        setEditValue(subtask.title);
+    }, []);
+
+    useEffect(() => {
+        if (!editingId) return;
+        setNativeCaretColor(editInputRef.current);
+        requestAnimationFrame(() => {
+            editInputRef.current?.setFocus();
+        });
+    }, [editingId]);
+
+    const cancelEditing = useCallback(() => {
+        setEditingId(null);
+        setEditValue('');
+    }, []);
+
+    const commitEditing = useCallback(() => {
+        if (editingId && editValue.trim()) {
+            onUpdateSubtask(editingId, editValue.trim());
+        }
+        cancelEditing();
+    }, [editingId, editValue, onUpdateSubtask, cancelEditing]);
+
+    const handleEditKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            commitEditing();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            cancelEditing();
+        }
+    }, [commitEditing, cancelEditing]);
+
+    const handleLabelClick = useCallback((e: React.MouseEvent, subtask: TodoSubtask) => {
+        e.stopPropagation();
+        startEditing(subtask);
+    }, [startEditing]);
+
+    const handleDeleteClick = useCallback((e: React.MouseEvent, subtaskId: string) => {
+        e.stopPropagation();
+        onDeleteSubtask(subtaskId);
+    }, [onDeleteSubtask]);
 
     return (
         <section className="edit-section edit-section--subtasks" id="todo-editor-section-subtasks" aria-labelledby="todo-editor-section-subtasks-title">
@@ -129,8 +171,8 @@ export const SubtasksSection = memo(function SubtasksSection({
                             button
                             detail={false}
                             lines="none"
-                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''}`}
-                            onClick={() => onToggleSubtask(subtask.id)}
+                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''} ${editingId === subtask.id ? 'is-editing' : ''}`}
+                            onClick={editingId === subtask.id ? undefined : () => onToggleSubtask(subtask.id)}
                             aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
                             aria-pressed={subtask.isCompleted}
                         >
@@ -139,7 +181,31 @@ export const SubtasksSection = memo(function SubtasksSection({
                                     <IonIcon icon={checkmarkDoneOutline} />
                                 )}
                             </div>
-                            <IonLabel className="subtask-text">{subtask.title}</IonLabel>
+                            {editingId === subtask.id ? (
+                                <IonInput
+                                    ref={editInputRef}
+                                    className="subtask-edit-input"
+                                    value={editValue}
+                                    onIonInput={(e) => setEditValue(e.detail.value ?? '')}
+                                    onKeyDown={handleEditKeyDown}
+                                    onIonBlur={commitEditing}
+                                    aria-label="Edit subtask title"
+                                />
+                            ) : (
+                                <IonLabel className="subtask-text" onClick={(e) => handleLabelClick(e, subtask)}>
+                                    {subtask.title}
+                                </IonLabel>
+                            )}
+                            <IonButton
+                                slot="end"
+                                fill="clear"
+                                color="medium"
+                                className="subtask-delete-button"
+                                onClick={(e) => handleDeleteClick(e, subtask.id)}
+                                aria-label={`Delete "${subtask.title}"`}
+                            >
+                                <IonIcon icon={trashOutline} />
+                            </IonButton>
                         </IonItem>
                     ))}
                 </IonList>
