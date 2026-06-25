@@ -122,7 +122,7 @@ return (
             >
                     <IonGrid className="task-row-grid">
                         <IonRow className="task-row-main">
-                            <IonCol size="auto">
+                            <IonCol size="auto" className="task-checkbox-col">
                                 <IonCheckbox
                                     checked={todo.isCompleted}
                                     onIonChange={handleToggle}
@@ -226,7 +226,7 @@ return (
                                 </div>
 
                                 {subtaskProgress.total > 0 && (
-                                    <IonProgressBar value={subtaskProgress.percent / 100} aria-label={`${subtaskProgress.percent}% complete`} />
+                                    <IonProgressBar className="task-progress-bar" value={subtaskProgress.percent / 100} aria-label={`${subtaskProgress.percent}% complete`} />
                                 )}
                             </IonCol>
                         </IonRow>

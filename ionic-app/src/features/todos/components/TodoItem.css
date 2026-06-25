@@ -130,6 +130,13 @@
   padding: 0;
 }
 
+.task-checkbox-col {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
 .task-content-stack {
   min-width: 0;
 }
@@ -333,6 +340,10 @@
 .task-chip--repeat {
   --background: rgba(var(--dotodo-primary-rgb), 0.08);
   --color: var(--dotodo-primary);
+}
+
+.task-progress-bar {
+  margin-top: 8px;
 }
 
 .task-options {
