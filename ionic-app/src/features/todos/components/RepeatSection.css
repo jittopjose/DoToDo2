@@ -31,10 +31,15 @@
 
 .repeat-weekday {
   --border-radius: 50% !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
   width: 36px !important;
   height: 36px !important;
   font-size: 12px !important;
   font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .repeat-weekday.is-active {
