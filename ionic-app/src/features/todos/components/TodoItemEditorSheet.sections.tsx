@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useRef, useState, type KeyboardEvent } fr
 import {
     IonBadge,
     IonButton,
+    IonCheckbox,
     IonIcon,
     IonInput,
     IonItem,
@@ -12,7 +13,6 @@ import {
 } from '@ionic/react';
 import {
     addOutline,
-    checkmarkDoneOutline,
     listOutline,
     trashOutline,
 } from 'ionicons/icons';
@@ -176,11 +176,7 @@ export const SubtasksSection = memo(function SubtasksSection({
                             aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
                             aria-pressed={subtask.isCompleted}
                         >
-                            <div className={`subtask-check ${subtask.isCompleted ? 'is-checked' : ''}`} slot="start" aria-hidden="true">
-                                {subtask.isCompleted && (
-                                    <IonIcon icon={checkmarkDoneOutline} />
-                                )}
-                            </div>
+                            <IonCheckbox slot="start" checked={subtask.isCompleted} aria-hidden="true" />
                             {editingId === subtask.id ? (
                                 <IonInput
                                     ref={editInputRef}

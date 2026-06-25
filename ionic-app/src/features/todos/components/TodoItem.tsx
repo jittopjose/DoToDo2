@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
+    IonCheckbox,
     IonChip,
     IonCol,
     IonDatetime,
@@ -8,6 +9,7 @@ import {
     IonItem,
     IonNote,
     IonPopover,
+    IonProgressBar,
     IonRow,
 } from '@ionic/react';
 import {
@@ -120,32 +122,13 @@ return (
             >
                     <IonGrid className="task-row-grid">
                         <IonRow className="task-row-main">
-                            <IonCol size="auto" className="task-checkbox-col">
-                                <div
-                                    className="custom-checkbox"
-                                    role="checkbox"
-                                    aria-checked={todo.isCompleted}
+                            <IonCol size="auto">
+                                <IonCheckbox
+                                    checked={todo.isCompleted}
+                                    onIonChange={handleToggle}
+                                    onClick={(e) => e.stopPropagation()}
                                     aria-label={`Mark "${todo.title}" as ${todo.isCompleted ? 'incomplete' : 'complete'}`}
-                                    tabIndex={0}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleToggle();
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleToggle();
-                                        }
-                                    }}
-                                >
-                                    {todo.isCompleted && (
-                                        <IonIcon
-                                            className="custom-checkbox__tick"
-                                            icon={checkmarkDoneOutline}
-                                        />
-                                    )}
-                                </div>
+                                />
                             </IonCol>
                             <IonCol className="task-content-stack">
                                 <IonGrid className="task-main-grid">
@@ -243,9 +226,7 @@ return (
                                 </div>
 
                                 {subtaskProgress.total > 0 && (
-                                    <div className="task-progress-track" aria-label={`${subtaskProgress.percent}% complete`}>
-                                        <div className="task-progress-fill" style={{ width: `${subtaskProgress.percent}%` }} />
-                                    </div>
+                                    <IonProgressBar value={subtaskProgress.percent / 100} aria-label={`${subtaskProgress.percent}% complete`} />
                                 )}
                             </IonCol>
                         </IonRow>
