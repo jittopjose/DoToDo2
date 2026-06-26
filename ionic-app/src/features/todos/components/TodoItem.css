@@ -497,105 +497,85 @@
   --background-hover: rgba(var(--dotodo-danger-rgb), 0.12);
 }
 
-.edit-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-  --background: transparent;
-  background: transparent;
-  padding: 0;
+.edit-details-card {
+  background: var(--dotodo-surface-strong);
+  padding: var(--dotodo-card-padding);
+  border-radius: var(--dotodo-radius-lg);
+  border: 1px solid var(--dotodo-card-border);
+  box-shadow: 0 4px 20px rgba(31, 41, 55, 0.04);
+  margin-bottom: var(--dotodo-section-gap);
+}
+
+.edit-details-divider {
+  height: 1px;
+  background: var(--dotodo-card-border);
+  margin: 8px 0;
 }
 
 .edit-field {
-  --background: var(--dotodo-card);
-  --background-hover: var(--dotodo-card);
-  --border-radius: 14px;
-  --border-color: var(--dotodo-card-border);
-  --border-style: solid;
-  --border-width: 1px;
-  --min-height: 0;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  --padding-start: 14px;
-  --padding-end: 14px;
-  --inner-padding-top: 0;
-  --inner-padding-bottom: 0;
-  --inner-padding-start: 0;
-  --inner-padding-end: 0;
-  transition: border-color 0.15s ease;
+  padding: 0;
 }
 
-.edit-field ion-label[slot="stacked"] {
+.edit-field-label {
+  display: block;
   color: var(--dotodo-muted);
   font-size: 12px;
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 4px;
-  padding-left: 2px;
-  transition: color 0.15s ease;
-}
-
-.edit-field:focus-within {
-  --background: var(--dotodo-primary-soft);
-  border-color: var(--dotodo-primary);
-}
-
-.edit-field:focus-within ion-label[slot="stacked"] {
-  color: var(--dotodo-primary);
-}
-
-.edit-field ion-input,
-.edit-field ion-textarea {
-  --padding-start: 0;
-  --padding-end: 0;
+  line-height: 1.3;
 }
 
 .edit-title-input {
   --padding-start: 0;
   --padding-end: 0;
-  --padding-top: 10px;
-  --padding-bottom: 10px;
+  --padding-top: 0;
+  --padding-bottom: 0;
   font-size: 18px;
-  font-weight: 750;
+  font-weight: 850;
   color: var(--dotodo-text);
   letter-spacing: -0.02em;
-  border-bottom: 1px solid var(--dotodo-card-border);
+  line-height: 1.25;
+  --background: transparent;
   --border-radius: 0;
   --highlight-color-focused: transparent;
-  margin-bottom: 4px;
-  transition: border-color 0.1s ease;
+  --highlight-color: transparent;
+  --highlight-height: 0;
+  --ripple-color: transparent;
+  min-height: 28px;
 }
 
 .edit-title-input::part(placeholder) {
   color: var(--dotodo-muted);
-  opacity: 0.7;
-}
-
-.edit-title-input:focus-within {
-  border-bottom-color: var(--dotodo-primary);
+  opacity: 0.5;
 }
 
 .edit-description-input {
   --padding-start: 0;
   --padding-end: 0;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
+  --padding-top: 0;
+  --padding-bottom: 0;
   font-size: 15px;
+  font-weight: 400;
   color: var(--dotodo-text);
   line-height: 1.5;
+  --background: transparent;
   --border-radius: 0;
   --highlight-color-focused: transparent;
+  --highlight-color: transparent;
+  --highlight-height: 0;
+  --ripple-color: transparent;
+  min-height: 24px;
 }
 
 .edit-description-input::part(placeholder) {
   color: var(--dotodo-muted);
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .edit-section {
-  margin: 0 0 20px;
+  margin: 0 0 var(--dotodo-section-gap);
   padding: 0;
 }
 
@@ -613,9 +593,10 @@
   align-items: center;
   gap: 8px;
   color: var(--dotodo-text);
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .edit-section-title ion-icon {
@@ -627,55 +608,167 @@
   color: var(--dotodo-success);
 }
 
-.edit-section--subtasks ion-progress-bar {
-  --background: var(--dotodo-card-border);
-  height: 3px;
-  border-radius: 999px;
-  width: 56px;
-}
-
 .edit-section-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .edit-progress-pill {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 850;
-  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--dotodo-muted);
+  background: var(--dotodo-surface);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-.subtask-editor-list {
+.edit-progress-track {
+  width: 96px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dotodo-surface);
+  overflow: hidden;
+}
+
+.edit-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dotodo-primary);
+  transition: width 0.3s var(--dotodo-motion-soft);
+}
+
+.subtask-card-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  --background: transparent;
-  background: none;
+  gap: 8px;
 }
 
-.subtask-editor-list ion-item {
-  --background: transparent;
-  background: none;
-  --border-radius: 12px;
-  --border-color: var(--dotodo-card-border);
-  --border-style: solid;
-  --border-width: 1px;
-  --min-height: 0;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  --padding-start: 14px;
-  --padding-end: 14px;
+.subtask-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--dotodo-surface-strong);
+  padding: var(--dotodo-card-padding);
+  border-radius: var(--dotodo-radius-lg);
+  border: 1px solid var(--dotodo-card-border);
+  transition: border-color 0.2s var(--dotodo-motion-soft), box-shadow 0.2s var(--dotodo-motion-soft);
+}
+
+.subtask-card.is-editing {
+  border-color: var(--dotodo-primary);
+  box-shadow: 0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.08);
+}
+
+.subtask-card.is-completed {
+  opacity: 0.88;
+}
+
+.subtask-checkbox {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid var(--dotodo-card-border);
+  color: var(--dotodo-primary-contrast);
   cursor: pointer;
-  transform: scale(1);
-  transition: opacity 0.2s var(--dotodo-motion-soft), border-color 0.2s var(--dotodo-motion-soft);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.subtask-checkbox:active {
+  transform: scale(0.9);
+}
 
-.subtask-editor-list ion-item.is-completed .subtask-text {
+.subtask-checkbox.is-checked {
+  background: var(--dotodo-primary);
+  border-color: var(--dotodo-primary);
+}
+
+.subtask-checkbox.is-checked ion-icon {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.subtask-card .subtask-text {
+  flex: 1;
+  min-width: 0;
+  color: var(--dotodo-text);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  padding: 0;
+}
+
+.subtask-card .subtask-text.is-completed {
   color: var(--dotodo-muted);
   text-decoration: line-through;
+}
+
+.subtask-card .subtask-edit-input {
+  flex: 1;
+  min-width: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: transparent;
+  --border-radius: 0;
+  --highlight-color-focused: transparent;
+  --highlight-color: transparent;
+  --highlight-height: 0;
+  --ripple-color: transparent;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--dotodo-text);
+  caret-color: var(--dotodo-primary);
+  min-height: 0;
+}
+
+.subtask-card .subtask-edit-input::part(placeholder) {
+  color: var(--dotodo-muted);
+  opacity: 0.7;
+}
+
+.subtask-card .subtask-delete-button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--dotodo-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.subtask-card:hover .subtask-delete-button,
+.subtask-card:focus-within .subtask-delete-button {
+  opacity: 0.6;
+}
+
+.subtask-card .subtask-delete-button:active {
+  opacity: 1;
+  background: rgba(var(--dotodo-danger-rgb), 0.08);
+  color: var(--dotodo-danger);
+}
+
+.subtask-card .subtask-delete-button ion-icon {
+  font-size: 18px;
 }
 
 .subtask-empty-state {
@@ -715,66 +808,46 @@
   line-height: 1.45;
 }
 
-.subtask-text {
-  --color: var(--dotodo-text);
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.35;
-}
 
-.subtask-row.is-editing {
-  border-color: var(--dotodo-primary);
-  --background: var(--dotodo-primary-soft);
-}
 
-.subtask-edit-input {
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --background: transparent;
-  --border-radius: 0;
-  --highlight-color-focused: transparent;
-  font-size: 15px;
-  font-weight: 650;
-  color: var(--dotodo-text);
-  caret-color: var(--dotodo-primary);
-  min-height: 0;
-}
-
-.subtask-edit-input::part(placeholder) {
+.subtask-add-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px var(--dotodo-card-padding);
+  border-radius: var(--dotodo-radius-lg);
+  border: 1px dashed var(--dotodo-card-border);
+  background: transparent;
   color: var(--dotodo-muted);
-  opacity: 0.7;
-}
-
-.subtask-delete-button {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --padding-top: 6px;
-  --padding-bottom: 6px;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  opacity: 0.4;
-  transition: opacity 0.15s ease;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.subtask-delete-button:active {
-  opacity: 1;
+.subtask-add-trigger:hover {
+  background: rgba(var(--dotodo-primary-rgb), 0.03);
+  color: var(--dotodo-primary);
+  border-color: rgba(var(--dotodo-primary-rgb), 0.2);
 }
 
-.subtask-row:hover .subtask-delete-button,
-.subtask-row:focus-within .subtask-delete-button {
-  opacity: 0.7;
+.subtask-add-trigger:active {
+  transform: scale(0.998);
+}
+
+.subtask-add-trigger ion-icon {
+  font-size: 20px;
 }
 
 .subtask-add-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .subtask-add-input {

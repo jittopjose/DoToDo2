@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { IonButton, IonChip, IonIcon, IonLabel, IonPopover, IonSelect, IonSelectOption, IonText, IonToggle, IonDatetime } from '@ionic/react';
+import { IonIcon, IonLabel, IonPopover, IonSelect, IonSelectOption, IonToggle, IonDatetime } from '@ionic/react';
 import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline } from 'ionicons/icons';
 import { Recurrence } from '../types';
 import { formatRecurrenceSummary } from '../utils/recurrence';
@@ -33,6 +33,26 @@ const MAX_INTERVAL = 99;
 function getDefaultWeekday(dueDate?: number): number {
   if (dueDate) return new Date(dueDate).getDay();
   return new Date().getDay();
+}
+
+function formatDateShort(ts: number): string {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const d = new Date(ts);
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+function formatEndDateLabel(ts: number): string {
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const d = new Date(ts);
+  return `ENDS ${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+function getDefaultEndDate(): number {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 1);
+  return d.getTime();
 }
 
 export const RepeatSection = memo(function RepeatSection({
@@ -133,29 +153,6 @@ export const RepeatSection = memo(function RepeatSection({
     }
   }, [customInterval, isCustomActive, value, onChange]);
 
-  function getDefaultEndDate(): number {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 1);
-    return d.getTime();
-  }
-
-  function formatDate(ts: number): string {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const d = new Date(ts);
-    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-  }
-
-  const handleToggleChange = useCallback((e: CustomEvent) => {
-    if (!value) return;
-    const isOn = e.detail.checked;
-    onChange({
-      ...value,
-      endType: isOn ? 'until' : 'never',
-      endDate: isOn ? (value.endDate ?? getDefaultEndDate()) : undefined,
-    });
-  }, [value, onChange]);
-
   const handleEndDateChange = useCallback((e: CustomEvent) => {
     if (!value) return;
     const isoStr = e.detail.value as string | undefined;
@@ -255,6 +252,9 @@ export const RepeatSection = memo(function RepeatSection({
     return `${dayName}, ${monthName} ${d.getDate()}`;
   };
 
+  const isActiveFreq = (freq: string) => value?.frequency === freq && !customMode;
+  const isWeekSelected = (i: number) => value?.weekdays?.includes(i) ?? false;
+
   return (
     <section className="edit-section edit-section--repeat">
       <div className="edit-section-heading">
@@ -264,146 +264,146 @@ export const RepeatSection = memo(function RepeatSection({
         </h2>
         {value && (
           <div className="edit-section-meta">
-            <IonChip color="primary" outline className="repeat-summary-chip">
-              {formatRecurrenceSummary(value)}
-            </IonChip>
+            <span className="repeat-summary-badge">{formatRecurrenceSummary(value)}</span>
           </div>
         )}
       </div>
 
-      <div className="repeat-frequency-grid">
-        {FREQUENCIES.map((f) => (
-          <IonChip
-            key={f.value}
-            className={`repeat-chip${value?.frequency === f.value && !customMode ? ' is-active' : ''}`}
-            outline={!(value?.frequency === f.value && !customMode)}
-            color={value?.frequency === f.value && !customMode ? 'primary' : undefined}
-            onClick={() => handleFrequencyClick(f.value)}
+      <div className="repeat-card">
+        <div className="repeat-frequency-grid">
+          {FREQUENCIES.map((f) => (
+            <button
+              key={f.value}
+              className={`repeat-chip${isActiveFreq(f.value) ? ' is-active' : ''}`}
+              onClick={() => handleFrequencyClick(f.value)}
+            >
+              {f.label}
+            </button>
+          ))}
+          <button
+            className={`repeat-chip${customMode ? ' is-active' : ''}`}
+            onClick={handleCustomClick}
           >
-            {f.label}
-          </IonChip>
-        ))}
-        <IonChip
-          className={`repeat-chip${customMode ? ' is-active' : ''}`}
-          outline={!customMode}
-          color={customMode ? 'primary' : undefined}
-          onClick={handleCustomClick}
-        >
-          Custom
-        </IonChip>
-      </div>
+            Custom
+          </button>
+        </div>
 
-      {value?.frequency === 'weekly' && !customMode && (
-        <div className="repeat-weekday-picker">
-          {WEEKDAY_LABELS.map((label, i) => {
-            const selected = value.weekdays?.includes(i) ?? false;
-            return (
-              <IonChip
+        {value?.frequency === 'weekly' && !customMode && (
+          <div className="repeat-weekday-picker">
+            {WEEKDAY_LABELS.map((label, i) => (
+              <button
                 key={i}
-                className={`repeat-weekday${selected ? ' is-active' : ''}`}
-                outline={!selected}
-                color={selected ? 'primary' : undefined}
+                className={`repeat-weekday-btn${isWeekSelected(i) ? ' is-active' : ''}`}
                 onClick={() => handleWeekdayToggle(i)}
                 aria-label={WEEKDAY_FULL[i]}
               >
                 {label}
-              </IonChip>
-            );
-          })}
-        </div>
-      )}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {isCustomActive && (
-        <div className="repeat-custom-panel">
-          <div className="repeat-custom-row">
-            <IonLabel color="medium">Every</IonLabel>
-            <div className="repeat-interval-stepper">
-              <IonButton
-                fill="clear"
-                size="small"
-                onClick={() => handleIntervalChange(-1)}
-                disabled={customInterval <= 1}
-                aria-label="Decrease interval"
-              >
-                <IonIcon icon={removeOutline} slot="icon-only" />
-              </IonButton>
-              <span className="repeat-interval-value">{customInterval}</span>
-              <IonButton
-                fill="clear"
-                size="small"
-                onClick={() => handleIntervalChange(1)}
-                disabled={customInterval >= MAX_INTERVAL}
-                aria-label="Increase interval"
-              >
-                <IonIcon icon={addOutline} slot="icon-only" />
-              </IonButton>
-            </div>
-            <div className="repeat-custom-unit">
-              <IonSelect
-                className="repeat-unit-select"
-                value={customUnit}
-                onIonChange={(e) => handleCustomUnitChange(e.detail.value as Recurrence['frequency'])}
-                interface="action-sheet"
-              >
-                {CUSTOM_UNITS.map(u => (
-                  <IonSelectOption key={u.value} value={u.value}>{u.label}</IonSelectOption>
-                ))}
-              </IonSelect>
+        {isCustomActive && (
+          <div className="repeat-custom-panel">
+            <div className="repeat-custom-row">
+              <span className="repeat-custom-label">Every</span>
+              <div className="repeat-interval-stepper">
+                <button
+                  className="repeat-stepper-btn"
+                  onClick={() => handleIntervalChange(-1)}
+                  disabled={customInterval <= 1}
+                  aria-label="Decrease interval"
+                >
+                  <IonIcon icon={removeOutline} />
+                </button>
+                <span className="repeat-interval-value">{customInterval}</span>
+                <button
+                  className="repeat-stepper-btn"
+                  onClick={() => handleIntervalChange(1)}
+                  disabled={customInterval >= MAX_INTERVAL}
+                  aria-label="Increase interval"
+                >
+                  <IonIcon icon={addOutline} />
+                </button>
+              </div>
+              <div className="repeat-custom-unit">
+                <IonSelect
+                  className="repeat-unit-select"
+                  value={customUnit}
+                  onIonChange={(e) => handleCustomUnitChange(e.detail.value as Recurrence['frequency'])}
+                  interface="action-sheet"
+                >
+                  {CUSTOM_UNITS.map(u => (
+                    <IonSelectOption key={u.value} value={u.value}>{u.label}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {value && (
-        <div className="repeat-end-section">
-          <div className="repeat-end-toggle-row">
-            <IonLabel>Repeat until date</IonLabel>
-            <IonToggle
-              checked={value.endType === 'until'}
-              onIonChange={handleToggleChange}
-            />
-          </div>
-          {value.endType === 'until' && (
-            <div className="repeat-end-date-row">
-              <IonButton fill="clear" size="small" onClick={openEndCalendar}>
-                Ends {formatDate(value.endDate!)}
-              </IonButton>
-              <IonPopover
-                isOpen={isEndCalendarOpen}
-                onDidDismiss={handleEndCalendarDismiss}
-              >
-                {isEndCalendarOpen && (
-                  <IonDatetime
-                    presentation="date"
-                    value={getEndDateValue(value.endDate)}
-                    onIonChange={handleEndDateChange}
-                    min={todayIsoString}
-                  />
+        {value && (
+          <div className="repeat-end-section">
+            <div className="repeat-end-toggle-row">
+              <div>
+                <p className="repeat-end-label">Repeat until date</p>
+                {value.endType === 'until' && (
+                  <p className="repeat-end-date-label">
+                    {formatEndDateLabel(value.endDate!)}
+                  </p>
                 )}
-              </IonPopover>
+              </div>
+              <IonToggle
+                checked={value.endType === 'until'}
+                onIonChange={(e) => {
+                  if (!value) return;
+                  const isOn = e.detail.checked;
+                  onChange({
+                    ...value,
+                    endType: isOn ? 'until' : 'never',
+                    endDate: isOn ? (value.endDate ?? getDefaultEndDate()) : undefined,
+                  });
+                }}
+              />
             </div>
-          )}
-        </div>
-      )}
+            {value.endType === 'until' && (
+              <div className="repeat-end-date-row">
+                <button className="repeat-end-date-btn" onClick={openEndCalendar}>
+                  <IonIcon icon={calendarOutline} />
+                  <span>Change date</span>
+                </button>
+                <IonPopover
+                  isOpen={isEndCalendarOpen}
+                  onDidDismiss={handleEndCalendarDismiss}
+                >
+                  {isEndCalendarOpen && (
+                    <IonDatetime
+                      presentation="date"
+                      value={getEndDateValue(value.endDate)}
+                      onIonChange={handleEndDateChange}
+                      min={todayIsoString}
+                    />
+                  )}
+                </IonPopover>
+              </div>
+            )}
+          </div>
+        )}
 
-      {value && nextOccurrence && (
-        <div className="repeat-preview">
-          <IonIcon icon={calendarOutline} />
-          <IonText color="medium">Next: {formatPreview(nextOccurrence)}</IonText>
-        </div>
-      )}
+        {value && nextOccurrence && (
+          <div className="repeat-preview">
+            <IonIcon icon={calendarOutline} />
+            <span>Next: {formatPreview(nextOccurrence)}</span>
+          </div>
+        )}
 
-      {value && (
-        <IonButton
-          fill="clear"
-          color="danger"
-          size="small"
-          onClick={handleRemove}
-        >
-          <IonIcon icon={closeOutline} slot="start" />
-          Remove repeat
-        </IonButton>
-      )}
+        {value && (
+          <button className="repeat-remove-btn" onClick={handleRemove}>
+            <IonIcon icon={closeOutline} />
+            <span>REMOVE REPEAT</span>
+          </button>
+        )}
+      </div>
     </section>
   );
 });

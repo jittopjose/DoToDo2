@@ -68,13 +68,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
         setNewSubtaskText('');
     }, [todo.id, newSubtaskText, onAddSubtask]);
 
-    const handleSubtaskKeyPress = useCallback((event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            handleAddSubtask();
-        }
-    }, [handleAddSubtask]);
-
     const handleToggleSubtask = useCallback((subtaskId: string) => {
         onToggleSubtask(todo.id, subtaskId);
     }, [todo.id, onToggleSubtask]);
@@ -144,7 +137,6 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
                         value={newSubtaskText}
                         onValueChange={setNewSubtaskText}
                         onSubmit={handleAddSubtask}
-                        onKeyPress={handleSubtaskKeyPress}
                         isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
                     />
                 </IonGrid>

@@ -3,17 +3,15 @@ import {
     IonBackButton,
     IonButton,
     IonButtons,
-    IonChip,
     IonContent,
     IonGrid,
     IonHeader,
     IonIcon,
-    IonLabel,
     IonPage,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { arrowBackOutline, checkmarkDoneOutline, trashOutline } from 'ionicons/icons';
+import { arrowBackOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/todos/components/TodoItemEditorSheet.sections';
 import { RepeatSection } from '../features/todos/components/RepeatSection';
@@ -75,13 +73,6 @@ const TodoEditPage: React.FC = () => {
         setNewSubtaskText('');
     }, [addSubtask, newSubtaskText, todo]);
 
-    const handleSubtaskKeyPress = useCallback((event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            handleAddSubtask();
-        }
-    }, [handleAddSubtask]);
-
     const handleToggleSubtask = useCallback((subtaskId: string) => {
         if (!todo) return;
         toggleSubtask(todo.id, subtaskId);
@@ -130,8 +121,8 @@ const TodoEditPage: React.FC = () => {
                 <IonToolbar>
                     <IonButtons slot="start">
                         <IonBackButton defaultHref={`/list/${encodeURIComponent(todo.list)}`} text="" aria-label="Go back" />
+                        <span className="todo-edit-title">Edit Task</span>
                     </IonButtons>
-                    <IonTitle className="todo-edit-toolbar-title">Edit task</IonTitle>
                     <IonButtons slot="end">
                         <IonButton
                             className="todo-edit-toolbar-action todo-edit-toolbar-action--delete"
@@ -142,12 +133,12 @@ const TodoEditPage: React.FC = () => {
                             <IonIcon icon={trashOutline} />
                         </IonButton>
                         <IonButton
-                            className="todo-edit-toolbar-action todo-edit-toolbar-action--done"
+                            className="todo-edit-toolbar-save"
                             fill="clear"
                             onClick={handleSave}
                             aria-label="Save task"
                         >
-                            <IonIcon icon={checkmarkDoneOutline} />
+                            Save
                         </IonButton>
                     </IonButtons>
                 </IonToolbar>
@@ -155,10 +146,10 @@ const TodoEditPage: React.FC = () => {
 
             <IonContent className="todo-edit-content">
                 <IonGrid className="todo-edit-grid">
-                    <IonChip color="medium" className="todo-edit-summary">
-                        <span className={`todo-edit-summary-dot todo-edit-summary-dot--${todo.itemType}`} />
-                        <IonLabel>{todo.isCompleted ? 'Completed task' : 'Active task'}</IonLabel>
-                    </IonChip>
+                    <span className="todo-edit-status-chip">
+                        <span className="todo-edit-status-dot" />
+                        {todo.isCompleted ? 'COMPLETED TASK' : 'ACTIVE TASK'}
+                    </span>
 
                     <EditorDetailsSection
                         title={title}
@@ -187,7 +178,6 @@ const TodoEditPage: React.FC = () => {
                         value={newSubtaskText}
                         onValueChange={setNewSubtaskText}
                         onSubmit={handleAddSubtask}
-                        onKeyPress={handleSubtaskKeyPress}
                         isEnabled={Boolean(todo.subtasks && todo.subtasks.length > 0)}
                     />
                 </IonGrid>

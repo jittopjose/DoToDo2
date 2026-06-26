@@ -1,18 +1,13 @@
-import { memo, useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
-    IonBadge,
     IonButton,
-    IonCheckbox,
     IonIcon,
     IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonProgressBar,
     IonTextarea,
 } from '@ionic/react';
 import {
     addOutline,
+    checkmarkOutline,
     listOutline,
     trashOutline,
 } from 'ionicons/icons';
@@ -46,19 +41,20 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
     const descRef = useCallback((el: HTMLIonTextareaElement | null) => setNativeCaretColor(el), []);
 
     return (
-        <IonList lines="none" className="edit-fields">
-            <IonItem lines="none" className="edit-field">
-                <IonLabel position="stacked">Title</IonLabel>
+        <div className="edit-details-card">
+            <div className="edit-field">
+                <label className="edit-field-label">Title</label>
                 <IonInput
                     ref={titleRef}
                     className="edit-title-input"
                     value={title}
                     onIonInput={(event) => onTitleChange(event.detail.value ?? '')}
-                    placeholder="Task title"
+                    placeholder="Enter task title..."
                 />
-            </IonItem>
-            <IonItem lines="none" className="edit-field">
-                <IonLabel position="stacked">Description</IonLabel>
+            </div>
+            <div className="edit-details-divider" />
+            <div className="edit-field">
+                <label className="edit-field-label">Description</label>
                 <IonTextarea
                     ref={descRef}
                     className="edit-description-input"
@@ -68,8 +64,8 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
                     rows={1}
                     autoGrow
                 />
-            </IonItem>
-        </IonList>
+            </div>
+        </div>
     );
 });
 
@@ -151,32 +147,30 @@ export const SubtasksSection = memo(function SubtasksSection({
                     className="edit-section-meta"
                     aria-label={progress.total > 0 ? `${progress.completed} of ${progress.total} subtasks completed` : 'No subtasks'}
                 >
-                    <IonBadge color="medium" className="edit-progress-pill">{progressLabel}</IonBadge>
+                    <span className="edit-progress-pill">{progressLabel}</span>
                     {progress.total > 0 && (
-                        <IonProgressBar
-                            value={progress.percent / 100}
-                            color="primary"
-                            className="edit-progress-bar"
-                            aria-label={`${progress.percent}% complete`}
-                        />
+                        <div className="edit-progress-track">
+                            <div className="edit-progress-fill" style={{ width: `${progress.percent}%` }} />
+                        </div>
                     )}
                 </div>
             </div>
 
             {hasSubtasks ? (
-                <IonList lines="none" className="subtask-editor-list" aria-label="Subtasks">
+                <div className="subtask-card-list" aria-label="Subtasks">
                     {subtaskList.map((subtask) => (
-                        <IonItem
+                        <div
                             key={subtask.id}
-                            button
-                            detail={false}
-                            lines="none"
-                            className={`subtask-row ${subtask.isCompleted ? 'is-completed' : ''} ${editingId === subtask.id ? 'is-editing' : ''}`}
-                            onClick={editingId === subtask.id ? undefined : () => onToggleSubtask(subtask.id)}
-                            aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
-                            aria-pressed={subtask.isCompleted}
+                            className={`subtask-card ${subtask.isCompleted ? 'is-completed' : ''} ${editingId === subtask.id ? 'is-editing' : ''}`}
                         >
-                            <IonCheckbox slot="start" checked={subtask.isCompleted} aria-hidden="true" />
+                            <button
+                                className={`subtask-checkbox ${subtask.isCompleted ? 'is-checked' : ''}`}
+                                onClick={() => onToggleSubtask(subtask.id)}
+                                aria-label={`Mark "${subtask.title}" as ${subtask.isCompleted ? 'incomplete' : 'complete'}`}
+                                aria-pressed={subtask.isCompleted}
+                            >
+                                {subtask.isCompleted && <IonIcon icon={checkmarkOutline} aria-hidden="true" />}
+                            </button>
                             {editingId === subtask.id ? (
                                 <IonInput
                                     ref={editInputRef}
@@ -188,23 +182,20 @@ export const SubtasksSection = memo(function SubtasksSection({
                                     aria-label="Edit subtask title"
                                 />
                             ) : (
-                                <IonLabel className="subtask-text" onClick={(e) => handleLabelClick(e, subtask)}>
+                                <span className={`subtask-text ${subtask.isCompleted ? 'is-completed' : ''}`} onClick={(e) => handleLabelClick(e, subtask)}>
                                     {subtask.title}
-                                </IonLabel>
+                                </span>
                             )}
-                            <IonButton
-                                slot="end"
-                                fill="clear"
-                                color="medium"
+                            <button
                                 className="subtask-delete-button"
                                 onClick={(e) => handleDeleteClick(e, subtask.id)}
                                 aria-label={`Delete "${subtask.title}"`}
                             >
                                 <IonIcon icon={trashOutline} />
-                            </IonButton>
-                        </IonItem>
+                            </button>
+                        </div>
                     ))}
-                </IonList>
+                </div>
             ) : (
                 <div className="subtask-empty-state" role="status">
                     <div className="subtask-empty-icon" aria-hidden="true">
@@ -222,7 +213,6 @@ interface AddSubtaskRowProps {
     value: string;
     onValueChange: (value: string) => void;
     onSubmit: () => void;
-    onKeyPress?: (event: KeyboardEvent) => void;
     isEnabled: boolean;
 }
 
@@ -230,28 +220,62 @@ export const AddSubtaskRow = memo(function AddSubtaskRow({
     value,
     onValueChange,
     onSubmit,
-    onKeyPress,
     isEnabled,
 }: AddSubtaskRowProps) {
-    return (
+    const [isAdding, setIsAdding] = useState(false);
+    const inputRef = useRef<HTMLIonInputElement>(null);
+
+    const handleOpen = useCallback(() => {
+        setIsAdding(true);
+        requestAnimationFrame(() => inputRef.current?.setFocus());
+    }, []);
+
+    const handleClose = useCallback(() => {
+        setIsAdding(false);
+        onValueChange('');
+    }, [onValueChange]);
+
+    const handleSubmit = useCallback(() => {
+        onSubmit();
+        if (value.trim()) {
+            setIsAdding(false);
+        }
+    }, [onSubmit, value]);
+
+    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+        } else if (e.key === 'Escape') {
+            handleClose();
+        }
+    }, [handleSubmit, handleClose]);
+
+    return isAdding ? (
         <div className="subtask-add-row">
             <IonInput
+                ref={inputRef}
                 className="subtask-add-input"
                 value={value}
                 onIonInput={(event) => onValueChange(event.detail.value ?? '')}
-                onKeyPress={onKeyPress}
+                onKeyDown={handleKeyPress}
                 placeholder={isEnabled ? 'Add subtask' : 'Add your first subtask'}
             />
             <IonButton
                 className="subtask-add-button"
                 fill="solid"
                 color="primary"
-                onClick={onSubmit}
+                onClick={handleSubmit}
                 disabled={!value.trim()}
             >
                 <IonIcon icon={addOutline} slot="start" />
                 Add
             </IonButton>
         </div>
+    ) : (
+        <button className="subtask-add-trigger" onClick={handleOpen} type="button">
+            <IonIcon icon={addOutline} aria-hidden="true" />
+            <span>Add subtask</span>
+        </button>
     );
 });
