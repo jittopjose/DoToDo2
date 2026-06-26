@@ -348,9 +348,15 @@ export const RepeatSection = memo(function RepeatSection({
               <div>
                 <p className="repeat-end-label">Repeat until date</p>
                 {value.endType === 'until' && (
-                  <p className="repeat-end-date-label">
-                    {formatEndDateLabel(value.endDate!)}
-                  </p>
+                  <div className="repeat-end-date-row">
+                    <button className="repeat-end-date-label" onClick={openEndCalendar}>
+                      {formatEndDateLabel(value.endDate!)}
+                    </button>
+                    <button className="repeat-end-date-btn" onClick={openEndCalendar}>
+                      <IonIcon icon={calendarOutline} />
+                      <span>Change date</span>
+                    </button>
+                  </div>
                 )}
               </div>
               <IonToggle
@@ -367,12 +373,7 @@ export const RepeatSection = memo(function RepeatSection({
               />
             </div>
             {value.endType === 'until' && (
-              <div className="repeat-end-date-row">
-                <button className="repeat-end-date-btn" onClick={openEndCalendar}>
-                  <IonIcon icon={calendarOutline} />
-                  <span>Change date</span>
-                </button>
-                <IonPopover
+              <IonPopover
                   isOpen={isEndCalendarOpen}
                   onDidDismiss={handleEndCalendarDismiss}
                 >
@@ -385,7 +386,6 @@ export const RepeatSection = memo(function RepeatSection({
                     />
                   )}
                 </IonPopover>
-              </div>
             )}
           </div>
         )}
