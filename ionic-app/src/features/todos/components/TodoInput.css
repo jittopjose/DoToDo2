@@ -7,6 +7,12 @@
   border-radius: 15px;
   box-shadow: var(--dotodo-shadow-card);
   backdrop-filter: blur(18px);
+  transition: box-shadow var(--dotodo-motion-soft), border-color var(--dotodo-motion-soft);
+}
+
+.composer-card:focus-within {
+  border-color: rgba(var(--dotodo-primary-rgb), 0.2);
+  box-shadow: var(--dotodo-shadow-card), 0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.08);
 }
 
 .composer-content {

@@ -115,6 +115,11 @@
   transform: scale(0.98);
 }
 
+.type-filter-icon {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
 .type-filter-button ion-icon,
 .type-filter-label {
   color: var(--color);

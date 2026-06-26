@@ -298,8 +298,9 @@
 }
 
 .task-chip--due.is-danger {
-  --background: rgba(var(--dotodo-danger-rgb), 0.1);
+  --background: rgba(var(--dotodo-danger-rgb), 0.12);
   --color: var(--dotodo-danger);
+  box-shadow: 0 0 12px rgba(var(--dotodo-danger-rgb), 0.08);
 }
 
 .task-chip--priority {
@@ -342,8 +343,34 @@
   --color: var(--dotodo-primary);
 }
 
-.task-progress-bar {
+.task-subtask-progress {
   margin-top: 8px;
+}
+
+.task-subtask-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.task-subtask-progress-label {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  color: var(--dotodo-muted);
+  text-transform: uppercase;
+}
+
+.task-subtask-progress-ratio {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  color: var(--dotodo-primary);
+}
+
+.task-progress-bar {
+  margin-top: 0;
 }
 
 .task-options {

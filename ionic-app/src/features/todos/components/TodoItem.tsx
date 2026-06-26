@@ -226,7 +226,13 @@ return (
                                 </div>
 
                                 {subtaskProgress.total > 0 && (
-                                    <IonProgressBar className="task-progress-bar" value={subtaskProgress.percent / 100} aria-label={`${subtaskProgress.percent}% complete`} />
+                                    <div className="task-subtask-progress">
+                                        <div className="task-subtask-progress-header">
+                                            <span className="task-subtask-progress-label">PROGRESS</span>
+                                            <span className="task-subtask-progress-ratio">{subtaskProgress.completed}/{subtaskProgress.total}</span>
+                                        </div>
+                                        <IonProgressBar className="task-progress-bar" value={subtaskProgress.percent / 100} aria-label={`${subtaskProgress.percent}% complete`} />
+                                    </div>
                                 )}
                             </IonCol>
                         </IonRow>

@@ -24,29 +24,37 @@
 }
 
 .todo-group-icon {
-  font-size: 16px;
+  font-size: 18px;
   flex-shrink: 0;
 }
 
 .todo-group-title {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--dotodo-muted);
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  color: var(--dotodo-text);
 }
 
 .todo-group-badge {
   --background: var(--dotodo-card-border, #e0e0e0);
-  --color: var(--dotodo-text);
-  font-weight: 600;
-  font-size: max(11px, 0.6875rem);
+  --color: var(--dotodo-muted);
+  font-weight: 850;
+  font-size: 11px;
+  line-height: 1.2;
+  min-width: 20px;
+  min-height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
   vertical-align: middle;
   transition: opacity var(--dotodo-motion-fast);
 }
 
 .todo-group-chevron {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--dotodo-muted);
   flex-shrink: 0;
   margin-left: auto;
@@ -75,16 +83,27 @@
 .group--overdue .todo-group-icon { color: var(--dotodo-danger); }
 .group--overdue .todo-group-title { color: var(--dotodo-danger); }
 .group--overdue .todo-group-chevron { color: var(--dotodo-danger); }
+.group--overdue .todo-group-badge { --background: rgba(var(--dotodo-danger-rgb), 0.12); --color: var(--dotodo-danger); }
 .group--today .todo-group-icon { color: var(--dotodo-primary); }
+.group--today .todo-group-title { color: var(--dotodo-primary); }
 .group--today .todo-group-chevron { color: var(--dotodo-primary); }
+.group--today .todo-group-badge { --background: rgba(var(--dotodo-primary-rgb), 0.12); --color: var(--dotodo-primary); }
 .group--tomorrow .todo-group-icon { color: var(--dotodo-secondary); }
+.group--tomorrow .todo-group-title { color: var(--dotodo-secondary); }
 .group--tomorrow .todo-group-chevron { color: var(--dotodo-secondary); }
+.group--tomorrow .todo-group-badge { --background: rgba(var(--dotodo-secondary-rgb), 0.12); --color: var(--dotodo-secondary); }
 .group--upcoming .todo-group-icon { color: var(--ion-color-tertiary); }
+.group--upcoming .todo-group-title { color: var(--ion-color-tertiary); }
 .group--upcoming .todo-group-chevron { color: var(--ion-color-tertiary); }
+.group--upcoming .todo-group-badge { --background: rgba(var(--ion-color-tertiary-rgb), 0.12); --color: var(--ion-color-tertiary); }
 .group--later .todo-group-icon { color: var(--dotodo-muted); }
+.group--later .todo-group-title { color: var(--dotodo-muted); }
+.group--later .todo-group-badge { --background: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.12); --color: var(--dotodo-muted); }
+.group--later .todo-group-chevron { color: var(--dotodo-muted); }
 .group--completed .todo-group-icon { color: var(--dotodo-success); }
 .group--completed .todo-group-title { color: var(--dotodo-success); }
 .group--completed .todo-group-chevron { color: var(--dotodo-success); }
+.group--completed .todo-group-badge { --background: rgba(var(--dotodo-success-rgb), 0.12); --color: var(--dotodo-success); }
 
 .empty-card {
   --border-radius: var(--dotodo-radius-lg);
