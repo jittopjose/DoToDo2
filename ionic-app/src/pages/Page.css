@@ -47,13 +47,7 @@
 }
 
 .type-filter-row {
-  margin: 0;
   padding: 0 12px 14px;
-}
-
-.type-filter-grid {
-  margin: 0;
-  padding: 0;
 }
 
 .type-filter-row-scroll {
@@ -62,11 +56,8 @@
   justify-content: flex-start;
   align-items: center;
   gap: 8px;
-  width: max-content;
-  min-width: 100%;
-  box-sizing: border-box;
   margin: 0;
-  padding: 14px 18px;
+  padding: 14px 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;

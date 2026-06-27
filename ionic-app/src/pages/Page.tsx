@@ -183,30 +183,26 @@ const Page: React.FC = () => {
               </IonCard>
             </IonCol>
           </IonRow>
-          <IonRow className="type-filter-row">
-            <IonCol>
-              <IonGrid className="type-filter-grid" onClick={handleTypeFilterSelectClick}>
-                <IonRow className="type-filter-row-scroll">
-                  {typeFilterButtons.map((button) => {
-                    const isActive = typeFilter === button.value;
+          <div className="type-filter-row" onClick={handleTypeFilterSelectClick}>
+            <div className="type-filter-row-scroll">
+              {typeFilterButtons.map((button) => {
+                const isActive = typeFilter === button.value;
 
-                    return (
-                      <IonButton
-                        key={button.value}
-                        className={`type-filter-button type-filter-button--${button.value} ${isActive ? 'is-active' : ''}`}
-                        fill="clear"
-                        data-type-filter={button.value}
-                        aria-pressed={isActive}
-                      >
-                        <IonIcon icon={button.icon} className="type-filter-icon" />
-                        <span className="type-filter-label">{button.label}</span>
-                      </IonButton>
-                    );
-                  })}
-                </IonRow>
-              </IonGrid>
-            </IonCol>
-          </IonRow>
+                return (
+                  <IonButton
+                    key={button.value}
+                    className={`type-filter-button type-filter-button--${button.value} ${isActive ? 'is-active' : ''}`}
+                    fill="clear"
+                    data-type-filter={button.value}
+                    aria-pressed={isActive}
+                  >
+                    <IonIcon icon={button.icon} className="type-filter-icon" />
+                    <span className="type-filter-label">{button.label}</span>
+                  </IonButton>
+                );
+              })}
+            </div>
+          </div>
           <IonRow className="composer-row">
             <IonCol>
               <TodoInput list={list} />
