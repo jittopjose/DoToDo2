@@ -187,17 +187,17 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                             <IonRow className="ion-justify-content-center">
                                 <IonCol size="12">
                                     <IonCardTitle className="empty-title">
-                                        {isEmptyList ? 'No tasks yet' : 'No matching tasks'}
+                                        {isEmptyList ? 'Blank page' : 'No matches'}
                                     </IonCardTitle>
                                     <IonNote className="empty-copy">
                                         {isEmptyList
                                             ? typeFilter === 'all'
-                                                ? 'Add your first task above and give today a clear shape.'
-                                                : `Add your first ${typeLabels[typeFilter].toLowerCase()} item above.`
+                                                ? 'Your notebook is empty — what would you like to write?'
+                                                : `Start with a ${typeLabels[typeFilter].toLowerCase()} — what's on your mind?`
                                             : isSearchActive
                                                 ? `No results for "${searchTerm}"`
                                                 : typeFilter === 'all'
-                                                    ? 'Try changing the filter'
+                                                    ? 'Nothing here with that tag. Try another?'
                                                     : 'Try another category'
                                         }
                                     </IonNote>

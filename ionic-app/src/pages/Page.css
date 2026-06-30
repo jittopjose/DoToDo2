@@ -69,7 +69,7 @@
 }
 
 .type-filter-button {
-  --background: rgba(255, 255, 255, 0.035);
+  --background: rgba(var(--dotodo-bg-rgb), 0.035);
   --border: 1px solid var(--dotodo-card-border);
   --color: var(--dotodo-muted);
   position: relative;

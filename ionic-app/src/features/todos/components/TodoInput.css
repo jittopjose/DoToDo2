@@ -1,5 +1,5 @@
 .composer-card {
-  --border: 1px solid rgba(255, 255, 255, 0.05);
+  --border: 1px solid rgba(var(--dotodo-bg-rgb), 0.05);
   --border-radius: 15px;
   --background: var(--dotodo-card);
   margin: 0;
@@ -120,7 +120,7 @@
 }
 
 .composer-type-chip {
-  --background: rgba(255, 255, 255, 0.035);
+  --background: rgba(var(--dotodo-bg-rgb), 0.035);
   --border: 1px solid var(--dotodo-card-border);
   --chip-color: var(--dotodo-muted);
   --padding-top: 0;
@@ -195,7 +195,7 @@
 
 .composer-type-chip.is-active {
   --background: rgba(var(--dotodo-secondary-rgb), 0.1);
-  --border: 1px solid rgba(139, 92, 246, 0.4);
+  --border: 1px solid rgba(var(--dotodo-secondary-rgb), 0.4);
   --chip-color: var(--dotodo-secondary);
   border: var(--border);
   box-shadow:

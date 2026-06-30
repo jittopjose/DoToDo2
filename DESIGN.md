@@ -23,76 +23,76 @@ colors:
   tertiary: '#14b8a6'
 typography:
   heading-xxl:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 26px
     fontWeight: 850
     lineHeight: 1.08
     letterSpacing: -0.03em
   heading-xl:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 22px
     fontWeight: 900
     lineHeight: 1.2
     letterSpacing: -0.035em
   heading-lg:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 20px
     fontWeight: 850
     lineHeight: 1.2
     letterSpacing: -0.03em
   heading-md:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 18px
     fontWeight: 850
     lineHeight: 1.25
     letterSpacing: -0.02em
   heading-sm:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 17px
     fontWeight: 850
     lineHeight: 1.2
     letterSpacing: -0.02em
   title:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 15px
     fontWeight: 700
     lineHeight: 1.25
     letterSpacing: -0.02em
   body:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 15px
     fontWeight: 400
     lineHeight: 1.5
   body-sm:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.45
   caption:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 13px
     fontWeight: 600
     lineHeight: 1.4
   label:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 12px
     fontWeight: 750
     lineHeight: 1.3
     letterSpacing: 0.06em
   label-sm:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 12px
     fontWeight: 800
     lineHeight: 1.3
     letterSpacing: 0.05em
   chip:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 10px
     fontWeight: 750
     lineHeight: 1.2
     letterSpacing: 0.01em
   badge:
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: 'Satoshi, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: 11px
     fontWeight: 850
     lineHeight: 1.2
@@ -247,7 +247,7 @@ The palette is centered on a **soft purple** accent against a **warm cream** can
 
 ## Typography
 
-The typography strategy uses a single typeface — **Inter** — across two distinct weight clusters to create hierarchy without introducing a second font family.
+The typography strategy uses a single variable typeface — **Satoshi** (Indian Type Foundry) — with a weight axis from 300 to 900, creating hierarchy across two distinct weight clusters without introducing multiple font families.
 
 - **Headings (850–900 weight):** Ultra-bold, tight letter-spacing (`-0.03em` to `-0.035em`). Used for greeting, section titles, modal headers, and progress display.
 - **Title (700 weight):** Semi-bold with `-0.02em` tracking. Used for todo item titles.
@@ -255,7 +255,9 @@ The typography strategy uses a single typeface — **Inter** — across two dist
 - **Labels (750–850 weight):** Upper-case or high-weight for metadata, section labels, and chips. Often paired with `0.05em–0.08em` letter-spacing for a crafted feel.
 - **Chips (750 weight, 10px):** The smallest visible type, used for metadata chips on todo items. Highly compressed to fit multiple chips per row.
 
-All numeric weights used: 600, 650, 700, 750, 800, 850, 900. The 850 weight is the most distinctive — heavier than the typical "extra-bold" (800) and visually anchors the UI.
+All numeric weights used: 400, 500, 600, 650, 700, 750, 800, 850, 900. The 850 weight is the most distinctive — heavier than the typical "extra-bold" (800) and visually anchors the UI.
+
+Satoshi was chosen over Inter for its warmer, more approachable character — it carries the "well-organized paper notebook" personality better than a neutral grotesque, with softer terminals and a friendlier aperture that matches the brand's playful warmth.
 
 ## Layout & Spacing
 
@@ -281,7 +283,7 @@ Depth is achieved through **card-based layering** with subtle shadows rather tha
 - **Card** (`0 8px 24px rgba(31, 41, 55, 0.08)` / dark: `0 8px 22px rgba(0, 0, 0, 0.2)`): Default card shadow, used for todo items, progress panel, composer, menu brand card.
 - **Pressed** (`0 4px 12px rgba(31, 41, 55, 0.14)`): Used for active/pressed state on cards.
 
-The background uses a **subtle radial gradient** (primary at top-left, secondary at bottom-right, each at 12–16% opacity) on top of the solid background color, creating gentle atmospheric depth without distracting from content.
+The background uses a **subtle radial gradient** (primary at top-left, secondary at bottom-right, each at 12–16% opacity) on top of the solid background color, creating gentle atmospheric depth without distracting from content. No background texture is applied — the page uses a clean gradient canvas. The notebook metaphor lives in the font choices and tone, not in decorative lines.
 
 Backdrop blur (`18px`) is applied to card and composer surfaces for a frosted-glass effect.
 
@@ -316,8 +318,7 @@ Motion follows a **spring-like ease-out curve** — `cubic-bezier(0.16, 1, 0.3, 
 ### Keyframe Animations
 
 - **`taskEnter`:** 0.35s — new todo items fade in and slide down (-10px → 0).
-- **`completionPulse`:** 0.55s — completed items scale up slightly (1 → 1.008) and adjust opacity.
-- **`completionGlow`:** 0.9s — a radial success gradient overlay fades in then out behind the completed card.
+- **`stampInk`:** 0.5s — completed items display a brief checkmark stamp that zooms from 0.3→1.1 scale, then fades out while floating upward. The signature completion ritual.
 - **`fadeIn`:** 0.24s — generic item entrance (opacity + translate).
 - **`slideOut`:** 0.22s — generic item exit (translateX 100%).
 
@@ -369,13 +370,14 @@ The most detailed component. Renders:
 
 Top section of the main list page:
 - 62px circular conic-gradient ring showing completion percentage.
-- Title ("X of Y done"), subtitle (tasks left / all done / encouragement).
+- Title ("X of Y done"), subtitle ("Your notebook is waiting" / "All pages checked off" / "X tasks left").
 - Search toggle button that expands an IonSearchbar with animated height transition (112px → 176px).
 - Card surface with backdrop-blur.
 
 ### Composer (`TodoInput`)
 
 Input card for adding new todos:
+- Clean, unadorned input surface with no background texture.
 - IonInput with type-aware placeholder text.
 - 46×46px circular primary add button with glow shadow.
 - Horizontal-scrolling type chip row (Task / Shop / Note / Check) below the input, each with underline indicator on active state.
@@ -403,8 +405,8 @@ Each group header: icon + title + count badge + rotating chevron. "Overdue" and 
 
 Centered `IonCard` with:
 - 76px circular icon container with primary gradient tint.
-- "No tasks yet" / "No matching tasks" heading.
-- Contextual subtitle.
+- "Blank page" / "No matches" heading (notebook-metaphor tone).
+- Contextual subtitle: "Your notebook is empty — what would you like to write?" (no tasks, no filter), "Start with a [type] — what's on your mind?" (filter by type), "Nothing here with that tag. Try another?" (filtered), or search results text.
 - Contextual message based on empty reason (no tasks, no search results, no matching filter).
 
 ### Side Menu (`Menu`)

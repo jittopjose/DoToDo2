@@ -87,9 +87,9 @@ const Page: React.FC = () => {
     const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
     const progressPercent = Math.round(progress * 100);
     const focusSubtitle = totalTasks === 0
-        ? 'Start with one small step'
+        ? 'Your notebook is waiting'
         : remainingTasks === 0
-            ? 'Everything is complete'
+            ? 'All pages checked off'
             : `${remainingTasks} task${remainingTasks > 1 ? 's' : ''} left`;
     const progressStyle: CSSProperties & { '--progress-value': string } = {
         '--progress-value': `${progressPercent}%`
@@ -136,7 +136,7 @@ const Page: React.FC = () => {
         <div className="greeting-section">
           <div className="greeting-copy">
             <h1 className="greeting-title">{greeting}</h1>
-            <p className="greeting-subtitle">Let's get things done!</p>
+            <p className="greeting-subtitle">What's on your notebook today?</p>
           </div>
         </div>
 
