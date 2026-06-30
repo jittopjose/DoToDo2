@@ -22,6 +22,7 @@ export interface Todo {
     price?: number;
     subtasks?: TodoSubtask[];
     dueDate?: number;
+    completedAt?: number;
     priority?: TodoPriority;
     recurrence?: Recurrence;
 }

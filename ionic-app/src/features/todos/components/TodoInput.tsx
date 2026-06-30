@@ -28,7 +28,7 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     }, [activeTypeFilter]);
 
     const titlePlaceholders = {
-        todo: `What needs to be done in ${list}?`,
+        todo: 'What needs to be done?',
         shopping: 'What should you buy?',
         note: 'Enter note title',
         checklist: 'Enter checklist title',

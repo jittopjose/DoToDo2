@@ -81,16 +81,27 @@ const Page: React.FC = () => {
         }
     }, [todos, list, typeFilter, normalizedSearchTerm, filter]);
 
-    const totalTasks = listTodos.length;
-    const completedTasks = listTodos.reduce((count, todo) => count + (todo.isCompleted ? 1 : 0), 0);
-    const remainingTasks = totalTasks - completedTasks;
-    const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    const todayStartTs = todayStart.getTime();
+    const todayEndTs = todayEnd.getTime();
+
+    const dueTodayTodos = listTodos.filter(t =>
+        t.dueDate !== undefined && t.dueDate >= todayStartTs && t.dueDate <= todayEndTs
+    );
+
+    const denominator = dueTodayTodos.length;
+    const numerator = dueTodayTodos.filter(t => t.isCompleted).length;
+    const progress = denominator > 0 ? numerator / denominator : 1;
     const progressPercent = Math.round(progress * 100);
-    const focusSubtitle = totalTasks === 0
+    const remainingToday = denominator - numerator;
+    const focusSubtitle = listTodos.length === 0
         ? 'Your notebook is waiting'
-        : remainingTasks === 0
-            ? 'All pages checked off'
-            : `${remainingTasks} task${remainingTasks > 1 ? 's' : ''} left`;
+        : remainingToday <= 0
+            ? 'All tasks up to date'
+            : `${remainingToday} task${remainingToday > 1 ? 's' : ''} left today`;
     const progressStyle: CSSProperties & { '--progress-value': string } = {
         '--progress-value': `${progressPercent}%`
     };
@@ -154,7 +165,7 @@ const Page: React.FC = () => {
                       </IonCol>
                       <IonCol className="progress-copy">
                         <IonNote className="focus-eyebrow">Daily progress</IonNote>
-                        <IonCardTitle className="progress-title">{completedTasks} of {totalTasks} done</IonCardTitle>
+                        <IonCardTitle className="progress-title">{numerator} of {denominator} done</IonCardTitle>
                         <IonNote className="progress-subtitle">{focusSubtitle}</IonNote>
                       </IonCol>
                       <IonCol size="auto" className="progress-actions">

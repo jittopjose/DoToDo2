@@ -19,6 +19,7 @@ type PersistedTodo = {
     price?: number;
     subtasks?: Array<Partial<TodoSubtask> & { id?: string; title?: string; isCompleted?: boolean }>;
     dueDate?: number;
+    completedAt?: number;
     priority?: unknown;
     recurrence?: unknown;
 };
@@ -74,6 +75,7 @@ const normalizePersistedTodo = (todo: unknown): Todo => {
         ...(typeof item.price === 'number' && Number.isFinite(item.price) && { price: item.price }),
         ...(subtasks && { subtasks }),
         ...(typeof item.dueDate === 'number' && { dueDate: item.dueDate }),
+        ...(typeof item.completedAt === 'number' && { completedAt: item.completedAt }),
         ...(isTodoPriority(item.priority) && { priority: item.priority }),
     ...(isRecurrence(item.recurrence) && { recurrence: item.recurrence }),
     };
@@ -210,20 +212,22 @@ export const useTodoStore = create<TodoState>()(
                             recurrence: isPastEnd ? undefined : { ...todo.recurrence },
                         };
 
-                        return {
-                            todos: [
-                                clone,
-                                ...state.todos.map(t =>
-                                    t.id === id ? { ...t, isCompleted: true, recurrence: undefined } : t
-                                ),
-                            ],
-                        };
+                            return {
+                                todos: [
+                                    clone,
+                                    ...state.todos.map(t =>
+                                        t.id === id ? { ...t, isCompleted: true, completedAt: Date.now(), recurrence: undefined } : t
+                                    ),
+                                ],
+                            };
                     }
                 }
 
                 return {
                     todos: state.todos.map(t =>
-                        t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
+                        t.id === id
+                            ? { ...t, isCompleted: !t.isCompleted, completedAt: !t.isCompleted ? Date.now() : undefined }
+                            : t
                     ),
                 };
             }),
@@ -281,9 +285,14 @@ export const useTodoStore = create<TodoState>()(
             })),
 
             updateTodo: (id, updates) => set((state) => ({
-                todos: state.todos.map((todo) =>
-                    todo.id === id ? { ...todo, ...updates } : todo
-                ),
+                todos: state.todos.map((todo) => {
+                    if (todo.id !== id) return todo;
+                    const merged = { ...todo, ...updates };
+                    if ('isCompleted' in updates) {
+                        merged.completedAt = updates.isCompleted ? Date.now() : undefined;
+                    }
+                    return merged;
+                }),
             })),
 
             setFilter: (filter) => set({ filter }),
