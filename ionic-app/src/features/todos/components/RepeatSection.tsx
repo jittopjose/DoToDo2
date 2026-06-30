@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { IonIcon, IonLabel, IonPopover, IonSelect, IonSelectOption, IonToggle, IonDatetime } from '@ionic/react';
-import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline } from 'ionicons/icons';
+import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline, todayOutline, briefcaseOutline, optionsOutline } from 'ionicons/icons';
 import { Recurrence } from '../types';
 import { formatRecurrenceSummary } from '../utils/recurrence';
 
@@ -18,7 +18,7 @@ const FREQUENCIES = [
   { value: 'yearly' as const, label: 'Yearly' },
 ];
 
-const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WEEKDAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const CUSTOM_UNITS = [
@@ -27,6 +27,14 @@ const CUSTOM_UNITS = [
   { value: 'monthly' as const, label: 'Months' },
   { value: 'yearly' as const, label: 'Years' },
 ];
+
+const FREQUENCY_ICONS: Record<string, string> = {
+  daily: todayOutline,
+  weekdays: briefcaseOutline,
+  weekly: calendarOutline,
+  monthly: calendarOutline,
+  yearly: calendarOutline,
+};
 
 const MAX_INTERVAL = 99;
 
@@ -277,6 +285,7 @@ export const RepeatSection = memo(function RepeatSection({
               className={`repeat-chip${isActiveFreq(f.value) ? ' is-active' : ''}`}
               onClick={() => handleFrequencyClick(f.value)}
             >
+              <IonIcon icon={FREQUENCY_ICONS[f.value]} className="repeat-chip-icon" />
               {f.label}
             </button>
           ))}
@@ -284,6 +293,7 @@ export const RepeatSection = memo(function RepeatSection({
             className={`repeat-chip${customMode ? ' is-active' : ''}`}
             onClick={handleCustomClick}
           >
+            <IonIcon icon={optionsOutline} className="repeat-chip-icon" />
             Custom
           </button>
         </div>
@@ -346,17 +356,12 @@ export const RepeatSection = memo(function RepeatSection({
           <div className="repeat-end-section">
             <div className="repeat-end-toggle-row">
               <div>
-                <p className="repeat-end-label">Repeat until date</p>
+                <p className="repeat-end-label">End repeat</p>
                 {value.endType === 'until' && (
-                  <div className="repeat-end-date-row">
-                    <button className="repeat-end-date-label" onClick={openEndCalendar}>
-                      {formatEndDateLabel(value.endDate!)}
-                    </button>
-                    <button className="repeat-end-date-btn" onClick={openEndCalendar}>
-                      <IonIcon icon={calendarOutline} />
-                      <span>Change date</span>
-                    </button>
-                  </div>
+                  <button className="repeat-end-date-label" onClick={openEndCalendar}>
+                    <IonIcon icon={calendarOutline} className="repeat-end-date-icon" />
+                    {formatEndDateLabel(value.endDate!)}
+                  </button>
                 )}
               </div>
               <IonToggle
@@ -391,16 +396,16 @@ export const RepeatSection = memo(function RepeatSection({
         )}
 
         {value && nextOccurrence && (
-          <div className="repeat-preview">
+          <div className="repeat-preview-card">
             <IonIcon icon={calendarOutline} />
-            <span>Next: {formatPreview(nextOccurrence)}</span>
+            <span>Next: <strong>{formatPreview(nextOccurrence)}</strong></span>
           </div>
         )}
 
         {value && (
           <button className="repeat-remove-btn" onClick={handleRemove}>
             <IonIcon icon={closeOutline} />
-            <span>REMOVE REPEAT</span>
+            <span>Remove repeat</span>
           </button>
         )}
       </div>

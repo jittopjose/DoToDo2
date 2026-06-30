@@ -6,7 +6,7 @@
   box-shadow: 0 4px 20px rgba(31, 41, 55, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .repeat-summary-badge {
@@ -28,6 +28,9 @@
 }
 
 .repeat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 16px;
   border-radius: 999px;
   border: none;
@@ -41,6 +44,11 @@
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   white-space: nowrap;
+}
+
+.repeat-chip-icon {
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
 .repeat-chip:hover {
@@ -65,19 +73,20 @@
 }
 
 .repeat-weekday-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  padding: 0 10px;
+  min-width: 38px;
+  height: 34px;
+  border-radius: 999px;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--dotodo-surface);
   color: var(--dotodo-muted);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  line-height: 1;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   -webkit-tap-highlight-color: transparent;
@@ -88,9 +97,8 @@
 }
 
 .repeat-weekday-btn.is-active {
-  background: var(--dotodo-primary-fixed);
-  color: var(--dotodo-on-primary-fixed-variant);
-  box-shadow: 0 0 0 4px rgba(var(--dotodo-primary-rgb), 0.12);
+  background: var(--dotodo-primary);
+  color: var(--dotodo-primary-contrast);
 }
 
 .repeat-weekday-btn:active {
@@ -205,7 +213,10 @@
 }
 
 .repeat-end-date-label {
-  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -228,74 +239,59 @@
   opacity: 0.5;
 }
 
-.repeat-end-date-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.repeat-end-date-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 0;
-  border: none;
-  background: transparent;
-  color: var(--dotodo-primary);
+.repeat-end-date-icon {
   font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.repeat-end-date-btn ion-icon {
-  font-size: 16px;
-}
-
-.repeat-preview {
+.repeat-preview-card {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(var(--dotodo-primary-rgb), 0.06);
+  border-left: 3px solid var(--dotodo-primary);
+  border-radius: 0 10px 10px 0;
   font-size: 14px;
   font-weight: 400;
-  color: var(--dotodo-muted);
+  color: var(--dotodo-text);
 }
 
-.repeat-preview ion-icon {
-  font-size: 16px;
-  color: var(--dotodo-muted);
+.repeat-preview-card ion-icon {
+  font-size: 18px;
+  color: var(--dotodo-primary);
+  flex-shrink: 0;
+}
+
+.repeat-preview-card strong {
+  font-weight: 850;
 }
 
 .repeat-remove-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(var(--dotodo-danger-rgb), 0.2);
+  gap: 6px;
+  padding: 6px 0;
+  border: none;
   background: transparent;
-  color: var(--dotodo-danger);
-  font-size: 15px;
+  color: rgba(var(--dotodo-danger-rgb), 0.6);
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.25;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .repeat-remove-btn:hover {
-  background: rgba(var(--dotodo-danger-rgb), 0.05);
+  color: var(--dotodo-danger);
 }
 
 .repeat-remove-btn:active {
-  transform: scale(0.98);
+  color: var(--dotodo-danger);
 }
 
 .repeat-remove-btn ion-icon {
-  font-size: 20px;
+  font-size: 16px;
 }
