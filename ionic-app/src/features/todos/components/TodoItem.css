@@ -26,7 +26,7 @@
 
 .task-row {
   --background: var(--dotodo-card);
-  --border-radius: var(--dotodo-radius-lg);
+  --border-radius: 0;
   --padding-top: 8px;
   --padding-end: 14px;
   --padding-bottom: 8px;
