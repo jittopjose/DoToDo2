@@ -28,11 +28,7 @@ const getGreeting = (date = new Date()) => {
         return 'Good afternoon';
     }
 
-    if (hour < 21) {
-        return 'Good evening';
-    }
-
-    return 'Good night';
+    return 'Good evening';
 };
 
 const typeFilterButtons = [
