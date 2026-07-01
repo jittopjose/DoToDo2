@@ -41,56 +41,15 @@
   font-size: 14px;
 }
 
-.settings-theme-card {
-  margin: 0 6px;
-  border-radius: var(--dotodo-radius-lg);
-  border: 1px solid var(--dotodo-card-border);
-  box-shadow: var(--dotodo-shadow-card);
-  overflow: hidden;
+.settings-theme-list {
+  background: var(--dotodo-surface-strong);
 }
 
-.settings-theme-item {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  --inner-padding-end: 0;
+.settings-theme-list ion-item {
+  --background: transparent;
   --border-color: var(--dotodo-border);
-  --background: var(--dotodo-surface-strong);
-  cursor: pointer;
 }
 
-.settings-theme-item:last-child {
+.settings-theme-list ion-item:last-child {
   --border-color: transparent;
-}
-
-.settings-theme-item-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.settings-theme-item-content ion-icon {
-  font-size: 20px;
-  color: var(--dotodo-muted);
-  flex-shrink: 0;
-}
-
-.settings-theme-item-label {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.settings-theme-item-label span {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--dotodo-text);
-  letter-spacing: -0.01em;
-}
-
-.settings-theme-item-label small {
-  font-size: 12px;
-  color: var(--dotodo-muted);
-  font-weight: 600;
 }

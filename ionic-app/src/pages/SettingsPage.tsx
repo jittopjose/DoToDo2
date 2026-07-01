@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonItem, IonPage, IonRadio, IonRadioGroup } from '@ionic/react';
+import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonPage, IonRadio, IonRadioGroup } from '@ionic/react';
 import {
   colorPaletteOutline,
   desktopOutline,
@@ -36,20 +36,18 @@ const SettingsPage: React.FC = () => {
             <span>Appearance</span>
           </div>
 
-          <div className="settings-theme-card">
+          <IonList inset={true} className="settings-theme-list">
             <IonRadioGroup
               value={themePreference}
               onIonChange={handleThemeChange}
             >
               {themeOptions.map((option) => (
-                <IonItem key={option.value} className="settings-theme-item" lines="full">
-                  <div className="settings-theme-item-content">
-                    <IonIcon icon={option.icon} />
-                    <div className="settings-theme-item-label">
-                      <span>{option.label}</span>
-                      <small>{option.description}</small>
-                    </div>
-                  </div>
+                <IonItem key={option.value}>
+                  <IonIcon icon={option.icon} slot="start" />
+                  <IonLabel>
+                    <h2>{option.label}</h2>
+                    <p>{option.description}</p>
+                  </IonLabel>
                   <IonRadio
                     slot="end"
                     value={option.value}
@@ -59,7 +57,7 @@ const SettingsPage: React.FC = () => {
                 </IonItem>
               ))}
             </IonRadioGroup>
-          </div>
+          </IonList>
         </div>
       </IonContent>
     </IonPage>
