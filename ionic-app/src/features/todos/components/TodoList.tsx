@@ -167,7 +167,7 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                             <IonBadge className="todo-group-badge">{group.todos.length}</IonBadge>
                             <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
                         </div>
-                        <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''}`}>
+                        <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
                             {group.todos.map((todo) => (
                                 <TodoItem key={todo.id} todo={todo} />
                             ))}

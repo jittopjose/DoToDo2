@@ -1,3 +1,19 @@
+.group--today .task-row {
+  border-left-color: var(--dotodo-primary);
+}
+
+.group--tomorrow .task-row {
+  border-left-color: var(--dotodo-secondary);
+}
+
+.group--upcoming .task-row {
+  border-left-color: var(--ion-color-tertiary);
+}
+
+.group--later .task-row {
+  border-left-color: var(--dotodo-muted);
+}
+
 .task-row.is-overdue {
   border-left-color: rgba(var(--dotodo-danger-rgb), 0.55);
   background: linear-gradient(90deg, rgba(var(--dotodo-danger-rgb), 0.09) 0%, var(--dotodo-card) 28%);
