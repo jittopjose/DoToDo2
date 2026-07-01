@@ -77,6 +77,7 @@
   --ion-item-border-color: transparent;
   --ion-card-background: var(--dotodo-surface-strong);
   --ion-border-color: var(--dotodo-border);
+  --dotodo-tab-bar-bg: rgba(255, 250, 243, 0.82);
 
   color-scheme: light;
 }
@@ -196,6 +197,7 @@
     --ion-item-border-color: transparent;
     --ion-card-background: var(--dotodo-surface-strong);
     --ion-border-color: var(--dotodo-border);
+    --dotodo-tab-bar-bg: rgba(23, 26, 36, 0.78);
 
     color-scheme: dark;
   }

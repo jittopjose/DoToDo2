@@ -1,0 +1,126 @@
+.calendar-page {
+  --background: var(--dotodo-bg);
+}
+
+.calendar-content {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+}
+
+.calendar-header {
+  padding: 18px 18px 4px;
+}
+
+.calendar-header h1 {
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 26px;
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+/* =============== BODY WRAPPER =============== */
+
+.calendar-body {
+  /* portrait: natural block stacking */
+}
+
+/* =============== PICKER =============== */
+
+.calendar-picker {
+  margin: 8px 12px 0;
+  border-radius: var(--dotodo-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--dotodo-shadow-card);
+  border: 1px solid var(--dotodo-card-border);
+}
+
+.calendar-picker ion-datetime {
+  --background: var(--dotodo-surface-strong);
+  --wheel-highlight-background: var(--dotodo-primary-soft);
+  --wheel-fade-background-rgb: var(--dotodo-bg-rgb);
+  border-radius: var(--dotodo-radius-lg);
+  width: 100%;
+}
+
+/* =============== TASKS SECTION =============== */
+
+.calendar-tasks-section {
+  padding: 20px 12px 8px;
+}
+
+.calendar-tasks-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 6px;
+}
+
+.calendar-tasks-header h2 {
+  margin: 0;
+  color: var(--dotodo-text);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.calendar-tasks-header ion-icon {
+  font-size: 18px;
+  color: var(--dotodo-primary);
+}
+
+.calendar-tasks-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.calendar-tasks-empty ion-icon {
+  font-size: 32px;
+  color: var(--dotodo-muted);
+  opacity: 0.5;
+}
+
+.calendar-tasks-empty p {
+  margin: 0;
+  color: var(--dotodo-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* =============== LANDSCAPE / TABLET =============== */
+
+@media (min-width: 640px) {
+
+  .calendar-body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 0 12px 20px;
+  }
+
+  .calendar-picker {
+    margin: 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .calendar-picker ion-datetime {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calendar-tasks-section {
+    padding: 0;
+    min-width: 0;
+  }
+
+}
