@@ -20,6 +20,7 @@ const SettingsPage: React.FC = () => {
   const setThemePreference = useSettingsStore((state) => state.setThemePreference);
 
   const handleThemeChange = useCallback((e: CustomEvent) => {
+    console.log('[Settings] onIonChange fired, detail.value=', e.detail.value);
     setThemePreference(e.detail.value as ThemePreference);
   }, [setThemePreference]);
 

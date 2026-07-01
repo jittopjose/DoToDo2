@@ -63,7 +63,10 @@ const App: React.FC = () => {
     const applyTheme = () => {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = themePreference === 'dark' || (themePreference === 'system' && prefersDark);
+      console.log('[Theme] applyTheme: themePreference=%s prefersDark=%s isDark=%s', themePreference, prefersDark, isDark);
       document.body.classList.toggle('ion-palette-dark', isDark);
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      console.log('[Theme] body classList:', document.body.className);
     };
 
     applyTheme();
@@ -74,6 +77,8 @@ const App: React.FC = () => {
       return () => mq.removeEventListener('change', applyTheme);
     }
   }, [themePreference]);
+
+  console.log('[Theme] render: themePreference=%s', themePreference);
 
   return (
     <IonApp>

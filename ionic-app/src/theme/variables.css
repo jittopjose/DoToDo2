@@ -82,7 +82,6 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
 @font-face {
   font-family: 'Satoshi';
   src: url('/fonts/satoshi/Satoshi-Variable.woff2') format('woff2-variations');
@@ -123,84 +122,83 @@
   font-style: normal;
 }
 
-:root {
-    --dotodo-primary: #8b7cff;
-    --dotodo-primary-rgb: 139, 124, 255;
-    --dotodo-primary-contrast: #171923;
-    --dotodo-primary-soft: rgba(139, 124, 255, 0.18);
-    --dotodo-secondary: #a78bfa;
-    --dotodo-secondary-rgb: 167, 139, 250;
-    --dotodo-success: #34d399;
-    --dotodo-success-rgb: 52, 211, 153;
-    --dotodo-warning: #fbbf24;
-    --dotodo-warning-rgb: 251, 191, 36;
-    --dotodo-danger: #fb7185;
-    --dotodo-danger-rgb: 251, 113, 133;
-    --dotodo-bg: #11131c;
-    --dotodo-bg-rgb: 17, 19, 28;
-    --dotodo-surface: #171a24;
-    --dotodo-surface-strong: #1d2130;
-    --dotodo-card: rgba(29, 33, 48, 0.9);
-    --dotodo-text: #f5f7fb;
-    --dotodo-text-rgb: 245, 247, 251;
-    --dotodo-muted: #9aa3b2;
-    --dotodo-muted-rgb: 154, 163, 178;
-    --dotodo-border: rgba(245, 247, 251, 0.1);
-    --dotodo-card-border: rgba(255, 255, 255, 0.08);
-    --dotodo-card-padding: 18px;
-    --dotodo-primary-fixed: #3b2f9e;
-    --dotodo-on-primary-fixed-variant: #c6bfff;
-    --dotodo-section-gap: 24px;
-    --dotodo-radius-sm: 4px;
-    --dotodo-radius-md: 12px;
-    --dotodo-radius-lg: 16px;
-    --dotodo-radius-xl: 24px;
-    --dotodo-shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.28);
-    --dotodo-shadow-card: 0 8px 22px rgba(0, 0, 0, 0.2);
+.ion-palette-dark {
+  --dotodo-primary: #8b7cff;
+  --dotodo-primary-rgb: 139, 124, 255;
+  --dotodo-primary-contrast: #171923;
+  --dotodo-primary-soft: rgba(139, 124, 255, 0.18);
+  --dotodo-secondary: #a78bfa;
+  --dotodo-secondary-rgb: 167, 139, 250;
+  --dotodo-success: #34d399;
+  --dotodo-success-rgb: 52, 211, 153;
+  --dotodo-warning: #fbbf24;
+  --dotodo-warning-rgb: 251, 191, 36;
+  --dotodo-danger: #fb7185;
+  --dotodo-danger-rgb: 251, 113, 133;
+  --dotodo-bg: #11131c;
+  --dotodo-bg-rgb: 17, 19, 28;
+  --dotodo-surface: #171a24;
+  --dotodo-surface-strong: #1d2130;
+  --dotodo-card: rgba(29, 33, 48, 0.9);
+  --dotodo-text: #f5f7fb;
+  --dotodo-text-rgb: 245, 247, 251;
+  --dotodo-muted: #9aa3b2;
+  --dotodo-muted-rgb: 154, 163, 178;
+  --dotodo-border: rgba(245, 247, 251, 0.1);
+  --dotodo-card-border: rgba(255, 255, 255, 0.08);
+  --dotodo-card-padding: 18px;
+  --dotodo-primary-fixed: #3b2f9e;
+  --dotodo-on-primary-fixed-variant: #c6bfff;
+  --dotodo-section-gap: 24px;
+  --dotodo-radius-sm: 4px;
+  --dotodo-radius-md: 12px;
+  --dotodo-radius-lg: 16px;
+  --dotodo-radius-xl: 24px;
+  --dotodo-shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.28);
+  --dotodo-shadow-card: 0 8px 22px rgba(0, 0, 0, 0.2);
 
-    --ion-color-primary: var(--dotodo-primary);
-    --ion-color-primary-rgb: var(--dotodo-primary-rgb);
-    --ion-color-primary-contrast: var(--dotodo-primary-contrast);
-    --ion-color-primary-shade: #7364e8;
-    --ion-color-primary-tint: #9b8cff;
-    --ion-color-secondary: var(--dotodo-secondary);
-    --ion-color-secondary-rgb: var(--dotodo-secondary-rgb);
-    --ion-color-secondary-contrast: #171923;
-    --ion-color-tertiary: #2dd4bf;
-    --ion-color-tertiary-rgb: 45, 212, 191;
-    --ion-color-tertiary-contrast: #0f172a;
-    --ion-color-success: var(--dotodo-success);
-    --ion-color-success-rgb: var(--dotodo-success-rgb);
-    --ion-color-success-contrast: #052e24;
-    --ion-color-warning: var(--dotodo-warning);
-    --ion-color-warning-rgb: var(--dotodo-warning-rgb);
-    --ion-color-warning-contrast: #241b03;
-    --ion-color-danger: var(--dotodo-danger);
-    --ion-color-danger-rgb: var(--dotodo-danger-rgb);
-    --ion-color-danger-contrast: #3b0710;
-    --ion-color-light: var(--dotodo-surface-strong);
-    --ion-color-light-rgb: 29, 33, 48;
-    --ion-color-light-contrast: var(--dotodo-text);
-    --ion-color-medium: var(--dotodo-muted);
-    --ion-color-medium-rgb: 154, 163, 178;
-    --ion-color-medium-contrast: #171923;
-    --ion-color-dark: var(--dotodo-text);
-    --ion-color-dark-rgb: 245, 247, 251;
-    --ion-color-dark-contrast: #171923;
-    --ion-background-color: var(--dotodo-bg);
-    --ion-background-color-rgb: var(--dotodo-bg-rgb);
-    --ion-text-color: var(--dotodo-text);
-    --ion-text-color-rgb: var(--dotodo-text);
-    --ion-toolbar-background: transparent;
-    --ion-toolbar-color: var(--dotodo-text);
-    --ion-item-background: transparent;
-    --ion-item-border-color: transparent;
-    --ion-card-background: var(--dotodo-surface-strong);
-    --ion-border-color: var(--dotodo-border);
-    --dotodo-tab-bar-bg: rgba(23, 26, 36, 0.78);
+  --ion-color-primary: var(--dotodo-primary);
+  --ion-color-primary-rgb: var(--dotodo-primary-rgb);
+  --ion-color-primary-contrast: var(--dotodo-primary-contrast);
+  --ion-color-primary-shade: #7364e8;
+  --ion-color-primary-tint: #9b8cff;
+  --ion-color-secondary: var(--dotodo-secondary);
+  --ion-color-secondary-rgb: var(--dotodo-secondary-rgb);
+  --ion-color-secondary-contrast: #171923;
+  --ion-color-tertiary: #2dd4bf;
+  --ion-color-tertiary-rgb: 45, 212, 191;
+  --ion-color-tertiary-contrast: #0f172a;
+  --ion-color-success: var(--dotodo-success);
+  --ion-color-success-rgb: var(--dotodo-success-rgb);
+  --ion-color-success-contrast: #052e24;
+  --ion-color-warning: var(--dotodo-warning);
+  --ion-color-warning-rgb: var(--dotodo-warning-rgb);
+  --ion-color-warning-contrast: #241b03;
+  --ion-color-danger: var(--dotodo-danger);
+  --ion-color-danger-rgb: var(--dotodo-danger-rgb);
+  --ion-color-danger-contrast: #3b0710;
+  --ion-color-light: var(--dotodo-surface-strong);
+  --ion-color-light-rgb: 29, 33, 48;
+  --ion-color-light-contrast: var(--dotodo-text);
+  --ion-color-medium: var(--dotodo-muted);
+  --ion-color-medium-rgb: 154, 163, 178;
+  --ion-color-medium-contrast: #171923;
+  --ion-color-dark: var(--dotodo-text);
+  --ion-color-dark-rgb: 245, 247, 251;
+  --ion-color-dark-contrast: #171923;
+  --ion-background-color: var(--dotodo-bg);
+  --ion-background-color-rgb: var(--dotodo-bg-rgb);
+  --ion-text-color: var(--dotodo-text);
+  --ion-text-color-rgb: var(--dotodo-text);
+  --ion-toolbar-background: transparent;
+  --ion-toolbar-color: var(--dotodo-text);
+  --ion-item-background: transparent;
+  --ion-item-border-color: transparent;
+  --ion-card-background: var(--dotodo-surface-strong);
+  --ion-border-color: var(--dotodo-border);
+  --dotodo-tab-bar-bg: rgba(23, 26, 36, 0.78);
 
-    color-scheme: dark;
-  }
+  color-scheme: dark;
 }
 
 html,
