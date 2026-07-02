@@ -75,6 +75,11 @@
   color: var(--dotodo-primary);
 }
 
+.calendar-tasks-list {
+  background: transparent;
+  --ion-item-background: transparent;
+}
+
 .calendar-tasks-list .task-row:not(.is-completed) {
   border-left-color: var(--dotodo-primary);
 }
