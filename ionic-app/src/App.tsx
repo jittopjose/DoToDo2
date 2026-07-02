@@ -64,9 +64,9 @@ const App: React.FC = () => {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = themePreference === 'dark' || (themePreference === 'system' && prefersDark);
       console.log('[Theme] applyTheme: themePreference=%s prefersDark=%s isDark=%s', themePreference, prefersDark, isDark);
-      document.body.classList.toggle('ion-palette-dark', isDark);
+      document.documentElement.classList.toggle('ion-palette-dark', isDark);
       document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-      console.log('[Theme] body classList:', document.body.className);
+      console.log('[Theme] html classList:', document.documentElement.className);
     };
 
     applyTheme();

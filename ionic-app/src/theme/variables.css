@@ -263,6 +263,12 @@ ion-item {
   --padding-bottom: 10px;
 }
 
+ion-datetime {
+  --background: var(--dotodo-surface-strong);
+  --wheel-highlight-background: var(--dotodo-primary-soft);
+  --wheel-fade-background-rgb: var(--dotodo-bg-rgb);
+}
+
 ion-input,
 ion-textarea {
   --color: var(--dotodo-text);
