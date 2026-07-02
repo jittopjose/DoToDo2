@@ -83,7 +83,7 @@ const CalendarPage: React.FC = () => {
             </div>
 
             {dayTodos.length > 0 ? (
-              <IonList lines="none">
+              <IonList lines="none" className="calendar-tasks-list">
                 {dayTodos.map((todo) => (
                   <TodoItem key={todo.id} todo={todo} />
                 ))}
