@@ -2,7 +2,7 @@ import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTab
 import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
-import { Redirect, Route, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import Page from './pages/Page';
 import TodoEditPage from './pages/TodoEditPage';
 import CalendarPage from './pages/CalendarPage';
@@ -58,34 +58,6 @@ setupIonicReact({
 
 const history = createMemoryHistory();
 
-const TabBar: React.FC = () => {
-  const location = useLocation();
-  const path = location.pathname;
-
-  if (path.startsWith('/task/')) return null;
-
-  return (
-    <IonTabBar slot="bottom">
-      <IonTabButton tab="home" href="/list/All%20Lists" selected={path.startsWith('/list/')}>
-        <IonIcon icon={homeOutline} />
-        <IonLabel>Home</IonLabel>
-      </IonTabButton>
-      <IonTabButton tab="calendar" href="/calendar" selected={path.startsWith('/calendar')}>
-        <IonIcon icon={calendarOutline} />
-        <IonLabel>Calendar</IonLabel>
-      </IonTabButton>
-      <IonTabButton tab="stats" href="/stats" selected={path.startsWith('/stats')}>
-        <IonIcon icon={barChartOutline} />
-        <IonLabel>Stats</IonLabel>
-      </IonTabButton>
-      <IonTabButton tab="settings" href="/settings" selected={path.startsWith('/settings')}>
-        <IonIcon icon={settingsOutline} />
-        <IonLabel>Settings</IonLabel>
-      </IonTabButton>
-    </IonTabBar>
-  );
-};
-
 const App: React.FC = () => {
   const themePreference = useSettingsStore((state) => state.themePreference);
   const isHydrated = useTodoStore((state) => state.isHydrated);
@@ -131,29 +103,50 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter history={history}>
-        <IonTabs>
-          <IonRouterOutlet id="main">
-            <Route path="/task/:id/edit" exact>
-              <TodoEditPage />
-            </Route>
-            <Route path="/" exact>
-              <Redirect to="/list/All%20Lists" />
-            </Route>
-            <Route path="/list/:name" exact>
-              <Page />
-            </Route>
-            <Route path="/calendar" exact>
-              <CalendarPage />
-            </Route>
-            <Route path="/stats" exact>
-              <StatsPage />
-            </Route>
-            <Route path="/settings" exact>
-              <SettingsPage />
-            </Route>
-          </IonRouterOutlet>
-          <TabBar />
-        </IonTabs>
+        <Switch>
+          <Route path="/task/:id/edit" exact>
+            <TodoEditPage />
+          </Route>
+          <Route>
+            <IonTabs>
+              <IonRouterOutlet id="main">
+                <Route path="/" exact>
+                  <Redirect to="/list/All%20Lists" />
+                </Route>
+                <Route path="/list/:name" exact>
+                  <Page />
+                </Route>
+                <Route path="/calendar" exact>
+                  <CalendarPage />
+                </Route>
+                <Route path="/stats" exact>
+                  <StatsPage />
+                </Route>
+                <Route path="/settings" exact>
+                  <SettingsPage />
+                </Route>
+              </IonRouterOutlet>
+              <IonTabBar slot="bottom">
+                <IonTabButton tab="home" href="/list/All%20Lists">
+                  <IonIcon icon={homeOutline} />
+                  <IonLabel>Home</IonLabel>
+                </IonTabButton>
+                <IonTabButton tab="calendar" href="/calendar">
+                  <IonIcon icon={calendarOutline} />
+                  <IonLabel>Calendar</IonLabel>
+                </IonTabButton>
+                <IonTabButton tab="stats" href="/stats">
+                  <IonIcon icon={barChartOutline} />
+                  <IonLabel>Stats</IonLabel>
+                </IonTabButton>
+                <IonTabButton tab="settings" href="/settings">
+                  <IonIcon icon={settingsOutline} />
+                  <IonLabel>Settings</IonLabel>
+                </IonTabButton>
+              </IonTabBar>
+            </IonTabs>
+          </Route>
+        </Switch>
       </IonReactRouter>
     </IonApp>
   );
