@@ -7,10 +7,11 @@ import {
     listOutline,
     searchOutline,
 } from 'ionicons/icons';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
-import { useTodoStore } from '../features/todos/store/todoStore';
-import { TodoTypeFilter } from '../features/todos/types';
+import { useShallow } from 'zustand/react/shallow';
+import { useTodoStore, selectFilteredEntries } from '../features/todos/store/todoStore';
+import type { ItemType } from '../features/todos/types';
 import { TodoInput } from '../features/todos/components/TodoInput';
 import { TodoList } from '../features/todos/components/TodoList';
 import './Page.css';
@@ -48,34 +49,8 @@ const Page: React.FC = () => {
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
     const setTypeFilter = useTodoStore((state) => state.setTypeFilter);
-    const todos = useTodoStore((state) => state.todos);
-    const filter = useTodoStore((state) => state.filter);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
-    const normalizedSearchTerm = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
-
-    const listTodos = useMemo(() => {
-        let filtered = todos.filter((t: typeof todos[0]) => t.list === list);
-
-        if (typeFilter && typeFilter !== 'all') {
-            filtered = filtered.filter((t: typeof todos[0]) => t.itemType === typeFilter);
-        }
-
-        if (normalizedSearchTerm) {
-            filtered = filtered.filter((t: typeof todos[0]) =>
-                t.title.toLowerCase().includes(normalizedSearchTerm) ||
-                (t.description && t.description.toLowerCase().includes(normalizedSearchTerm))
-            );
-        }
-
-        switch (filter) {
-            case 'active':
-                return filtered.filter((t: typeof todos[0]) => !t.isCompleted);
-            case 'completed':
-                return filtered.filter((t: typeof todos[0]) => t.isCompleted);
-            default:
-                return filtered;
-        }
-    }, [todos, list, typeFilter, normalizedSearchTerm, filter]);
+    const listTodos = useTodoStore(useShallow(selectFilteredEntries(list)));
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -122,7 +97,7 @@ const Page: React.FC = () => {
         setIsSearchOpen(false);
     }, [setSearchTerm]);
 
-    const handleTypeFilterSelect = useCallback((nextTypeFilter: TodoTypeFilter) => {
+    const handleTypeFilterSelect = useCallback((nextTypeFilter: ItemType | 'all') => {
         setTypeFilter(typeFilter === nextTypeFilter ? 'all' : nextTypeFilter);
         setSearchTerm('');
     }, [setSearchTerm, setTypeFilter, typeFilter]);
@@ -130,7 +105,7 @@ const Page: React.FC = () => {
     const handleTypeFilterSelectClick = useCallback((event: React.MouseEvent) => {
         const target = event.target as HTMLElement | null;
         const button = target?.closest<HTMLIonButtonElement>('.type-filter-button');
-        const value = button?.dataset.typeFilter as TodoTypeFilter | undefined;
+        const value = button?.dataset.typeFilter as ItemType | 'all' | undefined;
 
         if (!value) return;
 

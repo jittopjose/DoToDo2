@@ -1,5 +1,7 @@
 export type TodoPriority = 'low' | 'medium' | 'high';
 
+export type ItemType = 'todo' | 'shopping' | 'note' | 'checklist';
+
 export interface Recurrence {
   frequency: 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
   interval: number
@@ -10,22 +12,27 @@ export interface Recurrence {
   originDate: number
 }
 
-export interface Todo {
+export interface BaseItem {
     id: string;
     title: string;
     isCompleted: boolean;
     createdAt: number;
     list: string;
-    itemType: 'todo' | 'shopping' | 'note' | 'checklist';
+    itemType: ItemType;
+    completedAt?: number;
+}
+
+export interface Todo extends BaseItem {
     description?: string;
     quantity?: number;
     price?: number;
     subtasks?: TodoSubtask[];
     dueDate?: number;
-    completedAt?: number;
     priority?: TodoPriority;
     recurrence?: Recurrence;
 }
+
+export type AnyItem = Todo;
 
 export interface TodoSubtask {
     id: string;
@@ -34,4 +41,4 @@ export interface TodoSubtask {
 }
 
 export type TodoFilter = 'all' | 'active' | 'completed';
-export type TodoTypeFilter = Todo['itemType'] | 'all';
+export type TodoTypeFilter = ItemType | 'all';

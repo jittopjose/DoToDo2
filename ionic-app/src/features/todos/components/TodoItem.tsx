@@ -39,8 +39,8 @@ const priorityLevelValues: Array<TodoPriority | undefined> = ['low', 'medium', '
 
 export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     const history = useHistory();
-    const toggleTodo = useTodoStore((state) => state.toggleTodo);
-    const updateTodo = useTodoStore((state) => state.updateTodo);
+    const toggleTodo = useTodoStore((state) => state.toggleEntry);
+    const updateTodo = useTodoStore((state) => state.updateEntry);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
 
     const handleDueCalendarDismiss = useCallback(() => {

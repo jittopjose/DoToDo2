@@ -9,8 +9,9 @@ import {
     sunnyOutline,
     timeOutline,
 } from 'ionicons/icons';
-import { useTodoStore } from '../store/todoStore';
-import { TodoTypeFilter, Todo } from '../types';
+import { useShallow } from 'zustand/react/shallow';
+import { useTodoStore, selectFilteredEntries, selectCompletedCount, selectEntryCountByListAndType } from '../store/todoStore';
+import { AnyItem, ItemType } from '../types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
 import './TodoList.css';
@@ -30,7 +31,7 @@ interface TodoListProps {
     list: string;
 }
 
-const typeLabels: Record<Exclude<TodoTypeFilter, 'all'>, string> = {
+const typeLabels: Record<ItemType, string> = {
     todo: 'Task',
     shopping: 'Shopping',
     note: 'Note',
@@ -39,19 +40,19 @@ const typeLabels: Record<Exclude<TodoTypeFilter, 'all'>, string> = {
 
 interface TaskGroup {
     title: string;
-    todos: Todo[];
+    entries: AnyItem[];
 }
 
 const defaultExpanded = new Set(['Overdue', 'Today']);
 
 export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const [expanded, setExpanded] = useState<Set<string>>(defaultExpanded);
-    const todos = useTodoStore((state) => state.todos);
-    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
-    const searchTerm = useTodoStore((state) => state.searchTerm);
+    const filteredEntries = useTodoStore(useShallow(selectFilteredEntries(list)));
     const filter = useTodoStore((state) => state.filter);
     const setFilter = useTodoStore((state) => state.setFilter);
-    const totalCompletedCount = useMemo(() => todos.filter((t) => t.isCompleted).length, [todos]);
+    const searchTerm = useTodoStore((state) => state.searchTerm);
+    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
+    const totalCompletedCount = useTodoStore(selectCompletedCount);
     const hasMoreCompleted = filter !== 'completed' && totalCompletedCount > COMPLETED_LIMIT;
 
     const toggleGroup = useCallback((title: string) => {
@@ -66,78 +67,53 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
         });
     }, []);
 
-    const filteredTodos = useMemo(() => {
-        let filtered = todos.filter((t) => t.list === list);
-
-        if (typeFilter && typeFilter !== 'all') {
-            filtered = filtered.filter((t) => t.itemType === typeFilter);
-        }
-
-        if (searchTerm && searchTerm.trim()) {
-            const term = searchTerm.toLowerCase();
-            filtered = filtered.filter((t) =>
-                t.title.toLowerCase().includes(term) ||
-                (t.description && t.description.toLowerCase().includes(term))
-            );
-        }
-
-        switch (filter) {
-            case 'active':
-                return filtered.filter((t) => !t.isCompleted);
-            case 'completed':
-                return filtered.filter((t) => t.isCompleted);
-            default:
-                return filtered;
-        }
-    }, [todos, list, typeFilter, searchTerm, filter]);
-
-    const groupedTodos = useMemo(() => {
+    const groupedEntries = useMemo(() => {
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const startOfTomorrow = new Date(startOfToday);
         startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
         const groups: TaskGroup[] = [
-            { title: 'Overdue', todos: [] },
-            { title: 'Today', todos: [] },
-            { title: 'Tomorrow', todos: [] },
-            { title: 'Upcoming', todos: [] },
-            { title: 'Later', todos: [] },
-            { title: 'Completed', todos: [] },
+            { title: 'Overdue', entries: [] },
+            { title: 'Today', entries: [] },
+            { title: 'Tomorrow', entries: [] },
+            { title: 'Upcoming', entries: [] },
+            { title: 'Later', entries: [] },
+            { title: 'Completed', entries: [] },
         ];
 
-        filteredTodos.forEach((todo) => {
-            if (todo.isCompleted) {
-                groups[5].todos.push(todo);
-            } else if (isOverdue(todo)) {
-                groups[0].todos.push(todo);
-            } else if (todo.dueDate) {
-                const dueDay = new Date(todo.dueDate);
+        filteredEntries.forEach((entry) => {
+            if (entry.isCompleted) {
+                groups[5].entries.push(entry);
+            } else if (isOverdue(entry)) {
+                groups[0].entries.push(entry);
+            } else if (entry.dueDate) {
+                const dueDay = new Date(entry.dueDate);
                 const startOfDue = new Date(dueDay.getFullYear(), dueDay.getMonth(), dueDay.getDate());
 
                 if (startOfDue.getTime() === startOfToday.getTime()) {
-                    groups[1].todos.push(todo);
+                    groups[1].entries.push(entry);
                 } else if (startOfDue.getTime() === startOfTomorrow.getTime()) {
-                    groups[2].todos.push(todo);
+                    groups[2].entries.push(entry);
                 } else {
                     const diffDays = Math.round((startOfDue.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
                     if (diffDays >= 2 && diffDays <= 7) {
-                        groups[3].todos.push(todo);
+                        groups[3].entries.push(entry);
                     } else {
-                        groups[4].todos.push(todo);
+                        groups[4].entries.push(entry);
                     }
                 }
             } else {
-                groups[4].todos.push(todo);
+                groups[4].entries.push(entry);
             }
         });
 
-        if (filter !== 'completed' && groups[5].todos.length > COMPLETED_LIMIT) {
-            groups[5].todos.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
-            groups[5].todos = groups[5].todos.slice(0, COMPLETED_LIMIT);
+        if (filter !== 'completed' && groups[5].entries.length > COMPLETED_LIMIT) {
+            groups[5].entries.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+            groups[5].entries = groups[5].entries.slice(0, COMPLETED_LIMIT);
         }
 
-        const filteredGroups = groups.filter((g) => g.todos.length > 0);
+        const filteredGroups = groups.filter((g) => g.entries.length > 0);
 
         if (filter === 'active') {
             return filteredGroups.filter((g) => g.title !== 'Completed');
@@ -148,18 +124,16 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
         }
 
         return filteredGroups;
-    }, [filteredTodos, filter]);
+    }, [filteredEntries, filter]);
 
-    const totalInFilteredList = todos.filter((todo) =>
-        todo.list === list && (typeFilter === 'all' || todo.itemType === typeFilter)
-    ).length;
+    const totalInFilteredList = useTodoStore(selectEntryCountByListAndType(list));
     const isEmptyList = totalInFilteredList === 0;
     const isSearchActive = searchTerm && searchTerm.trim().length > 0;
-    const hasAnyGroup = groupedTodos.length > 0;
+    const hasAnyGroup = groupedEntries.length > 0;
 
     return (
         <IonList className="todo-list" lines="none">
-            {groupedTodos.map((group) => {
+            {groupedEntries.map((group) => {
                 const cfg = groupConfig[group.title];
                 const isExpanded = expanded.has(group.title);
                 return (
@@ -174,12 +148,12 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                         >
                             {cfg && <IonIcon icon={cfg.icon} className="todo-group-icon" />}
                             <h2 className="todo-group-title">{group.title}</h2>
-                            <IonBadge className="todo-group-badge">{group.todos.length}</IonBadge>
+                            <IonBadge className="todo-group-badge">{group.entries.length}</IonBadge>
                             <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
                         </div>
                         <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
-                            {isExpanded && group.todos.map((todo) => (
-                                <TodoItem key={todo.id} todo={todo} />
+                            {isExpanded && group.entries.map((entry) => (
+                                <TodoItem key={entry.id} todo={entry} />
                             ))}
                             {group.title === 'Completed' && hasMoreCompleted && isExpanded && (
                                 <div className="todo-group-view-all">

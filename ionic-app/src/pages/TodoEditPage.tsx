@@ -16,7 +16,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/todos/components/TodoItemEditorSheet.sections';
 import { RepeatSection } from '../features/todos/components/RepeatSection';
 import { Todo } from '../features/todos/types';
-import { useTodoStore } from '../features/todos/store/todoStore';
+import { useTodoStore, selectEntryById } from '../features/todos/store/todoStore';
 import { getSubtaskProgress } from '../features/todos/components/TodoItem.utils';
 import '../features/todos/components/TodoItem.css';
 import '../features/todos/components/RepeatSection.css';
@@ -25,13 +25,13 @@ import './TodoEditPage.css';
 const TodoEditPage: React.FC = () => {
     const history = useHistory();
     const { id } = useParams<{ id: string }>();
-    const todo = useTodoStore((state) => state.todos.find((item) => item.id === id));
+    const todo = useTodoStore(selectEntryById(id));
     const addSubtask = useTodoStore((state) => state.addSubtask);
     const updateSubtask = useTodoStore((state) => state.updateSubtask);
     const deleteSubtask = useTodoStore((state) => state.deleteSubtask);
-    const deleteTodo = useTodoStore((state) => state.deleteTodo);
+    const deleteEntry = useTodoStore((state) => state.deleteEntry);
     const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
-    const updateTodo = useTodoStore((state) => state.updateTodo);
+    const updateEntry = useTodoStore((state) => state.updateEntry);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [newSubtaskText, setNewSubtaskText] = useState('');
@@ -51,19 +51,19 @@ const TodoEditPage: React.FC = () => {
 
     const handleSave = useCallback(() => {
         if (!todo) return;
-        updateTodo(todo.id, {
+        updateEntry(todo.id, {
             title: title.trim() || todo.title,
             description: description.trim() || undefined,
             recurrence: recurrence,
         });
         goBack();
-    }, [description, goBack, recurrence, title, todo, updateTodo]);
+    }, [description, goBack, recurrence, title, todo, updateEntry]);
 
     const handleDelete = useCallback(() => {
         if (!todo) return;
-        deleteTodo(todo.id);
+        deleteEntry(todo.id);
         goBack();
-    }, [deleteTodo, goBack, todo]);
+    }, [deleteEntry, goBack, todo]);
 
     const handleAddSubtask = useCallback(() => {
         if (!todo) return;

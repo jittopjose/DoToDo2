@@ -1,261 +1,310 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import { Recurrence, Todo, TodoFilter, TodoPriority, TodoTypeFilter } from '../types';
+import { AnyItem, Recurrence, TodoFilter, TodoPriority } from '../types';
 import { getDefaultDueTimestamp } from '../components/TodoItem.utils';
 import { getNextDueDate } from '../utils/recurrence';
 import { loadData, saveData } from '../../../services/todo-storage.service';
 
 const defaultLists = ['All Lists'];
 
-interface TodoState {
-    todos: Todo[];
-    filter: TodoFilter;
-    typeFilter: TodoTypeFilter;
-    searchTerm: string;
-    customLists: string[];
-    isHydrated: boolean;
+interface EntryState {
+  entries: Record<string, AnyItem>;
+  entryIds: string[];
+  filter: TodoFilter;
+  typeFilter: AnyItem['itemType'] | 'all';
+  searchTerm: string;
+  customLists: string[];
+  isHydrated: boolean;
 
-    // Actions
-    hydrate: () => Promise<void>;
-    addTodo: (title: string, itemType: Todo['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: Todo['subtasks'], list?: string, recurrence?: Recurrence) => void;
-    addSubtask: (todoId: string, title: string) => void;
-    updateSubtask: (todoId: string, subtaskId: string, title: string) => void;
-    deleteSubtask: (todoId: string, subtaskId: string) => void;
-    toggleTodo: (id: string) => void;
-    toggleSubtask: (todoId: string, subtaskId: string) => void;
-    deleteTodo: (id: string) => void;
-    updateTodo: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence'>>) => void;
-    setFilter: (filter: TodoFilter) => void;
-    setTypeFilter: (typeFilter: TodoTypeFilter) => void;
-    setSearchTerm: (term: string) => void;
-    clearCompleted: () => void;
-    addList: (list: string) => void;
-
-    // Computed (helper)
-    getFilteredTodos: (list: string) => Todo[];
-    getActiveCount: () => number;
-    getCompletedCount: () => number;
+  hydrate: () => Promise<void>;
+  addEntry: (title: string, itemType: AnyItem['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: AnyItem['subtasks'], list?: string, recurrence?: Recurrence) => void;
+  addSubtask: (entryId: string, title: string) => void;
+  updateSubtask: (entryId: string, subtaskId: string, title: string) => void;
+  deleteSubtask: (entryId: string, subtaskId: string) => void;
+  toggleEntry: (id: string) => void;
+  toggleSubtask: (entryId: string, subtaskId: string) => void;
+  deleteEntry: (id: string) => void;
+  updateEntry: (id: string, updates: Partial<Pick<AnyItem, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence' | 'isCompleted'>>) => void;
+  setFilter: (filter: TodoFilter) => void;
+  setTypeFilter: (typeFilter: AnyItem['itemType'] | 'all') => void;
+  setSearchTerm: (term: string) => void;
+  clearCompleted: () => void;
+  addList: (list: string) => void;
 }
 
-const getFilteredTodos = (todos: Todo[], list: string, filter: TodoFilter, typeFilter: TodoTypeFilter, searchTerm: string): Todo[] => {
-    let filtered = todos;
+function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): (...args: Parameters<T>) => void {
+  let timer: ReturnType<typeof setTimeout>;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+}
 
-    if (list && list.trim()) {
-        filtered = filtered.filter((t) => t.list === list);
-    }
+export const useTodoStore = create<EntryState>()(
+  (set, get) => ({
+    entries: {},
+    entryIds: [],
+    filter: 'all',
+    typeFilter: 'all',
+    searchTerm: '',
+    customLists: [],
+    isHydrated: false,
 
-    if (typeFilter && typeFilter !== 'all') {
-        filtered = filtered.filter((t) => t.itemType === typeFilter);
-    }
+    hydrate: async () => {
+      const data = await loadData()
+      const entries: Record<string, AnyItem> = {}
+      const entryIds: string[] = []
+      for (const item of data.entries) {
+        entries[item.id] = item
+        entryIds.push(item.id)
+      }
+      set({
+        entries,
+        entryIds,
+        customLists: data.customLists,
+        isHydrated: true,
+      })
+    },
 
-    // Apply search filter next
-    if (searchTerm && searchTerm.trim()) {
-        const term = searchTerm.toLowerCase();
-        filtered = filtered.filter((t) =>
-            t.title.toLowerCase().includes(term) ||
-            (t.description && t.description.toLowerCase().includes(term))
-        );
-    }
+    addEntry: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists', recurrence) => {
+      const typeFilterOrDefault = get().typeFilter || 'all';
+      const defaultDueDate = getDefaultDueTimestamp();
+      const id = uuidv4();
+      const entry: AnyItem = {
+        id,
+        title,
+        isCompleted: false,
+        createdAt: Date.now(),
+        list,
+        itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
+        dueDate: dueDate ?? defaultDueDate,
+        ...(description !== undefined && { description }),
+        ...(priority !== undefined && { priority }),
+        ...(quantity !== undefined && { quantity }),
+        ...(price !== undefined && { price }),
+        ...(subtasks !== undefined && { subtasks }),
+        ...(recurrence !== undefined && { recurrence }),
+      };
+      set((state) => ({
+        entries: { ...state.entries, [id]: entry },
+        entryIds: [id, ...state.entryIds],
+      }));
+    },
 
-    // Apply status filter
-    switch (filter) {
-        case 'active':
-            return filtered.filter((t) => !t.isCompleted);
-        case 'completed':
-            return filtered.filter((t) => t.isCompleted);
-        default:
-            return filtered;
-    }
-};
+    toggleEntry: (id) => set((state) => {
+      const entry = state.entries[id];
+      if (!entry) return state;
 
-export const useTodoStore = create<TodoState>()(
-    (set, get) => ({
-        todos: [],
-        filter: 'all',
-        typeFilter: 'all',
-        searchTerm: '',
-        customLists: [],
-        isHydrated: false,
+      if (!entry.isCompleted && entry.recurrence) {
+        const nextDue = getNextDueDate(entry);
+        if (nextDue) {
+          const isPastEnd = entry.recurrence.endType === 'until' &&
+                            entry.recurrence.endDate !== undefined &&
+                            nextDue > entry.recurrence.endDate;
 
-        hydrate: async () => {
-            const data = await loadData()
-            set({
-                todos: data.todos,
-                customLists: data.customLists,
-                isHydrated: true,
-            })
+          const cloneId = uuidv4();
+          const clone: AnyItem = {
+            ...entry,
+            id: cloneId,
+            isCompleted: false,
+            createdAt: Date.now(),
+            dueDate: nextDue,
+            subtasks: entry.subtasks?.map(s => ({ ...s, isCompleted: false })),
+            recurrence: isPastEnd ? undefined : { ...entry.recurrence },
+          };
+
+          return {
+            entries: {
+              ...state.entries,
+              [id]: { ...entry, isCompleted: true, completedAt: Date.now(), recurrence: undefined },
+              [cloneId]: clone,
+            },
+            entryIds: [cloneId, ...state.entryIds],
+          };
+        }
+      }
+
+      return {
+        entries: {
+          ...state.entries,
+          [id]: { ...entry, isCompleted: !entry.isCompleted, completedAt: !entry.isCompleted ? Date.now() : undefined },
         },
+      };
+    }),
 
-        addTodo: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists', recurrence) => {
-            const typeFilterOrDefault = get().typeFilter || 'all';
-            const defaultDueDate = getDefaultDueTimestamp();
-            set((state) => ({
-                todos: [
-                    {
-                        id: uuidv4(),
-                        title,
-                        isCompleted: false,
-                        createdAt: Date.now(),
-                        list,
-                        itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
-                        dueDate: dueDate ?? defaultDueDate,
-                        ...(description !== undefined && { description }),
-                        ...(priority !== undefined && { priority }),
-                        ...(quantity !== undefined && { quantity }),
-                        ...(price !== undefined && { price }),
-                        ...(subtasks !== undefined && { subtasks }),
-                        ...(recurrence !== undefined && { recurrence }),
-                    },
-                    ...state.todos,
-                ],
-            }));
+    toggleSubtask: (entryId, subtaskId) => set((state) => {
+      const entry = state.entries[entryId];
+      if (!entry || !entry.subtasks) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [entryId]: {
+            ...entry,
+            subtasks: entry.subtasks.map((subtask) =>
+              subtask.id === subtaskId ? { ...subtask, isCompleted: !subtask.isCompleted } : subtask
+            ),
+          },
         },
+      };
+    }),
 
-        toggleTodo: (id) => set((state) => {
-            const todo = state.todos.find(t => t.id === id);
-            if (!todo) return state;
-
-            if (!todo.isCompleted && todo.recurrence) {
-                const nextDue = getNextDueDate(todo);
-                if (nextDue) {
-                    const isPastEnd = todo.recurrence.endType === 'until' &&
-                                      todo.recurrence.endDate !== undefined &&
-                                      nextDue > todo.recurrence.endDate;
-
-                    const clone: Todo = {
-                        ...todo,
-                        id: uuidv4(),
-                        isCompleted: false,
-                        createdAt: Date.now(),
-                        dueDate: nextDue,
-                        subtasks: todo.subtasks?.map(s => ({ ...s, isCompleted: false })),
-                        recurrence: isPastEnd ? undefined : { ...todo.recurrence },
-                    };
-
-                        return {
-                            todos: [
-                                clone,
-                                ...state.todos.map(t =>
-                                    t.id === id ? { ...t, isCompleted: true, completedAt: Date.now(), recurrence: undefined } : t
-                                ),
-                            ],
-                        };
-                }
-            }
-
-            return {
-                todos: state.todos.map(t =>
-                    t.id === id
-                        ? { ...t, isCompleted: !t.isCompleted, completedAt: !t.isCompleted ? Date.now() : undefined }
-                        : t
-                ),
-            };
-        }),
-
-        toggleSubtask: (todoId, subtaskId) => set((state) => ({
-            todos: state.todos.map((todo) => {
-                if (todo.id !== todoId) return todo;
-                if (!todo.subtasks) return todo;
-                return {
-                    ...todo,
-                    subtasks: todo.subtasks.map((subtask) =>
-                        subtask.id === subtaskId ? { ...subtask, isCompleted: !subtask.isCompleted } : subtask
-                    )
-                };
-            }),
-        })),
-
-        addSubtask: (todoId, title) => set((state) => ({
-            todos: state.todos.map((todo) => {
-                if (todo.id !== todoId) return todo;
-                const newSubtask = { id: uuidv4(), title, isCompleted: false };
-                return {
-                    ...todo,
-                    subtasks: [...(todo.subtasks || []), newSubtask]
-                };
-            })
-        })),
-
-        updateSubtask: (todoId, subtaskId, title) => set((state) => ({
-            todos: state.todos.map((todo) => {
-                if (todo.id !== todoId) return todo;
-                if (!todo.subtasks) return todo;
-                return {
-                    ...todo,
-                    subtasks: todo.subtasks.map((subtask) =>
-                        subtask.id === subtaskId ? { ...subtask, title } : subtask
-                    )
-                };
-            }),
-        })),
-
-        deleteSubtask: (todoId, subtaskId) => set((state) => ({
-            todos: state.todos.map((todo) => {
-                if (todo.id !== todoId) return todo;
-                if (!todo.subtasks) return todo;
-                return {
-                    ...todo,
-                    subtasks: todo.subtasks.filter((subtask) => subtask.id !== subtaskId)
-                };
-            }),
-        })),
-
-        deleteTodo: (id) => set((state) => ({
-            todos: state.todos.filter((todo) => todo.id !== id),
-        })),
-
-        updateTodo: (id, updates) => set((state) => ({
-            todos: state.todos.map((todo) => {
-                if (todo.id !== id) return todo;
-                const merged = { ...todo, ...updates };
-                if ('isCompleted' in updates) {
-                    merged.completedAt = updates.isCompleted ? Date.now() : undefined;
-                }
-                return merged;
-            }),
-        })),
-
-        setFilter: (filter) => set({ filter }),
-
-        setTypeFilter: (typeFilter) => set({ typeFilter }),
-
-        setSearchTerm: (term) => set({ searchTerm: term }),
-
-        clearCompleted: () => set((state) => ({
-            todos: state.todos.filter((todo) => !todo.isCompleted),
-        })),
-
-        addList: (list) => set((state) => {
-            const normalized = list.trim();
-            if (!normalized) return state;
-            if (defaultLists.includes(normalized) || state.customLists.includes(normalized)) return state;
-            return { customLists: [...state.customLists, normalized] };
-        }),
-
-        getFilteredTodos: (list) => {
-            const { todos, filter, typeFilter, searchTerm } = get();
-            return getFilteredTodos(todos, list, filter, typeFilter || 'all', searchTerm);
+    addSubtask: (entryId, title) => set((state) => {
+      const entry = state.entries[entryId];
+      if (!entry) return state;
+      const newSubtask = { id: uuidv4(), title, isCompleted: false };
+      return {
+        entries: {
+          ...state.entries,
+          [entryId]: { ...entry, subtasks: [...(entry.subtasks || []), newSubtask] },
         },
+      };
+    }),
 
-        getActiveCount: () => {
-            const { todos } = get();
-            return todos.filter((t) => !t.isCompleted).length;
+    updateSubtask: (entryId, subtaskId, title) => set((state) => {
+      const entry = state.entries[entryId];
+      if (!entry || !entry.subtasks) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [entryId]: {
+            ...entry,
+            subtasks: entry.subtasks.map((subtask) =>
+              subtask.id === subtaskId ? { ...subtask, title } : subtask
+            ),
+          },
         },
+      };
+    }),
 
-        getCompletedCount: () => {
-            const { todos } = get();
-            return todos.filter((t) => t.isCompleted).length;
+    deleteSubtask: (entryId, subtaskId) => set((state) => {
+      const entry = state.entries[entryId];
+      if (!entry || !entry.subtasks) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [entryId]: { ...entry, subtasks: entry.subtasks.filter((subtask) => subtask.id !== subtaskId) },
         },
-    })
+      };
+    }),
+
+    deleteEntry: (id) => set((state) => {
+      const rest = { ...state.entries };
+      delete rest[id];
+      return {
+        entries: rest,
+        entryIds: state.entryIds.filter((eid) => eid !== id),
+      };
+    }),
+
+    updateEntry: (id, updates) => set((state) => {
+      const entry = state.entries[id];
+      if (!entry) return state;
+      const merged = { ...entry, ...updates };
+      if ('isCompleted' in updates) {
+        merged.completedAt = updates.isCompleted ? Date.now() : undefined;
+      }
+      return {
+        entries: { ...state.entries, [id]: merged },
+      };
+    }),
+
+    setFilter: (filter) => set({ filter }),
+
+    setTypeFilter: (typeFilter) => set({ typeFilter }),
+
+    setSearchTerm: (term) => set({ searchTerm: term }),
+
+    clearCompleted: () => set((state) => {
+      const newEntries = { ...state.entries };
+      const completedIds: string[] = [];
+      for (const id of state.entryIds) {
+        if (state.entries[id].isCompleted) {
+          delete newEntries[id];
+          completedIds.push(id);
+        }
+      }
+      return {
+        entries: newEntries,
+        entryIds: state.entryIds.filter((id) => !state.entries[id].isCompleted),
+      };
+    }),
+
+    addList: (list) => set((state) => {
+      const normalized = list.trim();
+      if (!normalized) return state;
+      if (defaultLists.includes(normalized) || state.customLists.includes(normalized)) return state;
+      return { customLists: [...state.customLists, normalized] };
+    }),
+  })
 );
 
-let prevTodos: Todo[] | undefined
-let prevCustomLists: string[] | undefined
+const schedulePersist = debounce(() => {
+  const { entries, entryIds, customLists, isHydrated } = useTodoStore.getState();
+  if (!isHydrated) return;
+  saveData({ entries: entryIds.map((id) => entries[id]), customLists }).catch(() => {});
+}, 500);
 
-useTodoStore.subscribe((state) => {
-    if (!state.isHydrated) return
-    if (state.todos === prevTodos && state.customLists === prevCustomLists) return
-    prevTodos = state.todos
-    prevCustomLists = state.customLists
-    saveData({ todos: state.todos, customLists: state.customLists }).catch(() => {})
-})
+useTodoStore.subscribe((state, prevState) => {
+  if (state.entries === prevState.entries && state.customLists === prevState.customLists) return;
+  if (!state.isHydrated) return;
+  schedulePersist();
+});
+
+export const selectEntryById = (id: string) => (state: EntryState): AnyItem | undefined =>
+  state.entries[id];
+
+export const selectFilteredEntries = (list: string) => (state: EntryState): AnyItem[] => {
+  let ids = state.entryIds;
+
+  if (list && list.trim()) {
+    ids = ids.filter((id) => state.entries[id].list === list);
+  }
+
+  const typeFilter = state.typeFilter;
+  if (typeFilter && typeFilter !== 'all') {
+    ids = ids.filter((id) => state.entries[id].itemType === typeFilter);
+  }
+
+  const searchTerm = state.searchTerm;
+  if (searchTerm && searchTerm.trim()) {
+    const term = searchTerm.toLowerCase();
+    ids = ids.filter((id) => {
+      const entry = state.entries[id];
+      return entry.title.toLowerCase().includes(term) ||
+        (entry.description && entry.description.toLowerCase().includes(term));
+    });
+  }
+
+  switch (state.filter) {
+    case 'active':
+      ids = ids.filter((id) => !state.entries[id].isCompleted);
+      break;
+    case 'completed':
+      ids = ids.filter((id) => state.entries[id].isCompleted);
+      break;
+  }
+
+  return ids.map((id) => state.entries[id]);
+};
+
+export const selectEntriesByDateRange = (start: number, end: number) => (state: EntryState): AnyItem[] => {
+  const result: AnyItem[] = [];
+  for (const id of state.entryIds) {
+    const entry = state.entries[id];
+    if (entry.dueDate !== undefined && entry.dueDate >= start && entry.dueDate <= end) {
+      result.push(entry);
+    }
+  }
+  return result;
+};
+
+export const selectActiveCount = (state: EntryState): number =>
+  state.entryIds.reduce((count, id) => state.entries[id].isCompleted ? count : count + 1, 0);
+
+export const selectCompletedCount = (state: EntryState): number =>
+  state.entryIds.reduce((count, id) => state.entries[id].isCompleted ? count + 1 : count, 0);
+
+export const selectEntryCountByListAndType = (list: string) => (state: EntryState): number =>
+  state.entryIds.filter((id) => {
+    const entry = state.entries[id];
+    if (entry.list !== list) return false;
+    if (state.typeFilter !== 'all' && entry.itemType !== state.typeFilter) return false;
+    return true;
+  }).length;

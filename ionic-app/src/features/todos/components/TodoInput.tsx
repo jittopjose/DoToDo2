@@ -18,7 +18,7 @@ type TodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
 export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
     const [itemType, setItemType] = useState<TodoItemType>('todo');
-    const addTodo = useTodoStore((state) => state.addTodo);
+    const addEntry = useTodoStore((state) => state.addEntry);
     const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
     const typeFilter = useTodoStore((state) => state.typeFilter);
     const activeTypeFilter = typeFilter || 'all';
@@ -36,7 +36,7 @@ export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
 
     const handleAdd = () => {
         if (text.trim().length === 0) return;
-        addTodo(text, itemType, undefined, undefined, undefined, undefined, undefined, undefined, list);
+        addEntry(text, itemType, undefined, undefined, undefined, undefined, undefined, undefined, list);
         setSearchTerm('');
         setText('');
     };

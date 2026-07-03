@@ -1,12 +1,12 @@
 import { IonContent, IonDatetime, IonIcon, IonList, IonPage } from '@ionic/react';
 import { calendarNumberOutline } from 'ionicons/icons';
 import React, { useMemo, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { TodoItem } from '../features/todos/components/TodoItem';
-import { useTodoStore } from '../features/todos/store/todoStore';
+import { useTodoStore, selectEntriesByDateRange } from '../features/todos/store/todoStore';
 import './CalendarPage.css';
 
 const CalendarPage: React.FC = () => {
-  const todos = useTodoStore((state) => state.todos);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     const now = new Date();
     return now.getFullYear() + '-' +
@@ -44,13 +44,7 @@ const CalendarPage: React.FC = () => {
     return d.getTime();
   }, [selectedDate]);
 
-  const dayTodos = useMemo(() => {
-    return todos.filter((t) =>
-      t.dueDate !== undefined &&
-      t.dueDate >= dayStart &&
-      t.dueDate <= dayEnd
-    );
-  }, [todos, dayStart, dayEnd]);
+  const dayTodos = useTodoStore(useShallow(selectEntriesByDateRange(dayStart, dayEnd)));
 
   return (
     <IonPage className="calendar-page">
