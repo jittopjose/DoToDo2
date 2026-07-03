@@ -155,3 +155,15 @@
   font-size: 14px;
   line-height: 1.45;
 }
+
+.todo-group-view-all {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 12px;
+}
+
+.todo-group-view-all ion-button {
+  --color: var(--dotodo-muted);
+  font-size: 13px;
+  font-weight: 600;
+}

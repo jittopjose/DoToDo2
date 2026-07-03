@@ -1,4 +1,4 @@
-import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
+import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
@@ -8,6 +8,7 @@ import TodoEditPage from './pages/TodoEditPage';
 import CalendarPage from './pages/CalendarPage';
 import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
+import { useTodoStore } from './features/todos/store/todoStore';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -58,6 +59,11 @@ const history = createMemoryHistory();
 
 const App: React.FC = () => {
   const themePreference = useSettingsStore((state) => state.themePreference);
+  const isHydrated = useTodoStore((state) => state.isHydrated);
+
+  useEffect(() => {
+    useTodoStore.getState().hydrate()
+  }, [])
 
   useEffect(() => {
     const applyTheme = () => {
@@ -79,6 +85,18 @@ const App: React.FC = () => {
   }, [themePreference]);
 
   console.log('[Theme] render: themePreference=%s', themePreference);
+
+  if (!isHydrated) {
+    return (
+      <IonApp>
+        <IonPage>
+          <IonContent className="ion-padding ion-text-center ion-justify-content-center ion-align-items-center">
+            <p style={{ marginTop: '40vh' }}>Loading…</p>
+          </IonContent>
+        </IonPage>
+      </IonApp>
+    )
+  }
 
   return (
     <IonApp>

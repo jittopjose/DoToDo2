@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { IonBadge, IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
+import { IonBadge, IonButton, IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
 import {
     alertCircleOutline,
     calendarOutline,
@@ -14,6 +14,8 @@ import { TodoTypeFilter, Todo } from '../types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
 import './TodoList.css';
+
+const COMPLETED_LIMIT = 50
 
 const groupConfig: Record<string, { icon: string; className: string }> = {
     Overdue: { icon: alertCircleOutline, className: 'group--overdue' },
@@ -48,6 +50,9 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const filter = useTodoStore((state) => state.filter);
+    const setFilter = useTodoStore((state) => state.setFilter);
+    const totalCompletedCount = useMemo(() => todos.filter((t) => t.isCompleted).length, [todos]);
+    const hasMoreCompleted = filter !== 'completed' && totalCompletedCount > COMPLETED_LIMIT;
 
     const toggleGroup = useCallback((title: string) => {
         setExpanded((prev) => {
@@ -127,6 +132,11 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
             }
         });
 
+        if (filter !== 'completed' && groups[5].todos.length > COMPLETED_LIMIT) {
+            groups[5].todos.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+            groups[5].todos = groups[5].todos.slice(0, COMPLETED_LIMIT);
+        }
+
         const filteredGroups = groups.filter((g) => g.todos.length > 0);
 
         if (filter === 'active') {
@@ -168,9 +178,16 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                             <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
                         </div>
                         <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
-                            {group.todos.map((todo) => (
+                            {isExpanded && group.todos.map((todo) => (
                                 <TodoItem key={todo.id} todo={todo} />
                             ))}
+                            {group.title === 'Completed' && hasMoreCompleted && isExpanded && (
+                                <div className="todo-group-view-all">
+                                    <IonButton fill="clear" size="small" onClick={() => setFilter('completed')}>
+                                        View all {totalCompletedCount} completed
+                                    </IonButton>
+                                </div>
+                            )}
                         </div>
                     </React.Fragment>
                 );
