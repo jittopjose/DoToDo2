@@ -19,17 +19,23 @@
 #include <QUrl>
 #include <QString>
 #include <QQuickView>
+#include <QQmlContext>
+#include <QScreen>
 #include <QtWebEngine>
 
 int main(int argc, char *argv[])
 {
     QtWebEngine::initialize();
+
     QGuiApplication *app = new QGuiApplication(argc, (char**)argv);
     app->setApplicationName("dotodo2.jitto");
-    
-    qDebug() << "Starting app from main.cpp";
+
+    qreal dpr = QGuiApplication::primaryScreen()->devicePixelRatio();
+
+    qDebug() << "Starting app from main.cpp (DPR:" << dpr << ")";
 
     QQuickView *view = new QQuickView();
+    view->rootContext()->setContextProperty("dpRatio", dpr);
     view->setSource(QUrl("qrc:/qml/Main.qml"));
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->show();
