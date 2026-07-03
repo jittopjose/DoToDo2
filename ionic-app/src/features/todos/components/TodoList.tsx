@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IonBadge, IonButton, IonCard, IonCardContent, IonCardTitle, IonCol, IonGrid, IonIcon, IonList, IonNote, IonRow } from '@ionic/react';
 import {
     alertCircleOutline,
@@ -10,13 +10,13 @@ import {
     timeOutline,
 } from 'ionicons/icons';
 import { useShallow } from 'zustand/react/shallow';
-import { useTodoStore, selectFilteredEntries, selectCompletedCount, selectEntryCountByListAndType } from '../store/todoStore';
+import { useTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../store/todoStore';
 import { AnyItem, ItemType } from '../types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
 import './TodoList.css';
 
-const COMPLETED_LIMIT = 50
+const COMPLETED_BATCH_SIZE = 30
 
 const groupConfig: Record<string, { icon: string; className: string }> = {
     Overdue: { icon: alertCircleOutline, className: 'group--overdue' },
@@ -49,11 +49,13 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const [expanded, setExpanded] = useState<Set<string>>(defaultExpanded);
     const filteredEntries = useTodoStore(useShallow(selectFilteredEntries(list)));
     const filter = useTodoStore((state) => state.filter);
-    const setFilter = useTodoStore((state) => state.setFilter);
     const searchTerm = useTodoStore((state) => state.searchTerm);
     const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
-    const totalCompletedCount = useTodoStore(selectCompletedCount);
-    const hasMoreCompleted = filter !== 'completed' && totalCompletedCount > COMPLETED_LIMIT;
+    const [completedBatch, setCompletedBatch] = useState(1);
+
+    useEffect(() => {
+        setCompletedBatch(1);
+    }, [filter]);
 
     const toggleGroup = useCallback((title: string) => {
         setExpanded((prev) => {
@@ -108,11 +110,6 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
             }
         });
 
-        if (filter !== 'completed' && groups[5].entries.length > COMPLETED_LIMIT) {
-            groups[5].entries.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
-            groups[5].entries = groups[5].entries.slice(0, COMPLETED_LIMIT);
-        }
-
         const filteredGroups = groups.filter((g) => g.entries.length > 0);
 
         if (filter === 'active') {
@@ -148,17 +145,20 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                         >
                             {cfg && <IonIcon icon={cfg.icon} className="todo-group-icon" />}
                             <h2 className="todo-group-title">{group.title}</h2>
-                            <IonBadge className="todo-group-badge">{group.entries.length}</IonBadge>
+                            {group.title !== 'Completed' && <IonBadge className="todo-group-badge">{group.entries.length}</IonBadge>}
                             <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
                         </div>
                         <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
-                            {isExpanded && group.entries.map((entry) => (
+                            {isExpanded && (group.title === 'Completed'
+                                ? group.entries.slice(0, completedBatch * COMPLETED_BATCH_SIZE)
+                                : group.entries
+                            ).map((entry) => (
                                 <TodoItem key={entry.id} todo={entry} />
                             ))}
-                            {group.title === 'Completed' && hasMoreCompleted && isExpanded && (
+                            {group.title === 'Completed' && isExpanded && group.entries.length > completedBatch * COMPLETED_BATCH_SIZE && (
                                 <div className="todo-group-view-all">
-                                    <IonButton fill="clear" size="small" onClick={() => setFilter('completed')}>
-                                        View all {totalCompletedCount} completed
+                                    <IonButton fill="clear" size="small" onClick={() => setCompletedBatch(prev => prev + 1)}>
+                                        Show more
                                     </IonButton>
                                 </div>
                             )}
