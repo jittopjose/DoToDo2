@@ -168,7 +168,7 @@ const Page: React.FC = () => {
           <div className="type-filter-row" onClick={handleTypeFilterSelectClick}>
             <div className="type-filter-row-scroll">
               {typeFilterButtons.map((button) => {
-                const isActive = typeFilter === button.value;
+                const isActive = typeFilter === button.value || (typeFilter === 'all' && button.value === 'todo');
 
                 return (
                   <IonButton
