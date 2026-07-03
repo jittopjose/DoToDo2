@@ -46,7 +46,7 @@ MainView {
         anchors.fill: parent
         url: "qrc:/web/index.html"  // or a remote URL
         webChannel: channel
-        zoomFactor: 0.9
+        zoomFactor: dpRatio >= 2 ? 1.0 : 0.8
     }
 }
 
