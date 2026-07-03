@@ -9,6 +9,7 @@ import CalendarPage from './pages/CalendarPage';
 import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
 import { useTodoStore } from './features/todos/store/todoStore';
+import { initBridge, getBackend } from './services/bridge.service';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -63,6 +64,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     useTodoStore.getState().hydrate()
+    initBridge().then(() => getBackend()?.log("React app loaded"))
   }, [])
 
   useEffect(() => {
