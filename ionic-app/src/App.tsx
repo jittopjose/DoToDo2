@@ -111,7 +111,7 @@ const App: React.FC = () => {
             <IonTabs>
               <IonRouterOutlet id="main">
                 <Route path="/" exact>
-                  <Redirect to="/list/All Lists" />
+                  <Redirect to="/list/All%20Lists" />
                 </Route>
                 <Route path="/list/:name" exact>
                   <Page />
@@ -127,7 +127,7 @@ const App: React.FC = () => {
                 </Route>
               </IonRouterOutlet>
               <IonTabBar slot="bottom">
-                <IonTabButton tab="home" href="/list/All Lists">
+                <IonTabButton tab="home" href="/list/All%20Lists">
                   <IonIcon icon={homeOutline} />
                   <IonLabel>Home</IonLabel>
                 </IonTabButton>
