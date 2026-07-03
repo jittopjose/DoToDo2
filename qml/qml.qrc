@@ -5,6 +5,12 @@
         <file alias="app.js">../web/app.js</file>
         <file alias="app.css">../web/app.css</file>
         <file alias="manifest.json">../web/manifest.json</file>
+        <file alias="favicon.png">../web/favicon.png</file>
+        <file alias="fonts/satoshi/Satoshi-Variable.woff2">../web/fonts/satoshi/Satoshi-Variable.woff2</file>
+        <file alias="fonts/satoshi/Satoshi-Regular.woff2">../web/fonts/satoshi/Satoshi-Regular.woff2</file>
+        <file alias="fonts/satoshi/Satoshi-Medium.woff2">../web/fonts/satoshi/Satoshi-Medium.woff2</file>
+        <file alias="fonts/satoshi/Satoshi-Bold.woff2">../web/fonts/satoshi/Satoshi-Bold.woff2</file>
+        <file alias="fonts/satoshi/Satoshi-Black.woff2">../web/fonts/satoshi/Satoshi-Black.woff2</file>
     </qresource>
 
     <!-- QML -->
