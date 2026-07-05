@@ -10,14 +10,13 @@ import {
     IonRow
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { useDoTodoStore } from '../store/doTodoStore';
-import './DoTodoInput.css';
+import { useDoTodoStore } from '../../todos/store/doTodoStore';
+import { type ItemType } from '../../todos/types';
+import './TodoInput.css';
 
-type DoTodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
-
-export const DoTodoInput: React.FC<{ list: string }> = ({ list }) => {
+export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
-    const [itemType, setItemType] = useState<DoTodoItemType>('todo');
+    const [itemType, setItemType] = useState<ItemType>('todo');
     const addEntry = useDoTodoStore((state) => state.addEntry);
     const setSearchTerm = useDoTodoStore((state) => state.setSearchTerm);
     const typeFilter = useDoTodoStore((state) => state.typeFilter);

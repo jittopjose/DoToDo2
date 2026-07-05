@@ -3,12 +3,15 @@ import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import Page from './pages/Page';
-import DoTodoEditPage from './pages/DoTodoEditPage';
+import TodoPage from './features/todo/pages/TodoPage';
+import TodoEditPage from './features/todo/pages/TodoEditPage';
 import CalendarPage from './pages/CalendarPage';
 import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
-import { useDoTodoStore } from './features/dotodos/store/doTodoStore';
+import ShoppingPage from './features/shopping/pages/ShoppingPage';
+import NotePage from './features/note/pages/NotePage';
+import ChecklistPage from './features/checklist/pages/ChecklistPage';
+import { useDoTodoStore } from './features/todos/store/doTodoStore';
 import { initBridge, getBackend } from './services/bridge.service';
 
 /* Core CSS required for Ionic components to work properly */
@@ -105,7 +108,7 @@ const App: React.FC = () => {
       <IonReactRouter history={history}>
         <Switch>
           <Route path="/task/:id/edit" exact>
-            <DoTodoEditPage />
+            <TodoEditPage />
           </Route>
           <Route>
             <IonTabs>
@@ -114,7 +117,16 @@ const App: React.FC = () => {
                   <Redirect to="/list/All Lists" />
                 </Route>
                 <Route path="/list/:name" exact>
-                  <Page />
+                  <TodoPage />
+                </Route>
+                <Route path="/shopping/:name" exact>
+                  <ShoppingPage />
+                </Route>
+                <Route path="/note/:name" exact>
+                  <NotePage />
+                </Route>
+                <Route path="/checklist/:name" exact>
+                  <ChecklistPage />
                 </Route>
                 <Route path="/calendar" exact>
                   <CalendarPage />

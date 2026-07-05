@@ -10,11 +10,11 @@ import {
 import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
-import { useDoTodoStore, selectFilteredEntries } from '../features/dotodos/store/doTodoStore';
-import type { ItemType } from '../features/dotodos/types';
-import { DoTodoInput } from '../features/dotodos/components/DoTodoInput';
-import { DoTodoList } from '../features/dotodos/components/DoTodoList';
-import './Page.css';
+import { useDoTodoStore, selectFilteredEntries } from '../../todos/store/doTodoStore';
+import type { ItemType } from '../../todos/types';
+import { TodoInput } from '../components/TodoInput';
+import { TodoList } from '../components/TodoList';
+import './TodoPage.css';
 
 type SearchbarHandle = HTMLIonSearchbarElement;
 
@@ -187,12 +187,12 @@ const Page: React.FC = () => {
           </div>
           <IonRow className="composer-row">
             <IonCol>
-              <DoTodoInput list={list} />
+              <TodoInput list={list} />
             </IonCol>
           </IonRow>
           <IonRow className="list-row">
             <IonCol>
-              <DoTodoList list={list} />
+              <TodoList list={list} />
             </IonCol>
           </IonRow>
         </IonGrid>

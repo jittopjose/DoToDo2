@@ -1,9 +1,22 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { DoTodo, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
-import { getDefaultDueTimestamp } from '../components/DoTodoItem.utils';
 import { getNextDueDate } from '../utils/recurrence';
 import { loadData, saveData } from '../../../services/do-todo-storage.service';
+
+const normalizeToEndOfDay = (timestamp: number) => {
+    const date = new Date(timestamp);
+    date.setHours(23, 59, 59, 999);
+    return date.getTime();
+};
+
+const getDefaultDueTimestamp = (now = new Date()) => {
+    const date = new Date(now);
+    if (date.getHours() >= 18) {
+        date.setDate(date.getDate() + 1);
+    }
+    return normalizeToEndOfDay(date.getTime());
+};
 
 const defaultLists = ['All Lists'];
 

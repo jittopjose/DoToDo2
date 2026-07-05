@@ -8,10 +8,10 @@ import {
     IonModal,
 } from '@ionic/react';
 import { checkmarkDoneOutline, closeOutline, trashOutline } from 'ionicons/icons';
-import { DoTodo } from '../types';
-import { getSubtaskProgress, parseOptionalNumber } from './DoTodoItem.utils';
-import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from './DoTodoItemEditorSheet.sections';
-import './DoTodoItem.css';
+import { DoTodo } from '../../todos/types';
+import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
+import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from './TodoItemEditorSheet.sections';
+import './TodoItem.css';
 
 interface EditorSheetProps {
     todo: DoTodo;
@@ -25,7 +25,7 @@ interface EditorSheetProps {
     onUpdate: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description'>>) => void;
 }
 
-export const DoTodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
+export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
     todo,
     isOpen,
     onDismiss,

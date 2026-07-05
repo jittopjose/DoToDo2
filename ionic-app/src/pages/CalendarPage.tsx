@@ -2,8 +2,8 @@ import { IonContent, IonDatetime, IonIcon, IonList, IonPage } from '@ionic/react
 import { calendarNumberOutline } from 'ionicons/icons';
 import React, { useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { DoTodoItem } from '../features/dotodos/components/DoTodoItem';
-import { useDoTodoStore, selectEntriesByDateRange } from '../features/dotodos/store/doTodoStore';
+import { TodoItem } from '../features/todo/components/TodoItem';
+import { useDoTodoStore, selectEntriesByDateRange } from '../features/todos/store/doTodoStore';
 import './CalendarPage.css';
 
 const CalendarPage: React.FC = () => {
@@ -79,7 +79,7 @@ const CalendarPage: React.FC = () => {
             {dayTodos.length > 0 ? (
               <IonList lines="none" className="calendar-tasks-list">
                 {dayTodos.map((todo) => (
-                  <DoTodoItem key={todo.id} todo={todo} />
+                  <TodoItem key={todo.id} todo={todo} />
                 ))}
               </IonList>
             ) : (

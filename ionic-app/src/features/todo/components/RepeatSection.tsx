@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { IonIcon, IonLabel, IonPopover, IonSelect, IonSelectOption, IonToggle, IonDatetime } from '@ionic/react';
 import { closeOutline, calendarOutline, removeOutline, addOutline, repeatOutline, todayOutline, briefcaseOutline, optionsOutline } from 'ionicons/icons';
-import { Recurrence } from '../types';
-import { formatRecurrenceSummary } from '../utils/recurrence';
+import { Recurrence } from '../../todos/types';
+import { formatRecurrenceSummary } from '../../todos/utils/recurrence';
 
 interface RepeatSectionProps {
   value?: Recurrence

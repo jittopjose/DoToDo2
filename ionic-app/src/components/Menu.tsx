@@ -15,7 +15,7 @@ import {
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { addOutline, folderOpenOutline, listOutline, listSharp, trashOutline } from 'ionicons/icons';
-import { useDoTodoStore, selectActiveCount, selectCompletedCount } from '../features/dotodos/store/doTodoStore';
+import { useDoTodoStore, selectActiveCount, selectCompletedCount } from '../features/todos/store/doTodoStore';
 import './Menu.css';
 
 const Menu: React.FC = () => {

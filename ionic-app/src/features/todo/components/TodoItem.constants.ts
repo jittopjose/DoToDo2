@@ -4,7 +4,7 @@ import {
     documentTextOutline,
     listOutline,
 } from 'ionicons/icons';
-import { DoTodoPriority } from '../types';
+import { DoTodoPriority } from '../../todos/types';
 
 export type EditorSection = 'details' | 'due' | 'priority' | 'subtasks' | 'shopping';
 

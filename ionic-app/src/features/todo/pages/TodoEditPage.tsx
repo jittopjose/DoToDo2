@@ -13,16 +13,16 @@ import {
 } from '@ionic/react';
 import { arrowBackOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
-import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/dotodos/components/DoTodoItemEditorSheet.sections';
-import { RepeatSection } from '../features/dotodos/components/RepeatSection';
-import { DoTodo } from '../features/dotodos/types';
-import { useDoTodoStore, selectEntryById } from '../features/dotodos/store/doTodoStore';
-import { getSubtaskProgress } from '../features/dotodos/components/DoTodoItem.utils';
-import '../features/dotodos/components/DoTodoItem.css';
-import '../features/dotodos/components/RepeatSection.css';
-import './DoTodoEditPage.css';
+import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../components/TodoItemEditorSheet.sections';
+import { RepeatSection } from '../components/RepeatSection';
+import { DoTodo } from '../../todos/types';
+import { useDoTodoStore, selectEntryById } from '../../todos/store/doTodoStore';
+import { getSubtaskProgress } from '../components/TodoItem.utils';
+import '../components/TodoItem.css';
+import '../components/RepeatSection.css';
+import './TodoEditPage.css';
 
-const DoTodoEditPage: React.FC = () => {
+const TodoEditPage: React.FC = () => {
     const history = useHistory();
     const { id } = useParams<{ id: string }>();
     const todo = useDoTodoStore(selectEntryById(id));
@@ -186,4 +186,4 @@ const DoTodoEditPage: React.FC = () => {
     );
 };
 
-export default DoTodoEditPage;
+export default TodoEditPage;

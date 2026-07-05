@@ -10,11 +10,11 @@ import {
     timeOutline,
 } from 'ionicons/icons';
 import { useShallow } from 'zustand/react/shallow';
-import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../store/doTodoStore';
-import { DoTodo, ItemType } from '../types';
-import { DoTodoItem } from './DoTodoItem';
-import { isOverdue } from './DoTodoItem.utils';
-import './DoTodoList.css';
+import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../../todos/store/doTodoStore';
+import { DoTodo, ItemType } from '../../todos/types';
+import { TodoItem } from './TodoItem';
+import { isOverdue } from './TodoItem.utils';
+import './TodoList.css';
 
 const COMPLETED_BATCH_SIZE = 30
 
@@ -45,7 +45,7 @@ interface TaskGroup {
 
 const defaultExpanded = new Set(['Overdue', 'Today']);
 
-export const DoTodoList: React.FC<TodoListProps> = ({ list }) => {
+export const TodoList: React.FC<TodoListProps> = ({ list }) => {
     const [expanded, setExpanded] = useState<Set<string>>(defaultExpanded);
     const filteredEntries = useDoTodoStore(useShallow(selectFilteredEntries(list)));
     const filter = useDoTodoStore((state) => state.filter);
@@ -153,7 +153,7 @@ export const DoTodoList: React.FC<TodoListProps> = ({ list }) => {
                                 ? group.entries.slice(0, completedBatch * COMPLETED_BATCH_SIZE)
                                 : group.entries
                             ).map((entry) => (
-                                <DoTodoItem key={entry.id} todo={entry} />
+                                <TodoItem key={entry.id} todo={entry} />
                             ))}
                             {group.title === 'Completed' && isExpanded && group.entries.length > completedBatch * COMPLETED_BATCH_SIZE && (
                                 <div className="dotodo-group-view-all">

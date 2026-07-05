@@ -1,5 +1,5 @@
 import { get, set, createStore } from 'idb-keyval'
-import { DoTodo } from '../features/dotodos/types'
+import { DoTodo } from '../features/todos/types'
 
 const STORAGE_KEY = 'entries'
 const store = createStore('dotodo', 'entries')

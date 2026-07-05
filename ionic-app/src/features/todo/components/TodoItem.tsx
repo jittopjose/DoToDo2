@@ -22,14 +22,14 @@ import {
     repeatOutline,
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { DoTodo, DoTodoPriority } from '../types';
-import { useDoTodoStore } from '../store/doTodoStore';
-import { formatDueDate } from '../utils/formatDueDate';
-import { formatRecurrenceSummary } from '../utils/recurrence';
-import './DoTodoItem.css';
-import { priorityLabels } from './DoTodoItem.constants';
-import { typeIcons } from './DoTodoItem.constants';
-import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './DoTodoItem.utils';
+import { DoTodo, DoTodoPriority } from '../../todos/types';
+import { useDoTodoStore } from '../../todos/store/doTodoStore';
+import { formatDueDate } from '../../todos/utils/formatDueDate';
+import { formatRecurrenceSummary } from '../../todos/utils/recurrence';
+import './TodoItem.css';
+import { priorityLabels } from './TodoItem.constants';
+import { typeIcons } from './TodoItem.constants';
+import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
 
 interface Props {
     todo: DoTodo;
@@ -37,7 +37,7 @@ interface Props {
 
 const priorityLevelValues: Array<DoTodoPriority | undefined> = ['low', 'medium', 'high', undefined];
 
-export const DoTodoItem: React.FC<Props> = memo(({ todo }) => {
+export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     const history = useHistory();
     const toggleTodo = useDoTodoStore((state) => state.toggleEntry);
     const updateTodo = useDoTodoStore((state) => state.updateEntry);
