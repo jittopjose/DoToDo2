@@ -11,7 +11,6 @@ import {
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { useDoTodoStore } from '../store/doTodoStore';
-import { typePlugins } from '../plugins/registry';
 import './DoTodoInput.css';
 
 type DoTodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
@@ -37,8 +36,7 @@ export const DoTodoInput: React.FC<{ list: string }> = ({ list }) => {
 
     const handleAdd = () => {
         if (text.trim().length === 0) return;
-        const defaults = typePlugins[itemType].createDefaults || {};
-        addEntry(text, itemType, defaults.description, defaults.dueDate, defaults.priority, defaults.quantity, defaults.price, undefined, list, defaults.recurrence);
+        addEntry(text, itemType, undefined, undefined, undefined, undefined, undefined, undefined, list);
         setSearchTerm('');
         setText('');
     };
@@ -65,10 +63,6 @@ export const DoTodoInput: React.FC<{ list: string }> = ({ list }) => {
                             />
                         </IonCol>
                         <IonCol size="auto" className="composer-input-actions">
-                            {typePlugins[itemType].InputActions && (() => {
-                                const Actions = typePlugins[itemType].InputActions!
-                                return <Actions itemType={itemType} />
-                            })()}
                             <IonButton className="composer-add-button" fill="clear" onClick={handleAdd} disabled={!text.trim()} aria-label="Add task">
                                 <IonIcon icon={addOutline} />
                             </IonButton>
