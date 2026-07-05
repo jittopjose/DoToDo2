@@ -11,7 +11,7 @@ import SettingsPage from './pages/SettingsPage';
 import ShoppingPage from './features/shopping/pages/ShoppingPage';
 import NotePage from './features/note/pages/NotePage';
 import ChecklistPage from './features/checklist/pages/ChecklistPage';
-import { useDoTodoStore } from './features/todos/store/doTodoStore';
+import { useDoTodoStore } from './features/shared/store/doTodoStore';
 import { initBridge, getBackend } from './services/bridge.service';
 
 /* Core CSS required for Ionic components to work properly */

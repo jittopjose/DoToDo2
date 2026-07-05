@@ -10,8 +10,8 @@ import {
 import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
-import { useDoTodoStore, selectFilteredEntries } from '../../todos/store/doTodoStore';
-import type { ItemType } from '../../todos/types';
+import { useDoTodoStore, selectFilteredEntries } from '../../shared/store/doTodoStore';
+import type { ItemType } from '../../shared/types';
 import { TodoInput } from '../components/TodoInput';
 import { TodoList } from '../components/TodoList';
 import './TodoPage.css';

@@ -1,9 +1,9 @@
 import { IonContent, IonIcon, IonPage, IonNote } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline, trendingUpOutline } from 'ionicons/icons';
 import React, { useMemo } from 'react';
-import { useDoTodoStore } from '../features/todos/store/doTodoStore';
-import { formatDueDate } from '../features/todos/utils/formatDueDate';
-import type { DoTodo } from '../features/todos/types';
+import { useDoTodoStore } from '../features/shared/store/doTodoStore';
+import { formatDueDate } from '../features/shared/utils/formatDueDate';
+import type { DoTodo } from '../features/shared/types';
 import './StatsPage.css';
 
 interface DayData {

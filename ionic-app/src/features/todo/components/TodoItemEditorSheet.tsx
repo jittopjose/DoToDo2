@@ -8,7 +8,7 @@ import {
     IonModal,
 } from '@ionic/react';
 import { checkmarkDoneOutline, closeOutline, trashOutline } from 'ionicons/icons';
-import { DoTodo } from '../../todos/types';
+import { DoTodo } from '../../shared/types';
 import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
 import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from './TodoItemEditorSheet.sections';
 import './TodoItem.css';

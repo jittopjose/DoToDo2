@@ -22,10 +22,10 @@ import {
     repeatOutline,
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { DoTodo, DoTodoPriority } from '../../todos/types';
-import { useDoTodoStore } from '../../todos/store/doTodoStore';
-import { formatDueDate } from '../../todos/utils/formatDueDate';
-import { formatRecurrenceSummary } from '../../todos/utils/recurrence';
+import { DoTodo, DoTodoPriority } from '../../shared/types';
+import { useDoTodoStore } from '../../shared/store/doTodoStore';
+import { formatDueDate } from '../../shared/utils/formatDueDate';
+import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
 import './TodoItem.css';
 import { priorityLabels } from './TodoItem.constants';
 import { typeIcons } from './TodoItem.constants';

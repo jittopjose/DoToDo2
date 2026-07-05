@@ -3,7 +3,7 @@ import { calendarNumberOutline } from 'ionicons/icons';
 import React, { useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { TodoItem } from '../features/todo/components/TodoItem';
-import { useDoTodoStore, selectEntriesByDateRange } from '../features/todos/store/doTodoStore';
+import { useDoTodoStore, selectEntriesByDateRange } from '../features/shared/store/doTodoStore';
 import './CalendarPage.css';
 
 const CalendarPage: React.FC = () => {

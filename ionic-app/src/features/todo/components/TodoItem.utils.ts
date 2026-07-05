@@ -1,4 +1,4 @@
-import { DoTodo } from '../../todos/types';
+import { DoTodo } from '../../shared/types';
 
 export const parseOptionalNumber = (value: string) => {
     const trimmed = value.trim();

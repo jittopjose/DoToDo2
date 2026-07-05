@@ -11,7 +11,7 @@ import {
     listOutline,
     trashOutline,
 } from 'ionicons/icons';
-import { DoTodoSubtask } from '../../todos/types';
+import { DoTodoSubtask } from '../../shared/types';
 
 interface EditorDetailsProps {
     title: string;

@@ -10,8 +10,8 @@ import {
     timeOutline,
 } from 'ionicons/icons';
 import { useShallow } from 'zustand/react/shallow';
-import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../../todos/store/doTodoStore';
-import { DoTodo, ItemType } from '../../todos/types';
+import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../../shared/store/doTodoStore';
+import { DoTodo, ItemType } from '../../shared/types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
 import './TodoList.css';

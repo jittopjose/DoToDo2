@@ -10,8 +10,8 @@ import {
     IonRow
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { useDoTodoStore } from '../../todos/store/doTodoStore';
-import { type ItemType } from '../../todos/types';
+import { useDoTodoStore } from '../../shared/store/doTodoStore';
+import { type ItemType } from '../../shared/types';
 import './TodoInput.css';
 
 export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
