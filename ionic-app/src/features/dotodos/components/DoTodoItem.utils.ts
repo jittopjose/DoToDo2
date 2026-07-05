@@ -1,4 +1,4 @@
-import { Todo } from '../types';
+import { DoTodo } from '../types';
 
 export const parseOptionalNumber = (value: string) => {
     const trimmed = value.trim();
@@ -43,7 +43,7 @@ export const getDefaultDueTimestamp = (now = new Date()) => {
     return normalizeToEndOfDay(date.getTime());
 };
 
-export const isDueQuickSelected = (todo: Todo, daysFromNow: number) => {
+export const isDueQuickSelected = (todo: DoTodo, daysFromNow: number) => {
     if (!todo.dueDate) return false;
     const dueDay = startOfDay(new Date(todo.dueDate));
     const targetDay = startOfDay(new Date());
@@ -56,13 +56,13 @@ export const truncateText = (value: string, maxLength = 110) => {
     return `${value.slice(0, maxLength - 1).trimEnd()}…`;
 };
 
-export const getSubtaskProgress = (todo: Todo) => {
+export const getSubtaskProgress = (todo: DoTodo) => {
     const total = todo.subtasks?.length ?? 0;
     const completed = todo.subtasks?.filter((subtask) => subtask.isCompleted).length ?? 0;
     return { completed, total, percent: total > 0 ? Math.round((completed / total) * 100) : 0 };
 };
 
-export const isOverdue = (todo: Todo): boolean => {
+export const isOverdue = (todo: DoTodo): boolean => {
     if (todo.dueDate === undefined || todo.isCompleted) return false;
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());

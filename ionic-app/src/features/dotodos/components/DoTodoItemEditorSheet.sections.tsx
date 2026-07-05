@@ -11,7 +11,7 @@ import {
     listOutline,
     trashOutline,
 } from 'ionicons/icons';
-import { TodoSubtask } from '../types';
+import { DoTodoSubtask } from '../types';
 
 interface EditorDetailsProps {
     title: string;
@@ -70,7 +70,7 @@ export const EditorDetailsSection = memo(function EditorDetailsSection({
 });
 
 interface SubtasksSectionProps {
-    subtasks: TodoSubtask[] | undefined;
+    subtasks: DoTodoSubtask[] | undefined;
     onToggleSubtask: (subtaskId: string) => void;
     onUpdateSubtask: (subtaskId: string, title: string) => void;
     onDeleteSubtask: (subtaskId: string) => void;
@@ -91,7 +91,7 @@ export const SubtasksSection = memo(function SubtasksSection({
     const [editValue, setEditValue] = useState('');
     const editInputRef = useRef<HTMLIonInputElement | null>(null);
 
-    const startEditing = useCallback((subtask: TodoSubtask) => {
+    const startEditing = useCallback((subtask: DoTodoSubtask) => {
         setEditingId(subtask.id);
         setEditValue(subtask.title);
     }, []);
@@ -126,7 +126,7 @@ export const SubtasksSection = memo(function SubtasksSection({
         }
     }, [commitEditing, cancelEditing]);
 
-    const handleLabelClick = useCallback((e: React.MouseEvent, subtask: TodoSubtask) => {
+    const handleLabelClick = useCallback((e: React.MouseEvent, subtask: DoTodoSubtask) => {
         e.stopPropagation();
         startEditing(subtask);
     }, [startEditing]);
@@ -137,9 +137,9 @@ export const SubtasksSection = memo(function SubtasksSection({
     }, [onDeleteSubtask]);
 
     return (
-        <section className="edit-section edit-section--subtasks" id="todo-editor-section-subtasks" aria-labelledby="todo-editor-section-subtasks-title">
+        <section className="edit-section edit-section--subtasks" id="dotodo-editor-section-subtasks" aria-labelledby="dotodo-editor-section-subtasks-title">
             <div className="edit-section-heading">
-                <h2 id="todo-editor-section-subtasks-title" className="edit-section-title">
+                <h2 id="dotodo-editor-section-subtasks-title" className="edit-section-title">
                     <IonIcon icon={listOutline} aria-hidden="true" />
                     <span>Subtasks</span>
                 </h2>

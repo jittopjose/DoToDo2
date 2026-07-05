@@ -8,13 +8,13 @@ import {
     IonModal,
 } from '@ionic/react';
 import { checkmarkDoneOutline, closeOutline, trashOutline } from 'ionicons/icons';
-import { Todo } from '../types';
-import { getSubtaskProgress, parseOptionalNumber } from './TodoItem.utils';
-import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from './TodoItemEditorSheet.sections';
-import './TodoItem.css';
+import { DoTodo } from '../types';
+import { getSubtaskProgress, parseOptionalNumber } from './DoTodoItem.utils';
+import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from './DoTodoItemEditorSheet.sections';
+import './DoTodoItem.css';
 
 interface EditorSheetProps {
-    todo: Todo;
+    todo: DoTodo;
     isOpen: boolean;
     onDismiss: () => void;
     onDelete: () => void;
@@ -22,10 +22,10 @@ interface EditorSheetProps {
     onAddSubtask: (todoId: string, title: string) => void;
     onUpdateSubtask: (todoId: string, subtaskId: string, title: string) => void;
     onDeleteSubtask: (todoId: string, subtaskId: string) => void;
-    onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description'>>) => void;
+    onUpdate: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description'>>) => void;
 }
 
-export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
+export const DoTodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
     todo,
     isOpen,
     onDismiss,
@@ -82,7 +82,7 @@ export const TodoItemEditorSheet: React.FC<EditorSheetProps> = memo(({
 
     return (
         <IonModal
-            className="todo-editor-modal"
+            className="dotodo-editor-modal"
             isOpen={isOpen}
             onDidDismiss={onDismiss}
             initialBreakpoint={0.45}

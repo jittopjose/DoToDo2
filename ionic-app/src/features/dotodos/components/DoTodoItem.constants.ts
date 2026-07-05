@@ -4,7 +4,7 @@ import {
     documentTextOutline,
     listOutline,
 } from 'ionicons/icons';
-import { TodoPriority } from '../types';
+import { DoTodoPriority } from '../types';
 
 export type EditorSection = 'details' | 'due' | 'priority' | 'subtasks' | 'shopping';
 
@@ -30,9 +30,9 @@ export const typeLabels = {
     checklist: 'Checklist',
 };
 
-export const priorityLevels: Array<TodoPriority | undefined> = [undefined, 'low', 'medium', 'high'];
+export const priorityLevels: Array<DoTodoPriority | undefined> = [undefined, 'low', 'medium', 'high'];
 
-export const priorityLabels: Record<TodoPriority, string> = {
+export const priorityLabels: Record<DoTodoPriority, string> = {
     low: 'Low',
     medium: 'Medium',
     high: 'High',

@@ -1,14 +1,14 @@
-.todo-edit-page {
+.dotodo-edit-page {
   --background: var(--dotodo-bg);
 }
 
-.todo-edit-header {
+.dotodo-edit-header {
   --background: var(--dotodo-bg);
   --border-color: var(--dotodo-card-border);
   border-bottom: 1px solid var(--dotodo-card-border);
 }
 
-.todo-edit-title {
+.dotodo-edit-title {
   font-size: 18px;
   font-weight: 850;
   letter-spacing: -0.02em;
@@ -17,7 +17,7 @@
   margin-left: 4px;
 }
 
-.todo-edit-content {
+.dotodo-edit-content {
   --background: var(--dotodo-bg);
   --padding-top: 0;
   --padding-bottom: 0;
@@ -25,14 +25,14 @@
   --padding-end: 0;
 }
 
-.todo-edit-grid {
+.dotodo-edit-grid {
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
   padding: 16px 20px 34px;
 }
 
-.todo-edit-status-chip {
+.dotodo-edit-status-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -48,7 +48,7 @@
   margin-bottom: var(--dotodo-section-gap);
 }
 
-.todo-edit-status-dot {
+.dotodo-edit-status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -61,7 +61,7 @@
   50% { opacity: 0.4; }
 }
 
-.todo-edit-toolbar-action {
+.dotodo-edit-toolbar-action {
   --border-radius: 12px;
   --padding-start: 10px;
   --padding-end: 10px;
@@ -77,17 +77,17 @@
   opacity: 0.85;
 }
 
-.todo-edit-toolbar-action:active {
+.dotodo-edit-toolbar-action:active {
   transform: scale(0.88);
   opacity: 1;
 }
 
-.todo-edit-toolbar-action--delete {
+.dotodo-edit-toolbar-action--delete {
   --color: var(--dotodo-danger);
   --background-hover: rgba(var(--dotodo-danger-rgb), 0.12);
 }
 
-.todo-edit-toolbar-save {
+.dotodo-edit-toolbar-save {
   --color: var(--dotodo-primary);
   --background-hover: rgba(var(--dotodo-primary-rgb), 0.08);
   --padding-start: 12px;
@@ -100,11 +100,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.todo-edit-toolbar-save:active {
+.dotodo-edit-toolbar-save:active {
   transform: scale(0.94);
 }
 
-.todo-edit-empty {
+.dotodo-edit-empty {
   display: grid;
   place-items: center;
   min-height: 42vh;
@@ -112,7 +112,7 @@
   padding: 32px 24px;
 }
 
-.todo-edit-empty-title {
+.dotodo-edit-empty-title {
   margin: 0 0 8px;
   color: var(--dotodo-text);
   font-size: 22px;
@@ -121,7 +121,7 @@
   line-height: 1.2;
 }
 
-.todo-edit-empty-copy {
+.dotodo-edit-empty-copy {
   margin: 0;
   color: var(--dotodo-muted);
   font-size: 15px;

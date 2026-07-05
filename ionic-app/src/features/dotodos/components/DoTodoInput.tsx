@@ -10,17 +10,17 @@ import {
     IonRow
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { useTodoStore } from '../store/todoStore';
-import './TodoInput.css';
+import { useDoTodoStore } from '../store/doTodoStore';
+import './DoTodoInput.css';
 
-type TodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
+type DoTodoItemType = 'todo' | 'shopping' | 'note' | 'checklist';
 
-export const TodoInput: React.FC<{ list: string }> = ({ list }) => {
+export const DoTodoInput: React.FC<{ list: string }> = ({ list }) => {
     const [text, setText] = useState('');
-    const [itemType, setItemType] = useState<TodoItemType>('todo');
-    const addEntry = useTodoStore((state) => state.addEntry);
-    const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
-    const typeFilter = useTodoStore((state) => state.typeFilter);
+    const [itemType, setItemType] = useState<DoTodoItemType>('todo');
+    const addEntry = useDoTodoStore((state) => state.addEntry);
+    const setSearchTerm = useDoTodoStore((state) => state.setSearchTerm);
+    const typeFilter = useDoTodoStore((state) => state.typeFilter);
     const activeTypeFilter = typeFilter || 'all';
 
     useEffect(() => {

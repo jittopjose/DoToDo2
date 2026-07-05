@@ -1,32 +1,32 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import { AnyItem, Recurrence, TodoFilter, TodoPriority } from '../types';
-import { getDefaultDueTimestamp } from '../components/TodoItem.utils';
+import { DoTodo, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
+import { getDefaultDueTimestamp } from '../components/DoTodoItem.utils';
 import { getNextDueDate } from '../utils/recurrence';
-import { loadData, saveData } from '../../../services/todo-storage.service';
+import { loadData, saveData } from '../../../services/do-todo-storage.service';
 
 const defaultLists = ['All Lists'];
 
 interface EntryState {
-  entries: Record<string, AnyItem>;
+  entries: Record<string, DoTodo>;
   entryIds: string[];
-  filter: TodoFilter;
-  typeFilter: AnyItem['itemType'] | 'all';
+  filter: DoTodoFilter;
+  typeFilter: DoTodo['itemType'] | 'all';
   searchTerm: string;
   customLists: string[];
   isHydrated: boolean;
 
   hydrate: () => Promise<void>;
-  addEntry: (title: string, itemType: AnyItem['itemType'], description?: string, dueDate?: number, priority?: TodoPriority, quantity?: number, price?: number, subtasks?: AnyItem['subtasks'], list?: string, recurrence?: Recurrence) => void;
+  addEntry: (title: string, itemType: DoTodo['itemType'], description?: string, dueDate?: number, priority?: DoTodoPriority, quantity?: number, price?: number, subtasks?: DoTodo['subtasks'], list?: string, recurrence?: Recurrence) => void;
   addSubtask: (entryId: string, title: string) => void;
   updateSubtask: (entryId: string, subtaskId: string, title: string) => void;
   deleteSubtask: (entryId: string, subtaskId: string) => void;
   toggleEntry: (id: string) => void;
   toggleSubtask: (entryId: string, subtaskId: string) => void;
   deleteEntry: (id: string) => void;
-  updateEntry: (id: string, updates: Partial<Pick<AnyItem, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence' | 'isCompleted'>>) => void;
-  setFilter: (filter: TodoFilter) => void;
-  setTypeFilter: (typeFilter: AnyItem['itemType'] | 'all') => void;
+  updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence' | 'isCompleted'>>) => void;
+  setFilter: (filter: DoTodoFilter) => void;
+  setTypeFilter: (typeFilter: DoTodo['itemType'] | 'all') => void;
   setSearchTerm: (term: string) => void;
   clearCompleted: () => void;
   addList: (list: string) => void;
@@ -37,7 +37,7 @@ function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): (.
   return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
 }
 
-export const useTodoStore = create<EntryState>()(
+export const useDoTodoStore = create<EntryState>()(
   (set, get) => ({
     entries: {},
     entryIds: [],
@@ -49,7 +49,7 @@ export const useTodoStore = create<EntryState>()(
 
     hydrate: async () => {
       const data = await loadData()
-      const entries: Record<string, AnyItem> = {}
+      const entries: Record<string, DoTodo> = {}
       const entryIds: string[] = []
       for (const item of data.entries) {
         entries[item.id] = item
@@ -67,7 +67,7 @@ export const useTodoStore = create<EntryState>()(
       const typeFilterOrDefault = get().typeFilter || 'all';
       const defaultDueDate = getDefaultDueTimestamp();
       const id = uuidv4();
-      const entry: AnyItem = {
+      const entry: DoTodo = {
         id,
         title,
         isCompleted: false,
@@ -100,7 +100,7 @@ export const useTodoStore = create<EntryState>()(
                             nextDue > entry.recurrence.endDate;
 
           const cloneId = uuidv4();
-          const clone: AnyItem = {
+          const clone: DoTodo = {
             ...entry,
             id: cloneId,
             isCompleted: false,
@@ -236,21 +236,21 @@ export const useTodoStore = create<EntryState>()(
 );
 
 const schedulePersist = debounce(() => {
-  const { entries, entryIds, customLists, isHydrated } = useTodoStore.getState();
+  const { entries, entryIds, customLists, isHydrated } = useDoTodoStore.getState();
   if (!isHydrated) return;
   saveData({ entries: entryIds.map((id) => entries[id]), customLists }).catch(() => {});
 }, 500);
 
-useTodoStore.subscribe((state, prevState) => {
+useDoTodoStore.subscribe((state, prevState) => {
   if (state.entries === prevState.entries && state.customLists === prevState.customLists) return;
   if (!state.isHydrated) return;
   schedulePersist();
 });
 
-export const selectEntryById = (id: string) => (state: EntryState): AnyItem | undefined =>
+export const selectEntryById = (id: string) => (state: EntryState): DoTodo | undefined =>
   state.entries[id];
 
-export const selectFilteredEntries = (list: string) => (state: EntryState): AnyItem[] => {
+export const selectFilteredEntries = (list: string) => (state: EntryState): DoTodo[] => {
   let ids = state.entryIds;
 
   if (list && list.trim()) {
@@ -284,8 +284,8 @@ export const selectFilteredEntries = (list: string) => (state: EntryState): AnyI
   return ids.map((id) => state.entries[id]);
 };
 
-export const selectEntriesByDateRange = (start: number, end: number) => (state: EntryState): AnyItem[] => {
-  const result: AnyItem[] = [];
+export const selectEntriesByDateRange = (start: number, end: number) => (state: EntryState): DoTodo[] => {
+  const result: DoTodo[] = [];
   for (const id of state.entryIds) {
     const entry = state.entries[id];
     if (entry.dueDate !== undefined && entry.dueDate >= start && entry.dueDate <= end) {

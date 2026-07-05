@@ -4,11 +4,11 @@ import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import Page from './pages/Page';
-import TodoEditPage from './pages/TodoEditPage';
+import DoTodoEditPage from './pages/DoTodoEditPage';
 import CalendarPage from './pages/CalendarPage';
 import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
-import { useTodoStore } from './features/todos/store/todoStore';
+import { useDoTodoStore } from './features/dotodos/store/doTodoStore';
 import { initBridge, getBackend } from './services/bridge.service';
 
 /* Core CSS required for Ionic components to work properly */
@@ -60,10 +60,10 @@ const history = createMemoryHistory();
 
 const App: React.FC = () => {
   const themePreference = useSettingsStore((state) => state.themePreference);
-  const isHydrated = useTodoStore((state) => state.isHydrated);
+  const isHydrated = useDoTodoStore((state) => state.isHydrated);
 
   useEffect(() => {
-    useTodoStore.getState().hydrate()
+    useDoTodoStore.getState().hydrate()
     initBridge().then(() => getBackend()?.log("React app loaded"))
   }, [])
 
@@ -105,7 +105,7 @@ const App: React.FC = () => {
       <IonReactRouter history={history}>
         <Switch>
           <Route path="/task/:id/edit" exact>
-            <TodoEditPage />
+            <DoTodoEditPage />
           </Route>
           <Route>
             <IonTabs>

@@ -13,29 +13,29 @@ import {
 } from '@ionic/react';
 import { arrowBackOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
-import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/todos/components/TodoItemEditorSheet.sections';
-import { RepeatSection } from '../features/todos/components/RepeatSection';
-import { Todo } from '../features/todos/types';
-import { useTodoStore, selectEntryById } from '../features/todos/store/todoStore';
-import { getSubtaskProgress } from '../features/todos/components/TodoItem.utils';
-import '../features/todos/components/TodoItem.css';
-import '../features/todos/components/RepeatSection.css';
-import './TodoEditPage.css';
+import { EditorDetailsSection, SubtasksSection, AddSubtaskRow } from '../features/dotodos/components/DoTodoItemEditorSheet.sections';
+import { RepeatSection } from '../features/dotodos/components/RepeatSection';
+import { DoTodo } from '../features/dotodos/types';
+import { useDoTodoStore, selectEntryById } from '../features/dotodos/store/doTodoStore';
+import { getSubtaskProgress } from '../features/dotodos/components/DoTodoItem.utils';
+import '../features/dotodos/components/DoTodoItem.css';
+import '../features/dotodos/components/RepeatSection.css';
+import './DoTodoEditPage.css';
 
-const TodoEditPage: React.FC = () => {
+const DoTodoEditPage: React.FC = () => {
     const history = useHistory();
     const { id } = useParams<{ id: string }>();
-    const todo = useTodoStore(selectEntryById(id));
-    const addSubtask = useTodoStore((state) => state.addSubtask);
-    const updateSubtask = useTodoStore((state) => state.updateSubtask);
-    const deleteSubtask = useTodoStore((state) => state.deleteSubtask);
-    const deleteEntry = useTodoStore((state) => state.deleteEntry);
-    const toggleSubtask = useTodoStore((state) => state.toggleSubtask);
-    const updateEntry = useTodoStore((state) => state.updateEntry);
+    const todo = useDoTodoStore(selectEntryById(id));
+    const addSubtask = useDoTodoStore((state) => state.addSubtask);
+    const updateSubtask = useDoTodoStore((state) => state.updateSubtask);
+    const deleteSubtask = useDoTodoStore((state) => state.deleteSubtask);
+    const deleteEntry = useDoTodoStore((state) => state.deleteEntry);
+    const toggleSubtask = useDoTodoStore((state) => state.toggleSubtask);
+    const updateEntry = useDoTodoStore((state) => state.updateEntry);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [newSubtaskText, setNewSubtaskText] = useState('');
-    const [recurrence, setRecurrence] = useState<Todo['recurrence']>(undefined);
+    const [recurrence, setRecurrence] = useState<DoTodo['recurrence']>(undefined);
 
     useEffect(() => {
         if (!todo) return;
@@ -90,22 +90,22 @@ const TodoEditPage: React.FC = () => {
 
     if (!todo || !id) {
         return (
-            <IonPage className="todo-edit-page todo-edit-page--missing">
-                <IonHeader className="todo-edit-header">
+            <IonPage className="dotodo-edit-page dotodo-edit-page--missing">
+                <IonHeader className="dotodo-edit-header">
                     <IonToolbar>
                         <IonButtons slot="start">
-                            <IonButton className="todo-edit-toolbar-action" fill="clear" onClick={goBack} aria-label="Go back">
+                            <IonButton className="dotodo-edit-toolbar-action" fill="clear" onClick={goBack} aria-label="Go back">
                                 <IonIcon icon={arrowBackOutline} />
                             </IonButton>
                         </IonButtons>
                         <IonTitle>Task not found</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonContent className="todo-edit-content">
-                    <IonGrid className="todo-edit-grid">
-                        <div className="todo-edit-empty">
-                            <h1 className="todo-edit-empty-title">This task is no longer available.</h1>
-                            <p className="todo-edit-empty-copy">It may have been deleted from the list.</p>
+                <IonContent className="dotodo-edit-content">
+                    <IonGrid className="dotodo-edit-grid">
+                        <div className="dotodo-edit-empty">
+                            <h1 className="dotodo-edit-empty-title">This task is no longer available.</h1>
+                            <p className="dotodo-edit-empty-copy">It may have been deleted from the list.</p>
                         </div>
                     </IonGrid>
                 </IonContent>
@@ -116,16 +116,16 @@ const TodoEditPage: React.FC = () => {
     const subtaskProgress = getSubtaskProgress(todo);
 
     return (
-        <IonPage className="todo-edit-page">
-            <IonHeader className="todo-edit-header">
+        <IonPage className="dotodo-edit-page">
+            <IonHeader className="dotodo-edit-header">
                 <IonToolbar>
                     <IonButtons slot="start">
                         <IonBackButton defaultHref={`/list/${encodeURIComponent(todo.list)}`} text="" aria-label="Go back" />
-                        <span className="todo-edit-title">Edit Task</span>
+                        <span className="dotodo-edit-title">Edit Task</span>
                     </IonButtons>
                     <IonButtons slot="end">
                         <IonButton
-                            className="todo-edit-toolbar-action todo-edit-toolbar-action--delete"
+                            className="dotodo-edit-toolbar-action dotodo-edit-toolbar-action--delete"
                             fill="clear"
                             onClick={handleDelete}
                             aria-label="Delete task"
@@ -133,7 +133,7 @@ const TodoEditPage: React.FC = () => {
                             <IonIcon icon={trashOutline} />
                         </IonButton>
                         <IonButton
-                            className="todo-edit-toolbar-save"
+                            className="dotodo-edit-toolbar-save"
                             fill="clear"
                             onClick={handleSave}
                             aria-label="Save task"
@@ -144,10 +144,10 @@ const TodoEditPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
 
-            <IonContent className="todo-edit-content">
-                <IonGrid className="todo-edit-grid">
-                    <span className="todo-edit-status-chip">
-                        <span className="todo-edit-status-dot" />
+            <IonContent className="dotodo-edit-content">
+                <IonGrid className="dotodo-edit-grid">
+                    <span className="dotodo-edit-status-chip">
+                        <span className="dotodo-edit-status-dot" />
                         {todo.isCompleted ? 'COMPLETED TASK' : 'ACTIVE TASK'}
                     </span>
 
@@ -186,4 +186,4 @@ const TodoEditPage: React.FC = () => {
     );
 };
 
-export default TodoEditPage;
+export default DoTodoEditPage;

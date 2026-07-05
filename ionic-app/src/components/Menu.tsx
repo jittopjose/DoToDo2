@@ -15,16 +15,16 @@ import {
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { addOutline, folderOpenOutline, listOutline, listSharp, trashOutline } from 'ionicons/icons';
-import { useTodoStore, selectActiveCount, selectCompletedCount } from '../features/todos/store/todoStore';
+import { useDoTodoStore, selectActiveCount, selectCompletedCount } from '../features/dotodos/store/doTodoStore';
 import './Menu.css';
 
 const Menu: React.FC = () => {
   const location = useLocation();
-  const clearCompleted = useTodoStore((state) => state.clearCompleted);
-  const activeCount = useTodoStore(selectActiveCount);
-  const completedCount = useTodoStore(selectCompletedCount);
-  const customLists = useTodoStore((state) => state.customLists);
-  const addList = useTodoStore((state) => state.addList);
+  const clearCompleted = useDoTodoStore((state) => state.clearCompleted);
+  const activeCount = useDoTodoStore(selectActiveCount);
+  const completedCount = useDoTodoStore(selectCompletedCount);
+  const customLists = useDoTodoStore((state) => state.customLists);
+  const addList = useDoTodoStore((state) => state.addList);
   const [newListName, setNewListName] = useState('');
 
   const handleAddList = () => {

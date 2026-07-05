@@ -22,25 +22,25 @@ import {
     repeatOutline,
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { Todo, TodoPriority } from '../types';
-import { useTodoStore } from '../store/todoStore';
+import { DoTodo, DoTodoPriority } from '../types';
+import { useDoTodoStore } from '../store/doTodoStore';
 import { formatDueDate } from '../utils/formatDueDate';
 import { formatRecurrenceSummary } from '../utils/recurrence';
-import './TodoItem.css';
-import { priorityLabels } from './TodoItem.constants';
-import { typeIcons } from './TodoItem.constants';
-import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './TodoItem.utils';
+import './DoTodoItem.css';
+import { priorityLabels } from './DoTodoItem.constants';
+import { typeIcons } from './DoTodoItem.constants';
+import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './DoTodoItem.utils';
 
 interface Props {
-    todo: Todo;
+    todo: DoTodo;
 }
 
-const priorityLevelValues: Array<TodoPriority | undefined> = ['low', 'medium', 'high', undefined];
+const priorityLevelValues: Array<DoTodoPriority | undefined> = ['low', 'medium', 'high', undefined];
 
-export const TodoItem: React.FC<Props> = memo(({ todo }) => {
+export const DoTodoItem: React.FC<Props> = memo(({ todo }) => {
     const history = useHistory();
-    const toggleTodo = useTodoStore((state) => state.toggleEntry);
-    const updateTodo = useTodoStore((state) => state.updateEntry);
+    const toggleTodo = useDoTodoStore((state) => state.toggleEntry);
+    const updateTodo = useDoTodoStore((state) => state.updateEntry);
     const [isDueCalendarOpen, setIsDueCalendarOpen] = useState(false);
 
     const handleDueCalendarDismiss = useCallback(() => {
@@ -78,7 +78,7 @@ export const TodoItem: React.FC<Props> = memo(({ todo }) => {
     }, [todo.id, toggleTodo]);
 
     const handlePriorityCycle = useCallback(() => {
-        const currentIndex = priorityLevelValues.indexOf(todo.priority as TodoPriority);
+        const currentIndex = priorityLevelValues.indexOf(todo.priority as DoTodoPriority);
         const nextPriority = priorityLevelValues[(currentIndex + 1) % priorityLevelValues.length];
         updateTodo(todo.id, { priority: nextPriority });
     }, [todo.id, todo.priority, updateTodo]);

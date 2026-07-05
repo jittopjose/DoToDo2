@@ -1,9 +1,9 @@
 import { IonContent, IonIcon, IonPage, IonNote } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline, trendingUpOutline } from 'ionicons/icons';
 import React, { useMemo } from 'react';
-import { useTodoStore } from '../features/todos/store/todoStore';
-import { formatDueDate } from '../features/todos/utils/formatDueDate';
-import type { Todo } from '../features/todos/types';
+import { useDoTodoStore } from '../features/dotodos/store/doTodoStore';
+import { formatDueDate } from '../features/dotodos/utils/formatDueDate';
+import type { DoTodo } from '../features/dotodos/types';
 import './StatsPage.css';
 
 interface DayData {
@@ -26,13 +26,13 @@ const endOfDay = (date: Date) => {
 };
 
 const StatsPage: React.FC = () => {
-  const entries = useTodoStore((state) => state.entries);
-  const entryIds = useTodoStore((state) => state.entryIds);
+  const entries = useDoTodoStore((state) => state.entries);
+  const entryIds = useDoTodoStore((state) => state.entryIds);
 
   const stats = useMemo(() => {
     const tasks = entryIds
       .map((id) => entries[id])
-      .filter((e): e is Todo => e.itemType === 'todo');
+      .filter((e): e is DoTodo => e.itemType === 'todo');
 
     const total = tasks.length;
     const completed = tasks.filter((e) => e.isCompleted).length;

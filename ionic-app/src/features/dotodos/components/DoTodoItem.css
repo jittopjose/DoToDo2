@@ -400,7 +400,7 @@
   --background: var(--dotodo-success);
 }
 
-.todo-editor-modal {
+.dotodo-editor-modal {
   --background: var(--dotodo-card);
   --border-radius: var(--dotodo-radius-lg) var(--dotodo-radius-lg) 0 0;
   box-shadow: 0 -18px 44px rgba(31, 41, 55, 0.16);

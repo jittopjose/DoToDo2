@@ -10,11 +10,11 @@ import {
     timeOutline,
 } from 'ionicons/icons';
 import { useShallow } from 'zustand/react/shallow';
-import { useTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../store/todoStore';
-import { AnyItem, ItemType } from '../types';
-import { TodoItem } from './TodoItem';
-import { isOverdue } from './TodoItem.utils';
-import './TodoList.css';
+import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../store/doTodoStore';
+import { DoTodo, ItemType } from '../types';
+import { DoTodoItem } from './DoTodoItem';
+import { isOverdue } from './DoTodoItem.utils';
+import './DoTodoList.css';
 
 const COMPLETED_BATCH_SIZE = 30
 
@@ -40,17 +40,17 @@ const typeLabels: Record<ItemType, string> = {
 
 interface TaskGroup {
     title: string;
-    entries: AnyItem[];
+    entries: DoTodo[];
 }
 
 const defaultExpanded = new Set(['Overdue', 'Today']);
 
-export const TodoList: React.FC<TodoListProps> = ({ list }) => {
+export const DoTodoList: React.FC<TodoListProps> = ({ list }) => {
     const [expanded, setExpanded] = useState<Set<string>>(defaultExpanded);
-    const filteredEntries = useTodoStore(useShallow(selectFilteredEntries(list)));
-    const filter = useTodoStore((state) => state.filter);
-    const searchTerm = useTodoStore((state) => state.searchTerm);
-    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
+    const filteredEntries = useDoTodoStore(useShallow(selectFilteredEntries(list)));
+    const filter = useDoTodoStore((state) => state.filter);
+    const searchTerm = useDoTodoStore((state) => state.searchTerm);
+    const typeFilter = useDoTodoStore((state) => state.typeFilter) || 'all';
     const [completedBatch, setCompletedBatch] = useState(1);
 
     useEffect(() => {
@@ -123,40 +123,40 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
         return filteredGroups;
     }, [filteredEntries, filter]);
 
-    const totalInFilteredList = useTodoStore(selectEntryCountByListAndType(list));
+    const totalInFilteredList = useDoTodoStore(selectEntryCountByListAndType(list));
     const isEmptyList = totalInFilteredList === 0;
     const isSearchActive = searchTerm && searchTerm.trim().length > 0;
     const hasAnyGroup = groupedEntries.length > 0;
 
     return (
-        <IonList className="todo-list" lines="none">
+        <IonList className="dotodo-list" lines="none">
             {groupedEntries.map((group) => {
                 const cfg = groupConfig[group.title];
                 const isExpanded = expanded.has(group.title);
                 return (
                     <React.Fragment key={group.title}>
                         <div
-                            className={`todo-group-header ${cfg?.className ?? ''}`}
+                            className={`dotodo-group-header ${cfg?.className ?? ''}`}
                             onClick={() => toggleGroup(group.title)}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup(group.title); } }}
                             aria-expanded={isExpanded}
                         >
-                            {cfg && <IonIcon icon={cfg.icon} className="todo-group-icon" />}
-                            <h2 className="todo-group-title">{group.title}</h2>
-                            {group.title !== 'Completed' && <IonBadge className="todo-group-badge">{group.entries.length}</IonBadge>}
-                            <IonIcon icon={chevronDownOutline} className={`todo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
+                            {cfg && <IonIcon icon={cfg.icon} className="dotodo-group-icon" />}
+                            <h2 className="dotodo-group-title">{group.title}</h2>
+                            {group.title !== 'Completed' && <IonBadge className="dotodo-group-badge">{group.entries.length}</IonBadge>}
+                            <IonIcon icon={chevronDownOutline} className={`dotodo-group-chevron ${isExpanded ? 'is-expanded' : ''}`} />
                         </div>
-                        <div className={`todo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
+                        <div className={`dotodo-group-items ${isExpanded ? 'is-expanded' : ''} ${cfg?.className ?? ''}`}>
                             {isExpanded && (group.title === 'Completed'
                                 ? group.entries.slice(0, completedBatch * COMPLETED_BATCH_SIZE)
                                 : group.entries
                             ).map((entry) => (
-                                <TodoItem key={entry.id} todo={entry} />
+                                <DoTodoItem key={entry.id} todo={entry} />
                             ))}
                             {group.title === 'Completed' && isExpanded && group.entries.length > completedBatch * COMPLETED_BATCH_SIZE && (
-                                <div className="todo-group-view-all">
+                                <div className="dotodo-group-view-all">
                                     <IonButton fill="clear" size="small" onClick={() => setCompletedBatch(prev => prev + 1)}>
                                         Show more
                                     </IonButton>

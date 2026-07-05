@@ -1,11 +1,11 @@
 import { get, set, createStore } from 'idb-keyval'
-import { AnyItem } from '../features/todos/types'
+import { DoTodo } from '../features/dotodos/types'
 
 const STORAGE_KEY = 'entries'
 const store = createStore('dotodo', 'entries')
 
 export interface PersistedData {
-  entries: AnyItem[]
+  entries: DoTodo[]
   customLists: string[]
 }
 

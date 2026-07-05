@@ -10,10 +10,10 @@ import {
 import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
-import { useTodoStore, selectFilteredEntries } from '../features/todos/store/todoStore';
-import type { ItemType } from '../features/todos/types';
-import { TodoInput } from '../features/todos/components/TodoInput';
-import { TodoList } from '../features/todos/components/TodoList';
+import { useDoTodoStore, selectFilteredEntries } from '../features/dotodos/store/doTodoStore';
+import type { ItemType } from '../features/dotodos/types';
+import { DoTodoInput } from '../features/dotodos/components/DoTodoInput';
+import { DoTodoList } from '../features/dotodos/components/DoTodoList';
 import './Page.css';
 
 type SearchbarHandle = HTMLIonSearchbarElement;
@@ -46,11 +46,11 @@ const Page: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchbarRef = useRef<SearchbarHandle | null>(null);
     const list = name || 'All Lists';
-    const searchTerm = useTodoStore((state) => state.searchTerm);
-    const setSearchTerm = useTodoStore((state) => state.setSearchTerm);
-    const setTypeFilter = useTodoStore((state) => state.setTypeFilter);
-    const typeFilter = useTodoStore((state) => state.typeFilter) || 'all';
-    const listTodos = useTodoStore(useShallow(selectFilteredEntries(list)));
+    const searchTerm = useDoTodoStore((state) => state.searchTerm);
+    const setSearchTerm = useDoTodoStore((state) => state.setSearchTerm);
+    const setTypeFilter = useDoTodoStore((state) => state.setTypeFilter);
+    const typeFilter = useDoTodoStore((state) => state.typeFilter) || 'all';
+    const listTodos = useDoTodoStore(useShallow(selectFilteredEntries(list)));
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -187,12 +187,12 @@ const Page: React.FC = () => {
           </div>
           <IonRow className="composer-row">
             <IonCol>
-              <TodoInput list={list} />
+              <DoTodoInput list={list} />
             </IonCol>
           </IonRow>
           <IonRow className="list-row">
             <IonCol>
-              <TodoList list={list} />
+              <DoTodoList list={list} />
             </IonCol>
           </IonRow>
         </IonGrid>

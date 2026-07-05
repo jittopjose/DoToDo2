@@ -1,4 +1,4 @@
-export type TodoPriority = 'low' | 'medium' | 'high';
+export type DoTodoPriority = 'low' | 'medium' | 'high';
 
 export type ItemType = 'todo' | 'shopping' | 'note' | 'checklist';
 
@@ -22,23 +22,23 @@ export interface BaseItem {
     completedAt?: number;
 }
 
-export interface Todo extends BaseItem {
+export interface DoTodo extends BaseItem {
     description?: string;
     quantity?: number;
     price?: number;
-    subtasks?: TodoSubtask[];
+    subtasks?: DoTodoSubtask[];
     dueDate?: number;
-    priority?: TodoPriority;
+    priority?: DoTodoPriority;
     recurrence?: Recurrence;
 }
 
-export type AnyItem = Todo;
+export type AnyItem = DoTodo;
 
-export interface TodoSubtask {
+export interface DoTodoSubtask {
     id: string;
     title: string;
     isCompleted: boolean;
 }
 
-export type TodoFilter = 'all' | 'active' | 'completed';
-export type TodoTypeFilter = ItemType | 'all';
+export type DoTodoFilter = 'all' | 'active' | 'completed';
+export type DoTodoTypeFilter = ItemType | 'all';

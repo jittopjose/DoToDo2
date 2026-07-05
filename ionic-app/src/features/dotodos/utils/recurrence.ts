@@ -1,6 +1,6 @@
-import { Recurrence, Todo } from '../types';
+import { Recurrence, DoTodo } from '../types';
 
-export function getNextDueDate(todo: Todo): number | undefined {
+export function getNextDueDate(todo: DoTodo): number | undefined {
   if (!todo.recurrence || !todo.dueDate) return undefined;
 
   const r = todo.recurrence;
