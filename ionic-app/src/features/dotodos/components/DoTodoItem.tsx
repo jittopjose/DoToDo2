@@ -30,6 +30,7 @@ import './DoTodoItem.css';
 import { priorityLabels } from './DoTodoItem.constants';
 import { typeIcons } from './DoTodoItem.constants';
 import { getDueDateInputValue, getSubtaskProgress, isOverdue, truncateText } from './DoTodoItem.utils';
+import { typePlugins } from '../plugins/registry';
 
 interface Props {
     todo: DoTodo;
@@ -99,6 +100,7 @@ export const DoTodoItem: React.FC<Props> = memo(({ todo }) => {
 
     const subtaskProgress = getSubtaskProgress(todo);
     const overdue = isOverdue(todo);
+    const plugin = typePlugins[todo.itemType];
 
     const quickActions = useMemo(() => {
         const actions: Array<{ label: string; icon: string; onAction?: () => void }> = [];
@@ -223,6 +225,8 @@ return (
                                             <span>{action.label}</span>
                                         </IonChip>
                                     ))}
+
+                                    {plugin.ListItemExtra && <plugin.ListItemExtra item={todo} />}
                                 </div>
 
                                 {subtaskProgress.total > 0 && (

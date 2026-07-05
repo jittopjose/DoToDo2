@@ -12,6 +12,7 @@ import {
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } from '../store/doTodoStore';
 import { DoTodo, ItemType } from '../types';
+import { typePlugins } from '../plugins/registry';
 import { DoTodoItem } from './DoTodoItem';
 import { isOverdue } from './DoTodoItem.utils';
 import './DoTodoList.css';
@@ -152,9 +153,10 @@ export const DoTodoList: React.FC<TodoListProps> = ({ list }) => {
                             {isExpanded && (group.title === 'Completed'
                                 ? group.entries.slice(0, completedBatch * COMPLETED_BATCH_SIZE)
                                 : group.entries
-                            ).map((entry) => (
-                                <DoTodoItem key={entry.id} todo={entry} />
-                            ))}
+                            ).map((entry) => {
+                                const ItemComponent = typePlugins[entry.itemType].ListItem || DoTodoItem
+                                return <ItemComponent key={entry.id} todo={entry} />
+                            })}
                             {group.title === 'Completed' && isExpanded && group.entries.length > completedBatch * COMPLETED_BATCH_SIZE && (
                                 <div className="dotodo-group-view-all">
                                     <IonButton fill="clear" size="small" onClick={() => setCompletedBatch(prev => prev + 1)}>

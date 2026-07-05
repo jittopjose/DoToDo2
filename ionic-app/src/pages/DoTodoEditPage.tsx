@@ -18,6 +18,7 @@ import { RepeatSection } from '../features/dotodos/components/RepeatSection';
 import { DoTodo } from '../features/dotodos/types';
 import { useDoTodoStore, selectEntryById } from '../features/dotodos/store/doTodoStore';
 import { getSubtaskProgress } from '../features/dotodos/components/DoTodoItem.utils';
+import { typePlugins } from '../features/dotodos/plugins/registry';
 import '../features/dotodos/components/DoTodoItem.css';
 import '../features/dotodos/components/RepeatSection.css';
 import './DoTodoEditPage.css';
@@ -113,6 +114,11 @@ const DoTodoEditPage: React.FC = () => {
         );
     }
 
+    const EditPagePlugin = typePlugins[todo.itemType].EditPage;
+    if (EditPagePlugin) {
+        return <EditPagePlugin id={todo.id} />;
+    }
+
     const subtaskProgress = getSubtaskProgress(todo);
 
     return (
@@ -165,6 +171,16 @@ const DoTodoEditPage: React.FC = () => {
                             onChange={setRecurrence}
                         />
                     )}
+
+                    {typePlugins[todo.itemType].EditorSections && (() => {
+                        const Section = typePlugins[todo.itemType].EditorSections!
+                        return (
+                            <Section
+                                item={todo}
+                                onUpdate={(updates) => updateEntry(todo.id, updates)}
+                            />
+                        )
+                    })()}
 
                     <SubtasksSection
                         subtasks={todo.subtasks}

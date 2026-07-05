@@ -14,6 +14,7 @@ import { useDoTodoStore, selectFilteredEntries } from '../features/dotodos/store
 import type { ItemType } from '../features/dotodos/types';
 import { DoTodoInput } from '../features/dotodos/components/DoTodoInput';
 import { DoTodoList } from '../features/dotodos/components/DoTodoList';
+import { typePlugins } from '../features/dotodos/plugins/registry';
 import './Page.css';
 
 type SearchbarHandle = HTMLIonSearchbarElement;
@@ -111,6 +112,11 @@ const Page: React.FC = () => {
 
         handleTypeFilterSelect(value);
     }, [handleTypeFilterSelect]);
+
+    const activePlugin = typeFilter !== 'all' ? typePlugins[typeFilter] : undefined;
+    if (activePlugin?.ListPage) {
+        return <activePlugin.ListPage list={list} typeFilter={typeFilter as ItemType} />;
+    }
 
   return (
     <IonPage>
