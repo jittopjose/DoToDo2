@@ -18,7 +18,7 @@ const getDefaultDueTimestamp = (now = new Date()) => {
     return normalizeToEndOfDay(date.getTime());
 };
 
-const defaultLists = ['All Lists'];
+const defaultLists = ['all-lists'];
 
 interface EntryState {
   entries: Record<string, DoTodo>;
@@ -76,7 +76,7 @@ export const useDoTodoStore = create<EntryState>()(
       })
     },
 
-    addEntry: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'All Lists', recurrence) => {
+    addEntry: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'all-lists', recurrence) => {
       const typeFilterOrDefault = get().typeFilter || 'all';
       const defaultDueDate = getDefaultDueTimestamp();
       const id = uuidv4();

@@ -45,7 +45,7 @@ const Page: React.FC = () => {
     const [greeting] = useState(() => getGreeting());
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchbarRef = useRef<SearchbarHandle | null>(null);
-    const list = name || 'All Lists';
+    const list = name || 'all-lists';
     const searchTerm = useDoTodoStore((state) => state.searchTerm);
     const setSearchTerm = useDoTodoStore((state) => state.setSearchTerm);
     const setTypeFilter = useDoTodoStore((state) => state.setTypeFilter);

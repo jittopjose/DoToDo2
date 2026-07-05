@@ -48,9 +48,9 @@ const Menu: React.FC = () => {
         <IonList id="lists-list" className="menu-list">
           <IonListHeader className="menu-section-title">Lists</IonListHeader>
           <IonMenuToggle autoHide={false}>
-            <IonItem className={`menu-item ${location.pathname === '/list/All Lists' ? 'is-selected' : ''}`} routerLink="/list/All Lists" routerDirection="none" lines="none" detail={false}>
+            <IonItem className={`menu-item ${location.pathname === '/list/all-lists' ? 'is-selected' : ''}`} routerLink="/list/all-lists" routerDirection="none" lines="none" detail={false}>
               <IonIcon aria-hidden="true" slot="start" ios={listOutline} md={listSharp} />
-              <IonLabel>All Lists</IonLabel>
+              <IonLabel>all-lists</IonLabel>
               {activeCount > 0 && (
                 <IonBadge className="menu-badge" color="primary" slot="end">{activeCount}</IonBadge>
               )}
