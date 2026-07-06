@@ -14,6 +14,7 @@ import { useDoTodoStore, selectFilteredEntries, selectEntryCountByListAndType } 
 import { DoTodo, ItemType } from '../../shared/types';
 import { TodoItem } from './TodoItem';
 import { isOverdue } from './TodoItem.utils';
+import { ShoppingItem } from '../../shopping/components/ShoppingItem';
 import './TodoList.css';
 
 const COMPLETED_BATCH_SIZE = 30
@@ -153,7 +154,9 @@ export const TodoList: React.FC<TodoListProps> = ({ list }) => {
                                 ? group.entries.slice(0, completedBatch * COMPLETED_BATCH_SIZE)
                                 : group.entries
                             ).map((entry) => (
-                                <TodoItem key={entry.id} todo={entry} />
+                                typeFilter === 'shopping'
+                                    ? <ShoppingItem key={entry.id} item={entry} />
+                                    : <TodoItem key={entry.id} todo={entry} />
                             ))}
                             {group.title === 'Completed' && isExpanded && group.entries.length > completedBatch * COMPLETED_BATCH_SIZE && (
                                 <div className="dotodo-group-view-all">

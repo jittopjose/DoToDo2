@@ -1,0 +1,63 @@
+.shop-page-content {
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+}
+
+.shop-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 8px;
+}
+
+.shop-greeting-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.shop-greeting-title {
+    margin: 0;
+    color: var(--dotodo-text);
+    font-size: 26px;
+    font-weight: 850;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+}
+
+.shop-greeting-subtitle {
+    margin: 4px 0 0;
+    color: var(--dotodo-muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.shop-greeting-icon {
+    font-size: 28px;
+    color: var(--ion-color-tertiary);
+    flex-shrink: 0;
+}
+
+.shop-search-row {
+    padding: 0 12px 10px;
+}
+
+.shop-search-row ion-searchbar {
+    --background: var(--dotodo-surface-strong);
+    --min-height: 44px;
+    height: 44px;
+    --border-radius: 12px;
+    --icon-color: var(--dotodo-muted);
+    --placeholder-color: var(--dotodo-muted);
+    --clear-button-color: var(--dotodo-muted);
+    padding: 0;
+}
+
+.shop-input-row {
+    padding: 0 0 14px;
+}
+
+.shop-list-row {
+    padding: 0;
+}

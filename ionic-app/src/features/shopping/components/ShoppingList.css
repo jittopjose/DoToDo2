@@ -1,0 +1,50 @@
+.shop-list {
+    --ion-item-background: transparent;
+    padding: 0 12px 28px;
+}
+
+.shop-empty-card {
+    --border-radius: var(--dotodo-radius-lg);
+    --background: var(--dotodo-card);
+    margin: 30px 12px 8px;
+    border: 1px solid var(--dotodo-card-border);
+    box-shadow: var(--dotodo-shadow-card);
+    text-align: center;
+}
+
+.shop-empty-content {
+    padding: 34px var(--dotodo-card-padding) !important;
+}
+
+.shop-empty-illustration {
+    display: grid;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 16px;
+    place-items: center;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at top left, rgba(var(--ion-color-tertiary-rgb), 0.24), transparent 58%),
+        rgba(var(--ion-color-tertiary-rgb), 0.1);
+    color: var(--ion-color-tertiary);
+}
+
+.shop-empty-illustration ion-icon {
+    font-size: 38px;
+}
+
+.shop-empty-title {
+    margin: 0 0 8px;
+    color: var(--dotodo-text);
+    font-size: 20px;
+    font-weight: 850;
+    letter-spacing: -0.03em;
+}
+
+.shop-empty-copy {
+    max-width: 280px;
+    margin: 0 auto;
+    color: var(--dotodo-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}

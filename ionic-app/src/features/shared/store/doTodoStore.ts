@@ -87,7 +87,7 @@ export const useDoTodoStore = create<EntryState>()(
         createdAt: Date.now(),
         list,
         itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
-        dueDate: dueDate ?? defaultDueDate,
+        dueDate: dueDate ?? (itemType === 'todo' ? defaultDueDate : undefined),
         ...(description !== undefined && { description }),
         ...(priority !== undefined && { priority }),
         ...(quantity !== undefined && { quantity }),
