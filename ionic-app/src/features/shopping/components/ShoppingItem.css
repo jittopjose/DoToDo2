@@ -1,52 +1,53 @@
-.shop-item {
+.shop-item-wrap {
+    margin-bottom: 6px;
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 12px;
+    box-shadow: var(--dotodo-shadow-card);
+    overflow: hidden;
+    animation: shopItemEnter 0.3s ease both;
+    transition: border-color var(--dotodo-motion-fast);
+}
+
+.shop-item-wrap.is-editing {
+    border-color: rgba(var(--ion-color-tertiary-rgb), 0.3);
+}
+
+@keyframes shopItemEnter {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.shop-item-summary {
     --background: var(--dotodo-card);
     --padding-start: 12px;
     --padding-end: 14px;
     --padding-top: 8px;
     --padding-bottom: 8px;
     --inner-padding-end: 0;
-    margin-bottom: 6px;
-    border: 1px solid var(--dotodo-card-border);
-    border-radius: 12px;
-    box-shadow: var(--dotodo-shadow-card);
-    overflow: hidden;
-    transition:
-        background var(--dotodo-motion-fast),
-        border-color var(--dotodo-motion-fast),
-        opacity var(--dotodo-motion-fast);
-    animation: shopItemEnter 0.3s ease both;
+    --border-radius: 0;
+    --border-style: none;
+    --border-color: transparent;
+    --min-height: 0;
+    cursor: pointer;
 }
 
-@keyframes shopItemEnter {
-    from {
-        opacity: 0;
-        transform: translateY(-6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.shop-item:active {
+.shop-item-summary:active {
     transform: scale(0.998);
 }
 
-.shop-item.is-completed {
+.shop-item-wrap.is-completed .shop-item-summary {
     background: linear-gradient(90deg, rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.07) 0%, var(--dotodo-card) 28%);
-    border-color: rgba(var(--dotodo-success-rgb, 16, 185, 129), 0.12);
-    opacity: 0.75;
 }
 
-.shop-item.is-completed .shop-item-name {
+.shop-item-wrap.is-completed .shop-item-name {
     color: var(--dotodo-muted);
     text-decoration: line-through;
     text-decoration-thickness: 1.5px;
     text-decoration-color: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.45);
 }
 
-.shop-item.is-completed .shop-item-qty,
-.shop-item.is-completed .shop-item-price {
+.shop-item-wrap.is-completed .shop-item-qty,
+.shop-item-wrap.is-completed .shop-item-price {
     opacity: 0.55;
 }
 
@@ -99,4 +100,181 @@
     font-size: 11px;
     font-weight: 800;
     margin: 0;
+}
+
+.shop-item-chevron {
+    font-size: 16px;
+    color: var(--dotodo-muted);
+    margin-left: 6px;
+    transition: transform var(--dotodo-motion-fast);
+    flex-shrink: 0;
+}
+
+.shop-item-chevron.is-open {
+    transform: rotate(180deg);
+}
+
+/* ── Collapsible editor ── */
+
+.shop-item-editor-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--dotodo-motion-soft), opacity var(--dotodo-motion-soft);
+    opacity: 0;
+}
+
+.shop-item-editor-collapse.is-open {
+    max-height: 300px;
+    opacity: 1;
+}
+
+.shop-item-editor {
+    padding: 0 14px 12px;
+    border-top: 1px solid var(--dotodo-card-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shop-editor-field {
+    padding-top: 2px;
+}
+
+.shop-editor-name {
+    --background: var(--dotodo-surface-strong);
+    --border-style: solid;
+    --border-color: var(--dotodo-card-border);
+    --border-radius: 10px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --color: var(--dotodo-text);
+    --placeholder-color: var(--dotodo-muted);
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 10px;
+    min-height: 36px;
+}
+
+.shop-editor-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.shop-editor-qty {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shop-editor-price {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.shop-editor-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.shop-qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--dotodo-surface-strong);
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 10px;
+    padding: 1px;
+}
+
+.shop-qty-btn {
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --color: var(--dotodo-text);
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.shop-qty-btn:disabled {
+    --color: rgba(var(--dotodo-muted-rgb), 0.3);
+    opacity: 0.4;
+}
+
+.shop-qty-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    font-size: 13px;
+    font-weight: 850;
+    color: var(--dotodo-text);
+    text-align: center;
+}
+
+.shop-price-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--dotodo-surface-strong);
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 10px;
+    padding: 1px 8px;
+    width: 100%;
+}
+
+.shop-price-currency {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    flex-shrink: 0;
+}
+
+.shop-price-input {
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --background: transparent;
+    --border-style: none;
+    --color: var(--dotodo-text);
+    --placeholder-color: var(--dotodo-muted);
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 28px;
+}
+
+.shop-editor-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 4px;
+}
+
+.shop-editor-save-btn {
+    --border-radius: 8px;
+    --background: var(--ion-color-tertiary);
+    --background-activated: var(--ion-color-tertiary-shade);
+    --color: var(--ion-color-tertiary-contrast);
+    font-weight: 700;
+    min-height: 32px;
+}
+
+.shop-editor-delete-btn {
+    min-height: 32px;
+    font-weight: 600;
 }

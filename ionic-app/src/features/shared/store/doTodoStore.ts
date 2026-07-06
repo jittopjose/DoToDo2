@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import { DoTodo, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
+import { DoTodo, ShoppingItem, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
 import { getNextDueDate } from '../utils/recurrence';
 import { loadData, saveData } from '../../../services/do-todo-storage.service';
 
@@ -37,7 +37,13 @@ interface EntryState {
   toggleEntry: (id: string) => void;
   toggleSubtask: (entryId: string, subtaskId: string) => void;
   deleteEntry: (id: string) => void;
-  updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'recurrence' | 'isCompleted'>>) => void;
+  updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'shoppingItems' | 'recurrence' | 'isCompleted' | 'isArchived'>>) => void;
+  addShoppingList: (title: string) => void;
+  addShoppingItem: (listId: string, title: string, quantity?: number, price?: number) => void;
+  toggleShoppingItem: (listId: string, itemId: string) => void;
+  updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price'>>) => void;
+  removeShoppingItem: (listId: string, itemId: string) => void;
+  archiveShoppingList: (listId: string) => void;
   setFilter: (filter: DoTodoFilter) => void;
   setTypeFilter: (typeFilter: DoTodo['itemType'] | 'all') => void;
   setSearchTerm: (term: string) => void;
@@ -244,6 +250,101 @@ export const useDoTodoStore = create<EntryState>()(
       if (defaultLists.includes(normalized) || state.customLists.includes(normalized)) return state;
       return { customLists: [...state.customLists, normalized] };
     }),
+
+    addShoppingList: (title) => {
+      const id = uuidv4();
+      const entry: DoTodo = {
+        id,
+        title,
+        isCompleted: false,
+        createdAt: Date.now(),
+        list: 'all-lists',
+        itemType: 'shopping',
+        shoppingItems: [],
+      };
+      set((state) => ({
+        entries: { ...state.entries, [id]: entry },
+        entryIds: [id, ...state.entryIds],
+      }));
+    },
+
+    addShoppingItem: (listId, title, quantity, price) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry || !entry.shoppingItems) return state;
+      const newItem: ShoppingItem = {
+        id: uuidv4(),
+        title,
+        isCompleted: false,
+        ...(quantity !== undefined && { quantity }),
+        ...(price !== undefined && { price }),
+      };
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: {
+            ...entry,
+            shoppingItems: [...entry.shoppingItems, newItem],
+          },
+        },
+      };
+    }),
+
+    toggleShoppingItem: (listId, itemId) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry || !entry.shoppingItems) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: {
+            ...entry,
+            shoppingItems: entry.shoppingItems.map((item) =>
+              item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item
+            ),
+          },
+        },
+      };
+    }),
+
+    updateShoppingItem: (listId, itemId, updates) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry || !entry.shoppingItems) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: {
+            ...entry,
+            shoppingItems: entry.shoppingItems.map((item) =>
+              item.id === itemId ? { ...item, ...updates } : item
+            ),
+          },
+        },
+      };
+    }),
+
+    removeShoppingItem: (listId, itemId) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry || !entry.shoppingItems) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: {
+            ...entry,
+            shoppingItems: entry.shoppingItems.filter((item) => item.id !== itemId),
+          },
+        },
+      };
+    }),
+
+    archiveShoppingList: (listId) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: { ...entry, isArchived: !entry.isArchived },
+        },
+      };
+    }),
   })
 );
 
@@ -320,3 +421,37 @@ export const selectEntryCountByListAndType = (list: string) => (state: EntryStat
     if (state.typeFilter !== 'all' && entry.itemType !== state.typeFilter) return false;
     return true;
   }).length;
+
+const isShoppingList = (entry: DoTodo): boolean =>
+  entry.itemType === 'shopping' && entry.shoppingItems !== undefined;
+
+export const selectActiveShoppingLists = (state: EntryState): DoTodo[] =>
+  state.entryIds
+    .map((id) => state.entries[id])
+    .filter((entry) => isShoppingList(entry) && !entry.isArchived);
+
+export const selectArchivedShoppingLists = (state: EntryState): DoTodo[] =>
+  state.entryIds
+    .map((id) => state.entries[id])
+    .filter((entry) => isShoppingList(entry) && entry.isArchived);
+
+export const selectShoppingListItems = (listId: string) => (state: EntryState): ShoppingItem[] => {
+  const entry = state.entries[listId];
+  return entry?.shoppingItems ?? [];
+};
+
+export const selectShoppingListSummary = (listId: string) => (state: EntryState): { count: number; total: number; completedCount: number } => {
+  const entry = state.entries[listId];
+  const items = entry?.shoppingItems ?? [];
+  let total = 0;
+  let completedCount = 0;
+  for (const item of items) {
+    if (item.price) {
+      total += item.price * (item.quantity || 1);
+    }
+    if (item.isCompleted) {
+      completedCount++;
+    }
+  }
+  return { count: items.length, total, completedCount };
+};

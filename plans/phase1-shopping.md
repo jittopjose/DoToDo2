@@ -1,171 +1,321 @@
 # Phase 1 — Shopping List Feature
 
 ## Overview
-Build a dedicated shopping list into the DoToDo2 app. Each step is independently
-verifiable — you can see the result in the app immediately after implementation.
-Steps are ordered by dependency (each step builds on the previous one).
 
-**Global decisions**:
-- `DoTodo.category?: string` added to types in Step 3
-- Completed items stay in the running total with strikethrough styling (not excluded)
-- All shopping components live under `src/features/shopping/`
-- Shared Zustand store at `src/features/shared/store/` powers all data
+A shopping list system where each **shopping list is a single `DoTodo` entry**
+with embedded items (like task + subtasks). Multiple named lists coexist in
+Active/Archived sections.
+
+**Key design decisions**:
+- Items live in `shoppingItems: ShoppingItem[]` on the parent `DoTodo` — one entry per list
+- Inline expand-to-edit on items (no separate edit page navigation)
+- Quantity/price input is collapsed by default (quick-add by name only)
+- Completed items stay visible with strikethrough (like tasks)
+- Archive is a manual action on the whole list (not auto-archived)
 
 ---
 
-## Step 1 — Shopping Scaffold (Priority: HIGH)
-**Goal**: Replace placeholder with a fully working shopping list page.
+## Step 1 — Data Model + Store (Priority: HIGH)
 
-### Files to create
-| File | Purpose |
-|------|---------|
-| `src/features/shopping/pages/ShoppingPage.tsx` | Full page with greeting, search, type filter locked to `'shopping'`, ShoppingInput + ShoppingList |
-| `src/features/shopping/pages/ShoppingPage.css` | Page-level styles |
-| `src/features/shopping/components/ShoppingInput.tsx` | Text field + quantity stepper (default 1) + add button + barcode icon (disabled) |
-| `src/features/shopping/components/ShoppingInput.css` | Input styles (match composer-card pattern from TodoInput.css) |
-| `src/features/shopping/components/ShoppingItem.tsx` | IonCheckbox + name + quantity badge (×N) + price chip (hidden if unset) |
-| `src/features/shopping/components/ShoppingItem.css` | Item styles |
-| `src/features/shopping/components/ShoppingList.tsx` | Flat list of ShoppingItem (no grouping yet) |
-| `src/features/shopping/components/ShoppingList.css` | List styles |
+**Goal**: Add `ShoppingItem` type, extend `DoTodo`, add store actions and selectors.
 
-### Wireframe (text)
+### Files to modify
+
+| File | Change |
+|------|--------|
+| `src/features/shared/types.ts` | Add `ShoppingItem` interface; add `shoppingItems` and `isArchived` to `DoTodo` |
+| `src/features/shared/store/doTodoStore.ts` | Add 6 new actions + 3 new selectors |
+
+### New type
+
+```ts
+export interface ShoppingItem {
+    id: string;
+    title: string;
+    isCompleted: boolean;
+    quantity?: number;
+    price?: number;
+}
 ```
-┌──────────────────────────────┐
-│  Good morning                │
-│  Shopping list for today     │
-├──────────────────────────────┤
-│  [input: What to buy?] [qty] │
-│  [qty stepper: 2] [+ add] 📷│
-├──────────────────────────────┤
-│  ☐ Milk                  ×2  │
-│  ☐ Bread                 ×1  │
-│  ☑ Butter (strikethrough) ×1 │
-└──────────────────────────────┘
+
+### DoTodo changes
+
+```ts
+export interface DoTodo extends BaseItem {
+    // existing fields unchanged
+    shoppingItems?: ShoppingItem[];  // NEW
+    isArchived?: boolean;           // NEW
+}
 ```
+
+### New store actions
+
+| Action | Signature | Behaviour |
+|--------|-----------|----------|
+| `addShoppingList` | `(title: string) => void` | Creates `DoTodo` with `itemType: 'shopping'`, `shoppingItems: []` |
+| `addShoppingItem` | `(listId: string, title: string, quantity?: number, price?: number) => void` | Pushes new `ShoppingItem` to `shoppingItems` |
+| `toggleShoppingItem` | `(listId: string, itemId: string) => void` | Toggles `isCompleted` on the item |
+| `updateShoppingItem` | `(listId: string, itemId: string, updates: Partial<ShoppingItem>) => void` | Patches fields on the item |
+| `removeShoppingItem` | `(listId: string, itemId: string) => void` | Removes item from array |
+| `archiveShoppingList` | `(listId: string) => void` | Toggles `isArchived` |
+
+### New selectors
+
+| Selector | Returns |
+|----------|---------|
+| `selectActiveShoppingLists` | Entries where `itemType === 'shopping' && shoppingItems !== undefined && !isArchived` |
+| `selectArchivedShoppingLists` | Same but `isArchived === true` |
+| `selectShoppingListSummary(listId)` | `{ count, total, completedCount }` from items array |
 
 ### Acceptance criteria
-- Navigate to `/shopping/all-lists` → see the page
-- Add items with quantity → they appear in the list
-- Check items off → strikethrough style
-- Search filters items by name
-- Type filter locked to `'shopping'` (no switching to todo/note/checklist)
-- Empty state shown when no shopping items exist
+
+- TypeScript compiles clean
+- Calling `addShoppingList('Weekly Groceries')` creates a store entry with empty items array
+- `selectActiveShoppingLists` returns newly created lists
+- `selectShoppingListSummary` returns correct counts
 
 ### Dependencies
-- Shared store already supports `itemType: 'shopping'`
-- Route `/shopping/:name` already exists in App.tsx
+
+- Zustand store persistence (already wired up — `schedulePersist` runs on store changes)
 
 ---
 
-## Step 2 — Price + Running Total (Priority: MEDIUM)
-**Goal**: Add price tracking and cart total.
+## Step 2 — ShoppingItem with Inline Expand-to-Edit (Priority: HIGH)
 
-### Files to modify
-| File | Change |
+**Goal**: A single component that displays a shopping item and lets the user
+edit it inline by expanding the row.
+
+### Existing files to repurpose
+
+| File | Action |
 |------|--------|
-| `ShoppingInput.tsx` | Add price field (numeric, `$` prefix) |
-| `ShoppingItem.tsx` | Show price chip (`$3.50`) beside quantity badge |
-| `ShoppingPage.tsx` | Add total bar below search: `Total: $12.50` |
+| `src/features/shopping/components/ShoppingItem.tsx` | Rewrite with inline edit |
+| `src/features/shopping/components/ShoppingItem.css` | Rewrite with expand animation |
 
-### Wireframe (text)
+### ShoppingItem — Collapsed state (default)
+
 ```
-┌──────────────────────────────┐
-│  🛒 Total: $12.50            │
-├──────────────────────────────┤
-│  [input: What to buy?] [qty] │
-│  [$][price]         [+ add]  │
-├──────────────────────────────┤
-│  ☐ Milk      ×2   $3.50     │
-│  ☐ Bread     ×1   $2.00     │
-│  ☑ Butter    ×1   $5.00 ~~~ │ (strikethrough)
-└──────────────────────────────┘
+┌────────────────────────────────────────────┐
+│  ☐ 🛒 Milk                   ×2    $3.99  │
+└────────────────────────────────────────────┘
+```
+
+- Checkbox toggles completion (strikethrough when done)
+- Cart icon, name, quantity badge (`×N`), price chip (`$3.99`)
+- Tap anywhere on the body (not checkbox) → expands to edit
+
+### ShoppingItem — Expanded state
+
+```
+┌────────────────────────────────────────────┐
+│  ☐ 🛒 Milk                   ×2    $3.99  │
+├────────────────────────────────────────────┤
+│  Name                                      │
+│  ┌────────────────────────────────────────┐│
+│  │ Milk                                   ││
+│  └────────────────────────────────────────┘│
+│  ┌──────────────┐  ┌─────────────────────┐ │
+│  │ [−]  2  [+]  │  │ $ [3.99    ]        │ │
+│  └──────────────┘  └─────────────────────┘ │
+│  [Save]                    [🗑️ Delete]      │
+└────────────────────────────────────────────┘
+```
+
+- Only **one item expands at a time** (the detail page manages this via a `editingItemId` state)
+- Save → calls `updateShoppingItem`, collapses
+- Delete → calls `removeShoppingItem`, collapses
+- Animation: `max-height` + opacity transition
+
+### Props interface
+
+```ts
+interface ShoppingItemProps {
+    item: ShoppingItem;
+    isEditing: boolean;
+    onToggle: () => void;
+    onStartEdit: () => void;
+    onSave: (updates: Partial<ShoppingItem>) => void;
+    onDelete: () => void;
+    onCancel: () => void;
+}
 ```
 
 ### Acceptance criteria
-- Price field in input → item saves with price
-- Price shown on each item chip
-- Total bar updates in real-time as items are added/modified
-- Completed items still counted in total (with strikethrough)
-- Items without price show no price chip (not $0)
+
+- Item shows name, checkbox, quantity badge, price chip
+- Checking the checkbox → strikethrough style
+- Tapping the item → expands editor below the summary row
+- Editing name/qty/price → Save → collapses with updated values
+- Delete → item removed from list
+- Smooth expand/collapse animation
 
 ---
 
-## Step 3 — Categories (Priority: MEDIUM)
-**Goal**: Auto-categorize shopping items and group them in the list.
+## Step 3 — Shopping List Detail Page (Priority: HIGH)
 
-### Files to create
+**Goal**: A page showing items in a single shopping list with add-input, total bar, and archive.
+
+### New files
+
 | File | Purpose |
 |------|---------|
-| `src/features/shopping/utils/shoppingCategories.ts` | Keyword→category mapping + auto-tag function |
+| `src/features/shopping/pages/ShoppingListDetail.tsx` | Items in one list |
+| `src/features/shopping/pages/ShoppingListDetail.css` | Detail page styles |
 
-### Files to modify
-| File | Change |
+### Existing files to repurpose
+
+| File | Action |
 |------|--------|
-| `src/features/shared/types.ts` | Add `category?: string` to `DoTodo` |
-| `ShoppingInput.tsx` | On add: call auto-tag → save `category` on entry |
-| `ShoppingItem.tsx` | Add colored `IonChip` showing category name |
-| `ShoppingList.tsx` | Group items by category (collapsible headers) |
-| `ShoppingList.css` | Category group header styles |
+| `src/features/shopping/pages/ShoppingPage.tsx` **→** | Moves to `ShoppingListDetail.tsx` (the old flat page becomes the detail view) |
 
-### Category mapping (proposed)
+### Wireframe
+
 ```
-produce:  apple, banana, lettuce, tomato, onion, garlic, potato, carrot, spinach, broccoli, mushroom, avocado, lemon, lime, orange, grapes, strawberry, blueberry, melon, cucumber, pepper, zucchini, celery, kale, cilantro, parsley, corn
-dairy:    milk, cheese, yogurt, butter, cream, sour cream, cottage cheese, cream cheese, eggs, margarine
-meat:     chicken, beef, pork, turkey, bacon, sausage, ham, lamb, steak, ground beef, ribs, chicken breast, chicken thigh, deli, salami, pepperoni
-bakery:   bread, bagel, croissant, muffin, baguette, tortilla, pita, roll, bun, cake, cookie, pastry, donut, pie, brownie
-pantry:   rice, pasta, flour, sugar, salt, pepper, oil, vinegar, sauce, spice, cereal, oatmeal, peanut butter, jam, honey, syrup, beans, lentils, canned, soup, broth, stock, olive oil, coconut milk, soy sauce, ketchup, mustard, mayonnaise, baking powder, baking soda, yeast, noodles, couscous, quinoa, popcorn, chips, crackers
-frozen:   ice cream, frozen pizza, frozen vegetables, frozen fruit, frozen meals, frozen, popsicle
-beverages: juice, soda, water, coffee, tea, beer, wine, liquor, sparkling water, coconut water, sports drink, energy drink, kombucha
-household: soap, detergent, paper towels, toilet paper, toothpaste, shampoo, cleaning, trash bags, dish soap, laundry, sponge, tissue, bleach, disinfectant
-other:    (fallback for anything not matched)
+┌────────────────────────────────────────────┐
+│  ← Shopping Lists    Weekly Groceries   📦 │ ← archive button
+│                                            │
+│  ┌─ 🔍 Search items... ──────────────────┐│
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ┌────────────────────────────────────────┐│
+│  │  🛒  TOTAL                     $34.50  ││
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ┌────────────────────────────────────────┐│
+│  │  📝 [What to buy?                  ]   ││
+│  │  (+ qty) (+ price)              [+]   ││
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ☐ 🛒 Milk                   ×2    $3.99  │ ← tap to expand
+│  ☑ 🛒 Eggs                   ×12   $5.99  │ ← strikethrough
+│  ☐ 🛒 Bread                  ×1    $2.49  │
+│  ☐ 🛒 Apples                 ×5    $6.00  │
+│  ☐ 🛒 Chicken breast         ×2    $8.50  │
+│  ☐ 🛒 Olive oil              ×1    $7.99  │
+└────────────────────────────────────────────┘
 ```
 
-### Wireframe (text)
-```
-┌──────────────────────────────┐
-│  🛒 Total: $12.50            │
-├──────────────────────────────┤
-│  [input: What to buy?]  [qty]│
-│  [$][price]          [+ add] │
-├──────────────────────────────┤
-│ ▼ Dairy (2)                  │
-│  ☐ Milk      ×2    $3.50 🏷️Dairy│
-│  ☐ Yogurt    ×1    $2.00 🏷️Dairy│
-├──────────────────────────────┤
-│ ▼ Bakery (1)                 │
-│  ☐ Bread     ×1    $2.00 🏷️Bakery│
-├──────────────────────────────┤
-│ ▼ Produce (0) (collapsed)    │
-└──────────────────────────────┘
-```
+### Input widget (at bottom of search/total section)
+
+- **Collapsed**: text field + "+" button (for quick adds, no qty/price)
+- **Expanded**: text field + quantity stepper + price field + "+" button
+- User optionally fills quantity/price before adding, or adds first and edits inline later
+
+### Functionality
+
+| Feature | Detail |
+|---------|--------|
+| **Add item** | Text + optional qty/price → calls `addShoppingItem` |
+| **Toggle item** | Checkbox → calls `toggleShoppingItem` |
+| **Edit item** | Tap → sets `editingItemId`, only that item expands |
+| **Save edit** | Expand view Save → calls `updateShoppingItem`, clears `editingItemId` |
+| **Delete item** | Expand view Delete → calls `removeShoppingItem`, clears `editingItemId` |
+| **Archive list** | Header button → calls `archiveShoppingList` |
+| **Search** | Filters items by name locally |
+| **Total** | Derives `{ count, total, completedCount }` from items array |
+| **Empty state** | "No items yet — add your first item above" |
 
 ### Acceptance criteria
-- New items auto-tagged with category based on title keywords
-- List grouped by category headers (collapsible)
-- Each item shows category badge
-- User can't manually set category yet (comes in Step 5)
-- Items with no match → "Other" category
+
+- Navigate to `/shopping/:id` → see the list detail page
+- Add items with just a name → appear in list
+- Add items with name + qty + price → show quantity badge + price chip
+- Checkbox → strikethrough
+- Tap to expand → edit inline → save → collapse with updates
+- Archive button → list moves to archived (overview no longer shows it)
+- Total bar updates in real-time
+- Search filters items by name
 
 ---
 
-## Step 4 — Barcode Scanning (Priority: MEDIUM)
+## Step 4 — Shopping Overview Page (Priority: HIGH)
+
+**Goal**: Landing page showing all active shopping lists as cards, with create-new-list input.
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `src/features/shopping/pages/ShoppingOverview.tsx` | List-of-lists page |
+| `src/features/shopping/pages/ShoppingOverview.css` | Overview page styles |
+
+### Wireframe
+
+```
+┌────────────────────────────────────────────┐
+│  ← Tasks              Shopping             │
+│                                            │
+│  Shopping Lists                            │
+│  ┌────────────────────────────────────────┐│
+│  │ 📝 [New list name...            ] [+]  ││ ← input to create list
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ┌─🛒 Weekly Groceries ──────────────────┐│
+│  │  12 items  ·  $34.50               ││
+│  │  ▓▓▓▓▓▓▓░░░░  8/12 done           ││
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ┌─🛒 Hardware Store ────────────────────┐│
+│  │  5 items  ·  $89.20                  ││
+│  │  ▓░░░░░░░░░  1/5 done               ││
+│  └────────────────────────────────────────┘│
+│                                            │
+│  ▶ Archived (2)                            │ ← collapsible section
+│    ┌─🛒 Party Supplies ──────────────────┐│
+│    │  8 items  ·  $23.00                  ││
+│    └───────────────────────────────────────┘│
+│    ┌─🛒 Office Run ──────────────────────┐│
+│    │  3 items  ·  $12.75                  ││
+│    └───────────────────────────────────────┘│
+└────────────────────────────────────────────┘
+```
+
+### List card
+
+Each card shows:
+- Name (title)
+- Item count + total price
+- Progress bar + "N/M done" label
+- Tap → navigates to `/shopping/:id`
+
+### Active vs Archived
+
+- **Active section**: unarchived lists (default view)
+- **Archived section**: collapsed by default, shows archived lists with tap-to-unarchive
+
+### Acceptance criteria
+
+- Create a new list → appears as a card in Active section
+- Tap a card → navigate to the list detail page
+- Archive a list → card moves to Archived section
+- Archived section collapsible
+- Empty state when no lists exist: "No shopping lists yet. Create your first one above."
+
+---
+
+## Step 5 — Barcode Scanning (Priority: MEDIUM)
+
 **Goal**: Camera-based barcode scanning with Open Food Facts lookup.
+(Unchanged from original plan — implementation details same.)
 
 ### Files to create
+
 | File | Purpose |
 |------|---------|
 | `src/features/shopping/components/ScannerOverlay.tsx` | Full-screen camera preview in IonModal |
-| `src/features/shopping/components/ScannerOverlay.css` | Overlay styles (viewport overlay, scan frame guide) |
-| `src/features/shopping/services/barcode.service.ts` | @zxing/library BrowserMultiFormatReader wrapper + Open Food Facts API fetch |
+| `src/features/shopping/components/ScannerOverlay.css` | Overlay styles |
+| `src/features/shopping/services/barcode.service.ts` | @zxing/library wrapper + Open Food Facts API |
 
 ### Files to modify
+
 | File | Change |
 |------|--------|
-| `ShoppingInput.tsx` | Wire scan button → opens ScannerOverlay |
-| `dotodo2.apparmor` | Add `"camera"` policy group for Ubuntu Touch |
-| `package.json` | Add `@zxing/library` dependency |
+| `ShoppingListDetail.tsx` | Add barcode button beside add-input |
+| `dotodo2.apparmor` | Add `"camera"` policy group |
+| `package.json` | Add `@zxing/library` |
 
 ### Architecture
+
 ```
 User taps 📷
   → ScannerOverlay opens (IonModal)
@@ -173,161 +323,110 @@ User taps 📷
   → @zxing BrowserMultiFormatReader decodes in real-time
   → On decode success:
       → GET https://world.openfoodfacts.org/api/v2/product/{barcode}.json
-      → Extract product_name, categories_tags
+      → Extract product_name, categories_tags, image_url
       → Close overlay, pre-fill input fields (name + category)
-  → Manual fallback: "Enter barcode manually" text field always visible
-  → If getUserMedia fails (Qt WebEngine without camera):
-      → Show manual entry + note "Camera not available"
-      → Future: fall back to C++ ZBar plugin via bridge.service.ts
+  → Manual entry fallback always visible
+  → If getUserMedia fails → show "Camera not available"
 ```
 
 ### Acceptance criteria
-- Scan button in input → opens camera overlay
-- Scanning a real barcode → auto-fills name and category from Open Food Facts
-- Manual barcode entry available as fallback
-- Dismiss overlay without scanning returns to input
-- No crash if camera permission denied — graceful error message
 
----
-
-## Step 5 — Shopping Edit Page (Priority: LOW)
-**Goal**: Tap an item to edit all shopping-specific fields.
-
-### Files to create
-| File | Purpose |
-|------|---------|
-| `src/features/shopping/pages/ShoppingEditPage.tsx` | Edit page with all shopping fields |
-| `src/features/shopping/pages/ShoppingEditPage.css` | Edit page styles |
-
-### Files to modify
-| File | Change |
-|------|--------|
-| `ShoppingItem.tsx` | Tap handler → navigate to `/shopping/:id/edit` |
-| `App.tsx` | Add route: `<Route path="/shopping/:id/edit"><ShoppingEditPage /></Route>` |
-| `ShoppingItem.css` | Add hover/tap indicator styles |
-
-### Edit page fields
-- **Name** (text input)
-- **Quantity** (stepper + numeric input, 1-999)
-- **Unit** (dropdown: pcs, kg, g, l, ml, oz, lb, pack, bunch)
-- **Price** (numeric input, currency)
-- **Category** (dropdown, pre-filled from auto-tag, user can override)
-- **Save** button in header
-- **Delete** button with confirmation alert
-
-### Wireframe (text)
-```
-┌──────────────────────────────┐
-│ ← Back        Edit    Save 🗑│
-│              Item            │
-├──────────────────────────────┤
-│  Name                        │
-│  ┌──────────────────────┐   │
-│  │ Milk                  │   │
-│  └──────────────────────┘   │
-│                              │
-│  Quantity         Unit       │
-│  ┌──┐ ┌──┐ ┌──┐  ┌──────┐  │
-│  │－│ │3 │ │＋│  │pcs  ▼│  │
-│  └──┘ └──┘ └──┘  └──────┘  │
-│                              │
-│  Price                       │
-│  ┌──────────────────────┐   │
-│  │ $       3.50          │   │
-│  └──────────────────────┘   │
-│                              │
-│  Category                    │
-│  ┌──────────────────────┐   │
-│  │ Dairy              ▼│   │
-│  └──────────────────────┘   │
-└──────────────────────────────┘
-```
-
-### Acceptance criteria
-- Tap any shopping item → opens edit page
-- All fields pre-populated with current values
-- Edit fields → Save → changes reflected in list
-- Delete with confirmation → item removed
-- Cancel/back → no changes saved
+- Barcode button → opens camera overlay
+- Scan real barcode → auto-fills name
+- Manual barcode entry available
+- Graceful camera permission denial
 
 ---
 
 ## Step 6 — Real-Time Sharing (Priority: LOW — Deferred)
-**Goal**: Real-time sync shopping lists across devices via Firebase.
+
+**Goal**: Real-time sync via Firebase. (Unchanged from original plan.)
 
 ### Files to create
+
 | File | Purpose |
 |------|---------|
 | `src/services/firebase.service.ts` | Firebase init, anonymous auth, Firestore refs |
 | `src/services/share.service.ts` | Invite code gen, Firestore merge into Zustand |
 
 ### Files to modify
+
 | File | Change |
 |------|--------|
-| `ShoppingPage.tsx` | Add Share button in header → show invite code/QR |
-| `ShoppingList.tsx` | Show "shared with N others" indicator |
-| `dotodo2.apparmor` | Add `"network"` and `"networking"` policy groups |
-| `package.json` | Add `firebase` dependency |
+| `ShoppingListDetail.tsx` | Add Share button in header |
+| `ShoppingOverview.tsx` | Show "shared with N" indicator |
+| `dotodo2.apparmor` | Add `"network"` policy groups |
+| `package.json` | Add `firebase` |
 
 ### Architecture
+
 ```
 User taps Share
   → Firebase anonymous auth (silent)
   → Generate random 6-char invite code
   → Show code + QR in modal
-  → Remote user enters code
-  → Subscribe to Firestore collection for that list
+  → Remote user enters code → subscribe to Firestore collection
   → onSnapshot → merge writes into Zustand store
   → Zustand writes → Firestore writes (bidirectional)
 ```
 
-### Acceptance criteria
-- Share button on shopping page → shows invite code
-- Second device enters code → both see same items in real-time
-- Changes on either device sync to the other within seconds
-- Offline: local changes queued, sync when online
-- Works without sign-up/email/password
+---
+
+## Appendix: Route Map
+
+| Route | Page | Status |
+|-------|------|--------|
+| `/shopping` | `ShoppingOverview` | New (Step 4) |
+| `/shopping/:listId` | `ShoppingListDetail` | Repurposed from old `ShoppingPage` (Step 3) |
+
+No item-edit route — editing is inline via expand (Step 2).
 
 ---
 
-## Appendix: Module Dependency Graph
-
-```
-Step 1 (scaffold) ─────────────────────────────────┐
-  └─ Step 2 (prices + total) ← depends on Step 1   │
-       └─ Step 3 (categories) ← depends on Step 2  │
-            └─ Step 4 (barcode) ← depends on Step 3 │
-                 └─ Step 5 (edit page) ← depends on │
-                      └─ Step 6 (sharing) ← depends │
-                          on Steps 1-5              │
-                                                  ▼
-                                         Working shopping
-                                         list feature
-```
-
 ## Appendix: File Tree After Phase 1
+
 ```
 src/features/shopping/
 ├── components/
 │   ├── ScannerOverlay.tsx
 │   ├── ScannerOverlay.css
-│   ├── ShoppingInput.tsx
-│   ├── ShoppingInput.css
-│   ├── ShoppingItem.tsx
-│   ├── ShoppingItem.css
-│   ├── ShoppingList.tsx
-│   └── ShoppingList.css
+│   ├── ShoppingItem.tsx          ← rewritten with inline edit
+│   └── ShoppingItem.css
 ├── pages/
-│   ├── ShoppingEditPage.tsx
-│   ├── ShoppingEditPage.css
-│   ├── ShoppingPage.tsx
-│   └── ShoppingPage.css
+│   ├── ShoppingListDetail.tsx    ← repurposed from old ShoppingPage
+│   ├── ShoppingListDetail.css
+│   ├── ShoppingOverview.tsx      ← new
+│   └── ShoppingOverview.css
 ├── services/
 │   └── barcode.service.ts
-└── utils/
-    └── shoppingCategories.ts
+└── (utils/ directory — unused, categories deferred)
 ```
 
-## Appendix: New/Modified NPM Dependencies
-- `@zxing/library` (Step 4)
+Old files to delete:
+- `ShoppingInput.tsx` / `.css` → replaced by inline input in `ShoppingListDetail`
+- `ShoppingList.tsx` / `.css` → replaced by inline item list in `ShoppingListDetail`
+- `ShoppingEditPage.tsx` / `.css` → replaced by inline expand-to-edit
+- `ShoppingPage.tsx` / `.css` → replaced by `ShoppingListDetail.tsx`
+
+---
+
+## Appendix: Dependency Graph
+
+```
+Step 1 (data model + store)
+  └─ Step 2 (ShoppingItem with inline edit) ← depends on store actions
+       └─ Step 3 (ShoppingListDetail) ← depends on ShoppingItem component
+            └─ Step 4 (ShoppingOverview) ← depends on Step 1 (selectors)
+                 └─ Step 5 (barcode) ← depends on Step 3 (detail page integration)
+                      └─ Step 6 (Firebase sharing) ← depends on all steps
+```
+
+Steps 3 and 4 are independent once Step 1 and 2 are done — they can be built
+in parallel.
+
+---
+
+## Appendix: NPM Dependencies
+
+- `@zxing/library` (Step 5)
 - `firebase` (Step 6)

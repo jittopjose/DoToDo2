@@ -22,23 +22,33 @@ export interface BaseItem {
     completedAt?: number;
 }
 
-export interface DoTodo extends BaseItem {
-    description?: string;
-    quantity?: number;
-    price?: number;
-    subtasks?: DoTodoSubtask[];
-    dueDate?: number;
-    priority?: DoTodoPriority;
-    recurrence?: Recurrence;
-}
-
-export type AnyItem = DoTodo;
-
 export interface DoTodoSubtask {
     id: string;
     title: string;
     isCompleted: boolean;
 }
+
+export interface ShoppingItem {
+    id: string;
+    title: string;
+    isCompleted: boolean;
+    quantity?: number;
+    price?: number;
+}
+
+export interface DoTodo extends BaseItem {
+    description?: string;
+    quantity?: number;
+    price?: number;
+    subtasks?: DoTodoSubtask[];
+    shoppingItems?: ShoppingItem[];
+    dueDate?: number;
+    priority?: DoTodoPriority;
+    recurrence?: Recurrence;
+    isArchived?: boolean;
+}
+
+export type AnyItem = DoTodo;
 
 export type DoTodoFilter = 'all' | 'active' | 'completed';
 export type DoTodoTypeFilter = ItemType | 'all';

@@ -8,8 +8,8 @@ import TodoEditPage from './features/todo/pages/TodoEditPage';
 import CalendarPage from './pages/CalendarPage';
 import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
-import ShoppingPage from './features/shopping/pages/ShoppingPage';
-import ShoppingEditPage from './features/shopping/pages/ShoppingEditPage';
+import ShoppingOverview from './features/shopping/pages/ShoppingOverview';
+import ShoppingListDetail from './features/shopping/pages/ShoppingListDetail';
 import NotePage from './features/note/pages/NotePage';
 import ChecklistPage from './features/checklist/pages/ChecklistPage';
 import { useDoTodoStore } from './features/shared/store/doTodoStore';
@@ -120,11 +120,11 @@ const App: React.FC = () => {
                 <Route path="/list/:name" exact>
                   <TodoPage />
                 </Route>
-                <Route path="/shopping/:name" exact>
-                  <ShoppingPage />
+                <Route path="/shopping" exact>
+                  <ShoppingOverview />
                 </Route>
-                <Route path="/shopping/:id/edit" exact>
-                  <ShoppingEditPage />
+                <Route path="/shopping/:listId" exact>
+                  <ShoppingListDetail />
                 </Route>
                 <Route path="/note/:name" exact>
                   <NotePage />

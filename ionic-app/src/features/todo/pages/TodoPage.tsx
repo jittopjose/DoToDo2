@@ -117,7 +117,7 @@ const Page: React.FC = () => {
         if (!value) return;
 
         if (value === 'shopping') {
-            history.push('/shopping/all-lists');
+            history.push('/shopping');
             return;
         }
         if (value === 'note') {
