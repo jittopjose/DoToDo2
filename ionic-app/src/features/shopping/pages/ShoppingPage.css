@@ -54,6 +54,47 @@
     padding: 0;
 }
 
+.shop-total-row {
+    padding: 0 12px 10px;
+}
+
+.shop-total-card {
+    --border-radius: 12px;
+    --background: var(--dotodo-card);
+    margin: 0;
+    border: 1px solid var(--dotodo-card-border);
+    box-shadow: var(--dotodo-shadow-card);
+}
+
+.shop-total-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px !important;
+}
+
+.shop-total-icon {
+    font-size: 18px;
+    color: var(--ion-color-tertiary);
+    flex-shrink: 0;
+}
+
+.shop-total-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dotodo-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.shop-total-value {
+    margin-left: auto;
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -0.02em;
+    color: var(--dotodo-text);
+}
+
 .shop-input-row {
     padding: 0 0 14px;
 }

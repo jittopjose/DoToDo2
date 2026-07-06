@@ -1,7 +1,8 @@
-import React, { useCallback, useState } from 'react';
-import { IonContent, IonIcon, IonPage, IonSearchbar } from '@ionic/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { IonCard, IonCardContent, IonContent, IonIcon, IonPage, IonSearchbar } from '@ionic/react';
 import { cartOutline } from 'ionicons/icons';
 import { useParams } from 'react-router';
+import { useDoTodoStore } from '../../shared/store/doTodoStore';
 import { ShoppingInput } from '../components/ShoppingInput';
 import { ShoppingList } from '../components/ShoppingList';
 import './ShoppingPage.css';
@@ -10,6 +11,17 @@ const ShoppingPage: React.FC = () => {
     const { name } = useParams<{ name: string }>();
     const list = name || 'all-lists';
     const [searchTerm, setSearchTerm] = useState('');
+
+    const total = useDoTodoStore((state) =>
+        state.entryIds.reduce((sum, id) => {
+            const e = state.entries[id];
+            if (e.itemType === 'shopping' && e.list === list) {
+                return sum + (e.price || 0) * (e.quantity || 1);
+            }
+            return sum;
+        }, 0)
+    );
+    const displayTotal = useMemo(() => total.toFixed(2), [total]);
 
     const handleSearchInput = useCallback((e: CustomEvent) => {
         setSearchTerm(e.detail.value || '');
@@ -33,6 +45,16 @@ const ShoppingPage: React.FC = () => {
                         placeholder="Search shopping list…"
                         aria-label="Search shopping list"
                     />
+                </div>
+
+                <div className="shop-total-row">
+                    <IonCard className="shop-total-card">
+                        <IonCardContent className="shop-total-content">
+                            <IonIcon icon={cartOutline} className="shop-total-icon" />
+                            <span className="shop-total-label">Total</span>
+                            <span className="shop-total-value">${displayTotal}</span>
+                        </IonCardContent>
+                    </IonCard>
                 </div>
 
                 <div className="shop-input-row">

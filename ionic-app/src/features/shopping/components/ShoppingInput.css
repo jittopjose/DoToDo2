@@ -101,6 +101,50 @@
     text-align: center;
 }
 
+.shop-composer-price-col {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 0 4px !important;
+}
+
+.shop-price-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--dotodo-surface-strong);
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 10px;
+    padding: 1px 6px;
+    width: 100%;
+    max-width: 100px;
+}
+
+.shop-price-currency {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    flex-shrink: 0;
+}
+
+.shop-price-input {
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --background: transparent;
+    --border-style: none;
+    --color: var(--dotodo-text);
+    --placeholder-color: var(--dotodo-muted);
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 30px;
+}
+
+.shop-price-input input {
+    text-align: right;
+}
+
 .shop-composer-actions-col {
     display: flex;
     align-items: center;

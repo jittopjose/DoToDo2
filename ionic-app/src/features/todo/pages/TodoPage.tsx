@@ -9,6 +9,7 @@ import {
 } from 'ionicons/icons';
 import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useParams } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectFilteredEntries } from '../../shared/store/doTodoStore';
 import type { ItemType } from '../../shared/types';
@@ -42,6 +43,7 @@ const typeFilterButtons = [
 const Page: React.FC = () => {
 
     const { name } = useParams<{ name: string; }>();
+    const history = useHistory();
     const [greeting] = useState(() => getGreeting());
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchbarRef = useRef<SearchbarHandle | null>(null);
@@ -51,6 +53,11 @@ const Page: React.FC = () => {
     const setTypeFilter = useDoTodoStore((state) => state.setTypeFilter);
     const typeFilter = useDoTodoStore((state) => state.typeFilter) || 'all';
     const listTodos = useDoTodoStore(useShallow(selectFilteredEntries(list)));
+
+    useEffect(() => {
+        setTypeFilter('todo');
+        setSearchTerm('');
+    }, [setTypeFilter, setSearchTerm]);
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -109,8 +116,21 @@ const Page: React.FC = () => {
 
         if (!value) return;
 
+        if (value === 'shopping') {
+            history.push('/shopping/all-lists');
+            return;
+        }
+        if (value === 'note') {
+            history.push('/note/all-lists');
+            return;
+        }
+        if (value === 'checklist') {
+            history.push('/checklist/all-lists');
+            return;
+        }
+
         handleTypeFilterSelect(value);
-    }, [handleTypeFilterSelect]);
+    }, [handleTypeFilterSelect, history]);
 
   return (
     <IonPage>

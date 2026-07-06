@@ -77,7 +77,6 @@ export const useDoTodoStore = create<EntryState>()(
     },
 
     addEntry: (title, itemType, description, dueDate, priority, quantity, price, subtasks, list = 'all-lists', recurrence) => {
-      const typeFilterOrDefault = get().typeFilter || 'all';
       const defaultDueDate = getDefaultDueTimestamp();
       const id = uuidv4();
       const entry: DoTodo = {
@@ -86,7 +85,7 @@ export const useDoTodoStore = create<EntryState>()(
         isCompleted: false,
         createdAt: Date.now(),
         list,
-        itemType: typeFilterOrDefault === 'all' ? itemType : typeFilterOrDefault,
+        itemType,
         dueDate: dueDate ?? (itemType === 'todo' ? defaultDueDate : undefined),
         ...(description !== undefined && { description }),
         ...(priority !== undefined && { priority }),

@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { IonCheckbox, IonChip, IonIcon, IonItem } from '@ionic/react';
 import { cartOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 import { DoTodo } from '../../shared/types';
 import { useDoTodoStore } from '../../shared/store/doTodoStore';
 import './ShoppingItem.css';
@@ -11,10 +12,15 @@ interface ShoppingItemProps {
 
 export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({ item }) => {
     const toggleEntry = useDoTodoStore((state) => state.toggleEntry);
+    const history = useHistory();
 
     const handleToggle = useCallback(() => {
         toggleEntry(item.id);
     }, [item.id, toggleEntry]);
+
+    const handleClick = useCallback(() => {
+        history.push(`/shopping/${encodeURIComponent(item.id)}/edit`);
+    }, [history, item.id]);
 
     return (
         <IonItem
@@ -22,6 +28,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({ item }) => {
             lines="none"
             button
             detail={false}
+            onClick={handleClick}
             aria-label={`${item.title}${item.quantity ? `, quantity ${item.quantity}` : ''}`}
         >
             <IonCheckbox

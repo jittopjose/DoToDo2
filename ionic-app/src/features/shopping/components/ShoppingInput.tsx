@@ -20,15 +20,20 @@ interface ShoppingInputProps {
 export const ShoppingInput: React.FC<ShoppingInputProps> = ({ list }) => {
     const [text, setText] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [price, setPrice] = useState('');
     const addEntry = useDoTodoStore((state) => state.addEntry);
 
     const handleAdd = useCallback(() => {
         const trimmed = text.trim();
         if (!trimmed) return;
-        addEntry(trimmed, 'shopping', undefined, undefined, undefined, quantity, undefined, undefined, list);
+        const priceValue = price !== '' ? parseFloat(price) : undefined;
+        addEntry(trimmed, 'shopping', undefined, undefined, undefined, quantity,
+                 priceValue !== undefined && !isNaN(priceValue) ? priceValue : undefined,
+                 undefined, list);
         setText('');
         setQuantity(1);
-    }, [text, quantity, addEntry, list]);
+        setPrice('');
+    }, [text, quantity, price, addEntry, list]);
 
     const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -82,6 +87,21 @@ export const ShoppingInput: React.FC<ShoppingInputProps> = ({ list }) => {
                                 >
                                     +
                                 </IonButton>
+                            </div>
+                        </IonCol>
+                        <IonCol className="shop-composer-price-col">
+                            <div className="shop-price-input-wrap">
+                                <span className="shop-price-currency">$</span>
+                                <IonInput
+                                    className="shop-price-input"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={price}
+                                    placeholder="0.00"
+                                    onIonInput={(e) => setPrice(e.detail.value ?? '')}
+                                    aria-label="Price"
+                                />
                             </div>
                         </IonCol>
                         <IonCol className="shop-composer-actions-col">
