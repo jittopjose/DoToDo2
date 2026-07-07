@@ -23,18 +23,22 @@
     margin: 0;
 }
 
-.shop-overview-create {
-    margin-bottom: 20px;
+.shop-overview-create-card {
+    --border-radius: 14px;
+    --background: var(--dotodo-card);
+    box-shadow: var(--dotodo-shadow-card);
+    margin: 0 0 20px;
+    border: none;
 }
 
 .shop-overview-create-input-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--dotodo-card);
-    border-radius: 14px;
-    padding: 4px 4px 4px 14px;
-    box-shadow: var(--dotodo-shadow-card);
+    --padding-start: 14px;
+    --padding-end: 4px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
 }
 
 .shop-overview-create-input {
@@ -161,14 +165,21 @@
 /* ── Archived section ── */
 
 .shop-overview-archived-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    padding: 8px 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --min-height: 44px;
+    --background: transparent;
+    --inner-padding-end: 0;
+    --border-style: none;
+    --border-color: transparent;
     margin-bottom: 8px;
-    min-height: 44px;
-    user-select: none;
+    cursor: pointer;
+}
+
+.shop-overview-archived-header .shop-overview-archived-chevron {
+    margin-right: 6px;
 }
 
 .shop-overview-archived-chevron {

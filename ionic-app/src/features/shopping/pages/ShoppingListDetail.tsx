@@ -118,52 +118,54 @@ const ShoppingListDetail: React.FC = () => {
                     </IonCard>
                 </div>
 
-                <div className="shop-detail-composer">
-                    <div className="shop-detail-composer-main">
-                        <IonInput
-                            className="shop-detail-composer-input"
-                            value={newItemText}
-                            placeholder="What to buy?"
-                            onIonInput={(e) => setNewItemText(e.detail.value ?? '')}
-                            onKeyDown={handleAddKeyDown}
-                            aria-label="Item name"
-                        />
-                        <IonButton
-                            className="shop-detail-composer-add-btn"
-                            onClick={handleAddItem}
-                            disabled={!newItemText.trim()}
-                            aria-label="Add item"
-                        >
-                            <IonIcon icon={addOutline} />
-                        </IonButton>
-                    </div>
-                    <div className="shop-detail-composer-more-toggle" onClick={() => setShowMore((prev) => !prev)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMore((prev) => !prev); } }}>
-                        <IonIcon icon={chevronDownOutline} className={`shop-detail-composer-chevron ${showMore ? 'is-open' : ''}`} />
-                        <span className="shop-detail-composer-more-text">Add qty & price</span>
-                    </div>
-                    {showMore && (
-                        <div className="shop-detail-composer-extras">
-                            <div className="shop-qty-stepper">
-                                <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyDec} disabled={newItemQty <= 1} aria-label="Decrease quantity">−</IonButton>
-                                <span className="shop-qty-value">{newItemQty}</span>
-                                <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyInc} disabled={newItemQty >= 999} aria-label="Increase quantity">+</IonButton>
-                            </div>
-                            <div className="shop-price-input-wrap">
-                                <span className="shop-price-currency">$</span>
-                                <IonInput
-                                    className="shop-price-input"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={newItemPrice}
-                                    placeholder="0.00"
-                                    onIonInput={(e) => setNewItemPrice(e.detail.value ?? '')}
-                                    aria-label="Price"
-                                />
-                            </div>
+                <IonCard className="shop-detail-composer">
+                    <IonCardContent className="shop-detail-composer-inner">
+                        <div className="shop-detail-composer-main">
+                            <IonInput
+                                className="shop-detail-composer-input"
+                                value={newItemText}
+                                placeholder="What to buy?"
+                                onIonInput={(e) => setNewItemText(e.detail.value ?? '')}
+                                onKeyDown={handleAddKeyDown}
+                                aria-label="Item name"
+                            />
+                            <IonButton
+                                className="shop-detail-composer-add-btn"
+                                onClick={handleAddItem}
+                                disabled={!newItemText.trim()}
+                                aria-label="Add item"
+                            >
+                                <IonIcon icon={addOutline} />
+                            </IonButton>
                         </div>
-                    )}
-                </div>
+                        <div className="shop-detail-composer-more-toggle" onClick={() => setShowMore((prev) => !prev)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMore((prev) => !prev); } }}>
+                            <IonIcon icon={chevronDownOutline} className={`shop-detail-composer-chevron ${showMore ? 'is-open' : ''}`} />
+                            <span className="shop-detail-composer-more-text">Add qty & price</span>
+                        </div>
+                        {showMore && (
+                            <div className="shop-detail-composer-extras">
+                                <div className="shop-qty-stepper">
+                                    <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyDec} disabled={newItemQty <= 1} aria-label="Decrease quantity">−</IonButton>
+                                    <span className="shop-qty-value">{newItemQty}</span>
+                                    <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyInc} disabled={newItemQty >= 999} aria-label="Increase quantity">+</IonButton>
+                                </div>
+                                <div className="shop-price-input-wrap">
+                                    <span className="shop-price-currency">$</span>
+                                    <IonInput
+                                        className="shop-price-input"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={newItemPrice}
+                                        placeholder="0.00"
+                                        onIonInput={(e) => setNewItemPrice(e.detail.value ?? '')}
+                                        aria-label="Price"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </IonCardContent>
+                </IonCard>
 
                 {items.length === 0 ? (
                     <div className="shop-detail-empty">

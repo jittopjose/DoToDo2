@@ -7,6 +7,7 @@ import {
     IonContent,
     IonIcon,
     IonInput,
+    IonItem,
     IonPage,
 } from '@ionic/react';
 import { addOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
@@ -75,8 +76,8 @@ const ShoppingOverview: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="shop-overview-create">
-                    <div className="shop-overview-create-input-row">
+                <IonCard className="shop-overview-create-card">
+                    <IonCardContent className="shop-overview-create-input-row">
                         <IonInput
                             className="shop-overview-create-input"
                             value={newListName}
@@ -93,8 +94,8 @@ const ShoppingOverview: React.FC = () => {
                         >
                             <IonIcon icon={addOutline} />
                         </IonButton>
-                    </div>
-                </div>
+                    </IonCardContent>
+                </IonCard>
 
                 {activeLists.length > 0 && (
                     <div className="shop-overview-section">
@@ -116,12 +117,12 @@ const ShoppingOverview: React.FC = () => {
 
                 {archivedLists.length > 0 && (
                     <div className="shop-overview-section">
-                        <div
+                        <IonItem
+                            button
+                            detail={false}
+                            lines="none"
                             className="shop-overview-archived-header"
                             onClick={() => setShowArchived((prev) => !prev)}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowArchived((prev) => !prev); } }}
                         >
                             <IonIcon
                                 icon={chevronDownOutline}
@@ -130,7 +131,7 @@ const ShoppingOverview: React.FC = () => {
                             <h2 className="shop-overview-section-title">
                                 Archived ({archivedLists.length})
                             </h2>
-                        </div>
+                        </IonItem>
                         {showArchived && archivedLists.map((list) => (
                             <ListCard key={list.id} listId={list.id} />
                         ))}
