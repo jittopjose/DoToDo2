@@ -14,7 +14,7 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cartOutline, chevronDownOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -104,8 +104,16 @@ const ShoppingListDetail: React.FC = () => {
                     <IonCard className="shop-detail-total-card">
                         <IonCardContent className="shop-detail-total-content">
                             <IonIcon icon={cartOutline} className="shop-detail-total-icon" />
-                            <span className="shop-detail-total-label">Total</span>
-                            <span className="shop-detail-total-value">${summary.total.toFixed(2)}</span>
+                            <div className="shop-detail-total-body">
+                                <div className="shop-detail-total-top">
+                                    <span className="shop-detail-total-label">Total</span>
+                                    <span className="shop-detail-total-value">${summary.total.toFixed(2)}</span>
+                                </div>
+                                <span className="shop-detail-total-sublabel">
+                                    <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 12 }} />
+                                    {items.filter((i) => i.isCompleted).length} of {items.length} items
+                                </span>
+                            </div>
                         </IonCardContent>
                     </IonCard>
                 </div>
@@ -165,10 +173,11 @@ const ShoppingListDetail: React.FC = () => {
                     </div>
                 ) : (
                     <IonList className="shop-detail-list" lines="none">
-                        {items.map((item) => (
+                        {items.map((item, idx) => (
                             <ShoppingItem
                                 key={item.id}
                                 item={item}
+                                index={idx}
                                 isEditing={editingItemId === item.id}
                                 onToggle={() => toggleShoppingItem(listId, item.id)}
                                 onStartEdit={() => setEditingItemId(item.id)}

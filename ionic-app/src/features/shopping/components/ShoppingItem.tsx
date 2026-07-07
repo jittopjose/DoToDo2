@@ -7,7 +7,7 @@ import {
     IonInput,
     IonItem,
 } from '@ionic/react';
-import { cartOutline, chevronDownOutline, trashOutline } from 'ionicons/icons';
+import { chevronDownOutline, trashOutline } from 'ionicons/icons';
 import type { ShoppingItem as ShoppingItemType } from '../../shared/types';
 import './ShoppingItem.css';
 
@@ -19,6 +19,7 @@ interface ShoppingItemProps {
     onSave: (updates: Partial<Pick<ShoppingItemType, 'title' | 'quantity' | 'price'>>) => void;
     onDelete: () => void;
     onCancel: () => void;
+    index?: number;
 }
 
 export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
@@ -29,6 +30,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     onSave,
     onDelete,
     onCancel,
+    index,
 }) => {
     const [editTitle, setEditTitle] = useState(item.title);
     const [editQty, setEditQty] = useState(item.quantity ?? 1);
@@ -78,7 +80,10 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     }, [handleSave, onCancel]);
 
     return (
-        <div className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''}`}>
+        <div
+            className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''}`}
+            style={{ '--item-index': index ?? 0 } as React.CSSProperties}
+        >
             <IonItem
                 className="shop-item-summary"
                 lines="none"
@@ -93,10 +98,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                     onClick={(e) => e.stopPropagation()}
                     aria-label={`Mark "${item.title}" as ${item.isCompleted ? 'incomplete' : 'complete'}`}
                 />
-                <IonIcon
-                    icon={cartOutline}
-                    className="shop-item-icon"
-                />
+
                 <div className="shop-item-body">
                     <span className="shop-item-name">{item.title}</span>
                     <div className="shop-item-meta">
@@ -175,7 +177,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                         <IonButton
                             className="shop-editor-delete-btn"
                             size="small"
-                            fill="clear"
+                            fill="outline"
                             color="danger"
                             onClick={onDelete}
                         >

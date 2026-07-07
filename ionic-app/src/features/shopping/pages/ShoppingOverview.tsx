@@ -3,18 +3,13 @@ import {
     IonButton,
     IonCard,
     IonCardContent,
-    IonCol,
+    IonChip,
     IonContent,
-    IonGrid,
     IonIcon,
     IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
     IonPage,
-    IonRow,
 } from '@ionic/react';
-import { addOutline, cartOutline, chevronDownOutline } from 'ionicons/icons';
+import { addOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectActiveShoppingLists, selectArchivedShoppingLists, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -44,6 +39,7 @@ const ShoppingOverview: React.FC = () => {
     const ListCard: React.FC<{ listId: string }> = ({ listId }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);
         const summary = useDoTodoStore(useShallow(selectShoppingListSummary(listId)));
+        const doneCount = (entry?.shoppingItems ?? []).filter((i) => i.isCompleted).length;
         const handleTap = useCallback(() => {
             history.push(`/shopping/${encodeURIComponent(listId)}`);
         }, [history, listId]);
@@ -56,6 +52,12 @@ const ShoppingOverview: React.FC = () => {
                         <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
                         <span className="shop-list-card-summary">
                             {summary.count} item{summary.count !== 1 ? 's' : ''} · ${summary.total.toFixed(2)}
+                            {summary.count > 0 && (
+                                <IonChip className="shop-list-card-progress">
+                                    <IonIcon icon={checkmarkCircleOutline} style={{ marginRight: 2, fontSize: 10 }} />
+                                    {doneCount}/{summary.count}
+                                </IonChip>
+                            )}
                         </span>
                     </div>
                 </IonCardContent>
@@ -68,6 +70,9 @@ const ShoppingOverview: React.FC = () => {
             <IonContent className="shop-overview-content">
                 <div className="shop-overview-header">
                     <h1 className="shop-overview-title">Shopping Lists</h1>
+                    <p className="shop-overview-subtitle">
+                        {activeLists.length} active list{activeLists.length !== 1 ? 's' : ''}
+                    </p>
                 </div>
 
                 <div className="shop-overview-create">
@@ -100,14 +105,14 @@ const ShoppingOverview: React.FC = () => {
                     </div>
                 )}
 
-                {activeLists.length === 0 && archivedLists.length === 0 && (
-                    <div className="shop-overview-empty">
-                        <IonIcon icon={cartOutline} className="shop-overview-empty-icon" />
-                        <p className="shop-overview-empty-text">
-                            No shopping lists yet.<br />Create your first one above.
-                        </p>
-                    </div>
-                )}
+                    {activeLists.length === 0 && archivedLists.length === 0 && (
+                        <div className="shop-overview-empty">
+                            <IonIcon icon={cartOutline} className="shop-overview-empty-icon" />
+                            <p className="shop-overview-empty-text">
+                                Your shopping lists live here.<br />Start one above.
+                            </p>
+                        </div>
+                    )}
 
                 {archivedLists.length > 0 && (
                     <div className="shop-overview-section">

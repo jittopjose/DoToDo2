@@ -5,14 +5,21 @@
 }
 
 .shop-overview-header {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .shop-overview-title {
     font-size: 26px;
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.025em;
     color: var(--dotodo-text);
+    margin: 0 0 2px;
+}
+
+.shop-overview-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dotodo-muted);
     margin: 0;
 }
 
@@ -25,7 +32,6 @@
     align-items: center;
     gap: 8px;
     background: var(--dotodo-card);
-    border: 1px solid var(--dotodo-card-border);
     border-radius: 14px;
     padding: 4px 4px 4px 14px;
     box-shadow: var(--dotodo-shadow-card);
@@ -64,7 +70,7 @@
 }
 
 .shop-overview-section {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .shop-overview-section-title {
@@ -76,12 +82,27 @@
     margin: 0 0 8px;
 }
 
+/* ── List cards ── */
+
 .shop-list-card {
     --border-radius: 14px;
     margin-bottom: 8px;
-    border: 1px solid var(--dotodo-card-border);
+    border: none;
     box-shadow: var(--dotodo-shadow-card);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-list-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ion-color-tertiary);
+    z-index: 1;
 }
 
 .shop-list-card:active {
@@ -106,6 +127,7 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+    flex: 1;
 }
 
 .shop-list-card-name {
@@ -122,15 +144,31 @@
     font-size: 13px;
     font-weight: 600;
     color: var(--dotodo-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
+
+.shop-list-card-progress {
+    --background: rgba(var(--ion-color-tertiary-rgb), 0.1);
+    --color: var(--ion-color-tertiary);
+    min-height: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* ── Archived section ── */
 
 .shop-overview-archived-header {
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    padding: 4px 0;
+    padding: 8px 0;
     margin-bottom: 8px;
+    min-height: 44px;
+    user-select: none;
 }
 
 .shop-overview-archived-chevron {
@@ -143,19 +181,27 @@
     transform: rotate(180deg);
 }
 
+/* ── Empty state ── */
+
 .shop-overview-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    padding: 72px 20px;
     text-align: center;
+    animation: shopFadeIn 0.5s ease both;
+}
+
+@keyframes shopFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .shop-overview-empty-icon {
-    font-size: 48px;
+    font-size: 56px;
     color: var(--dotodo-muted);
-    opacity: 0.3;
+    opacity: 0.2;
     margin-bottom: 16px;
 }
 
