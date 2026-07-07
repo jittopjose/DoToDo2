@@ -77,14 +77,95 @@
     margin-bottom: 20px;
 }
 
-.shop-overview-section-title {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--dotodo-muted);
-    margin: 0 0 8px;
+/* ── Group headers (matching TodoList pattern) ── */
+
+.dotodo-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 4px 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
+
+.dotodo-group-header:not(:first-child) {
+    border-top: 1px solid var(--dotodo-card-border);
+    margin-top: 20px;
+    padding-top: 12px;
+}
+
+.dotodo-group-header:active {
+    opacity: 0.6;
+}
+
+.dotodo-group-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.dotodo-group-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 850;
+    letter-spacing: -0.01em;
+    color: var(--dotodo-text);
+}
+
+.dotodo-group-badge {
+    --background: var(--dotodo-card-border, #e0e0e0);
+    --color: var(--dotodo-muted);
+    font-weight: 850;
+    font-size: 11px;
+    line-height: 1.2;
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    vertical-align: middle;
+    transition: opacity var(--dotodo-motion-fast);
+}
+
+.dotodo-group-chevron {
+    font-size: 18px;
+    color: var(--dotodo-muted);
+    flex-shrink: 0;
+    margin-left: auto;
+    transition: transform var(--dotodo-motion-medium);
+}
+
+.dotodo-group-chevron.is-expanded {
+    transform: rotate(180deg);
+}
+
+.dotodo-group-items {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition:
+      max-height var(--dotodo-motion-medium),
+      opacity var(--dotodo-motion-medium);
+}
+
+.dotodo-group-items.is-expanded {
+    max-height: 5000px;
+    opacity: 1;
+}
+
+/* Group color variants */
+
+.group--active .dotodo-group-icon { color: var(--ion-color-tertiary); }
+.group--active .dotodo-group-title { color: var(--ion-color-tertiary); }
+.group--active .dotodo-group-chevron { color: var(--ion-color-tertiary); }
+.group--active .dotodo-group-badge { --background: rgba(var(--ion-color-tertiary-rgb), 0.12); --color: var(--ion-color-tertiary); }
+
+.group--archived .dotodo-group-icon { color: var(--dotodo-muted); }
+.group--archived .dotodo-group-title { color: var(--dotodo-muted); }
+.group--archived .dotodo-group-badge { --background: rgba(var(--dotodo-muted-rgb, 104, 112, 131), 0.12); --color: var(--dotodo-muted); }
+.group--archived .dotodo-group-chevron { color: var(--dotodo-muted); }
 
 /* ── List cards ── */
 
@@ -160,36 +241,6 @@
     font-size: 10px;
     font-weight: 800;
     margin: 0;
-}
-
-/* ── Archived section ── */
-
-.shop-overview-archived-header {
-    --padding-start: 0;
-    --padding-end: 0;
-    --padding-top: 8px;
-    --padding-bottom: 8px;
-    --min-height: 44px;
-    --background: transparent;
-    --inner-padding-end: 0;
-    --border-style: none;
-    --border-color: transparent;
-    margin-bottom: 8px;
-    cursor: pointer;
-}
-
-.shop-overview-archived-header .shop-overview-archived-chevron {
-    margin-right: 6px;
-}
-
-.shop-overview-archived-chevron {
-    font-size: 16px;
-    color: var(--dotodo-muted);
-    transition: transform var(--dotodo-motion-fast);
-}
-
-.shop-overview-archived-chevron.is-open {
-    transform: rotate(180deg);
 }
 
 /* ── Empty state ── */

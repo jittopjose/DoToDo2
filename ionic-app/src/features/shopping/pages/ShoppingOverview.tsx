@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+    IonBadge,
     IonButton,
     IonCard,
     IonCardContent,
@@ -7,10 +8,9 @@ import {
     IonContent,
     IonIcon,
     IonInput,
-    IonItem,
     IonPage,
 } from '@ionic/react';
-import { addOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectActiveShoppingLists, selectArchivedShoppingLists, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -19,7 +19,7 @@ import './ShoppingOverview.css';
 const ShoppingOverview: React.FC = () => {
     const history = useHistory();
     const [newListName, setNewListName] = useState('');
-    const [showArchived, setShowArchived] = useState(false);
+    const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
     const activeLists = useDoTodoStore(useShallow(selectActiveShoppingLists));
     const archivedLists = useDoTodoStore(useShallow(selectArchivedShoppingLists));
@@ -36,6 +36,15 @@ const ShoppingOverview: React.FC = () => {
             handleCreateList();
         }
     }, [handleCreateList]);
+
+    const toggleGroup = useCallback((title: string) => {
+        setExpanded((prev) => {
+            const next = new Set(prev);
+            if (next.has(title)) next.delete(title);
+            else next.add(title);
+            return next;
+        });
+    }, []);
 
     const ListCard: React.FC<{ listId: string }> = ({ listId }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);
@@ -99,10 +108,24 @@ const ShoppingOverview: React.FC = () => {
 
                 {activeLists.length > 0 && (
                     <div className="shop-overview-section">
-                        <h2 className="shop-overview-section-title">Active</h2>
-                        {activeLists.map((list) => (
-                            <ListCard key={list.id} listId={list.id} />
-                        ))}
+                        <div
+                            className="dotodo-group-header group--active"
+                            onClick={() => toggleGroup('Active')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup('Active'); } }}
+                            aria-expanded={expanded.has('Active')}
+                        >
+                            <IonIcon icon={cartOutline} className="dotodo-group-icon" />
+                            <h2 className="dotodo-group-title">Active</h2>
+                            <IonBadge className="dotodo-group-badge">{activeLists.length}</IonBadge>
+                            <IonIcon icon={chevronDownOutline} className={`dotodo-group-chevron ${expanded.has('Active') ? 'is-expanded' : ''}`} />
+                        </div>
+                        <div className={`dotodo-group-items group--active ${expanded.has('Active') ? 'is-expanded' : ''}`}>
+                            {expanded.has('Active') && activeLists.map((list) => (
+                                <ListCard key={list.id} listId={list.id} />
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -117,24 +140,24 @@ const ShoppingOverview: React.FC = () => {
 
                 {archivedLists.length > 0 && (
                     <div className="shop-overview-section">
-                        <IonItem
-                            button
-                            detail={false}
-                            lines="none"
-                            className="shop-overview-archived-header"
-                            onClick={() => setShowArchived((prev) => !prev)}
+                        <div
+                            className="dotodo-group-header group--archived"
+                            onClick={() => toggleGroup('Archived')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup('Archived'); } }}
+                            aria-expanded={expanded.has('Archived')}
                         >
-                            <IonIcon
-                                icon={chevronDownOutline}
-                                className={`shop-overview-archived-chevron ${showArchived ? 'is-open' : ''}`}
-                            />
-                            <h2 className="shop-overview-section-title">
-                                Archived ({archivedLists.length})
-                            </h2>
-                        </IonItem>
-                        {showArchived && archivedLists.map((list) => (
-                            <ListCard key={list.id} listId={list.id} />
-                        ))}
+                            <IonIcon icon={archiveOutline} className="dotodo-group-icon" />
+                            <h2 className="dotodo-group-title">Archived</h2>
+                            <IonBadge className="dotodo-group-badge">{archivedLists.length}</IonBadge>
+                            <IonIcon icon={chevronDownOutline} className={`dotodo-group-chevron ${expanded.has('Archived') ? 'is-expanded' : ''}`} />
+                        </div>
+                        <div className={`dotodo-group-items group--archived ${expanded.has('Archived') ? 'is-expanded' : ''}`}>
+                            {expanded.has('Archived') && archivedLists.map((list) => (
+                                <ListCard key={list.id} listId={list.id} />
+                            ))}
+                        </div>
                     </div>
                 )}
             </IonContent>
