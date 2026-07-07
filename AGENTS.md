@@ -85,6 +85,7 @@ This project is indexed by GitNexus as **DoToDo2** (487 symbols, 584 relationshi
 - NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
 - NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- NEVER commit without asking the user first. Present the diff for review before committing.
 - NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
 
 ## Resources

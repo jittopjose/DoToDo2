@@ -173,21 +173,11 @@
     --border-radius: 14px;
     margin-bottom: 8px;
     border: none;
+    border-left: 4px solid var(--ion-color-tertiary);
     box-shadow: var(--dotodo-shadow-card);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-}
-
-.shop-list-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--ion-color-tertiary);
-    z-index: 1;
 }
 
 .shop-list-card:active {
