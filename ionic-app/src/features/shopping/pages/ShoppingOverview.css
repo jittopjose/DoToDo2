@@ -23,54 +23,31 @@
     margin: 0;
 }
 
-.shop-overview-create-card {
-    --border-radius: 14px;
-    --background: var(--dotodo-card);
-    box-shadow: var(--dotodo-shadow-card);
+.shop-create-card {
     margin: 0 0 20px;
-    border: none;
 }
 
-.shop-overview-create-input-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    --padding-start: 14px;
-    --padding-end: 4px;
-    --padding-top: 4px;
-    --padding-bottom: 4px;
+.shop-create-card .composer-content {
+    padding: 10px 14px !important;
 }
 
-.shop-overview-create-input {
-    --background: transparent;
-    --border-style: none;
-    --color: var(--dotodo-text);
-    --placeholder-color: var(--dotodo-muted);
-    --padding-top: 0;
-    --padding-bottom: 0;
-    flex: 1;
-    font-size: 15px;
-    font-weight: 600;
-    min-height: 36px;
+.shop-create-card.composer-card:focus-within {
+    border-color: rgba(var(--ion-color-tertiary-rgb), 0.2);
+    box-shadow: var(--dotodo-shadow-card), 0 0 0 3px rgba(var(--ion-color-tertiary-rgb), 0.08);
 }
 
-.shop-overview-create-btn {
-    --border-radius: 999px;
+.shop-create-add-btn {
     --background: var(--ion-color-tertiary);
     --background-activated: var(--ion-color-tertiary-shade);
     --color: var(--ion-color-tertiary-contrast);
-    --box-shadow: 0 6px 16px rgba(var(--ion-color-tertiary-rgb), 0.2);
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    min-height: 38px;
-    margin: 0;
+    --box-shadow: 0 12px 24px rgba(var(--ion-color-tertiary-rgb), 0.24);
 }
 
-.shop-overview-create-btn:disabled {
+.shop-create-add-btn:disabled {
     --background: rgba(var(--ion-color-tertiary-rgb), 0.2);
     --box-shadow: none;
-    opacity: 0.5;
+    opacity: 0.55;
+    pointer-events: none;
 }
 
 .shop-overview-section {
@@ -170,13 +147,17 @@
 /* ── List cards ── */
 
 .shop-list-card {
-    --border-radius: 14px;
+    --border-radius: 12px;
+    --background: var(--dotodo-card);
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --inner-padding-end: 0;
+    --min-height: 0;
     margin-bottom: 8px;
-    border: none;
     border-left: 4px solid var(--ion-color-tertiary);
     box-shadow: var(--dotodo-shadow-card);
-    cursor: pointer;
-    position: relative;
     overflow: hidden;
 }
 
@@ -184,17 +165,10 @@
     transform: scale(0.995);
 }
 
-.shop-list-card-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px !important;
-}
-
 .shop-list-card-icon {
     font-size: 24px;
     color: var(--ion-color-tertiary);
-    flex-shrink: 0;
+    margin: 0;
 }
 
 .shop-list-card-body {

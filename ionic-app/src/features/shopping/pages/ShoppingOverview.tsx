@@ -5,10 +5,14 @@ import {
     IonCard,
     IonCardContent,
     IonChip,
+    IonCol,
     IonContent,
+    IonGrid,
     IonIcon,
     IonInput,
+    IonItem,
     IonPage,
+    IonRow,
 } from '@ionic/react';
 import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -55,23 +59,21 @@ const ShoppingOverview: React.FC = () => {
         }, [history, listId]);
 
         return (
-            <IonCard className="shop-list-card" button onClick={handleTap}>
-                <IonCardContent className="shop-list-card-content">
-                    <IonIcon icon={cartOutline} className="shop-list-card-icon" />
-                    <div className="shop-list-card-body">
-                        <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
-                        <span className="shop-list-card-summary">
-                            {summary.count} item{summary.count !== 1 ? 's' : ''} · ${summary.total.toFixed(2)}
-                            {summary.count > 0 && (
-                                <IonChip className="shop-list-card-progress">
-                                    <IonIcon icon={checkmarkCircleOutline} style={{ marginRight: 2, fontSize: 10 }} />
-                                    {doneCount}/{summary.count}
-                                </IonChip>
-                            )}
-                        </span>
-                    </div>
-                </IonCardContent>
-            </IonCard>
+            <IonItem className="shop-list-card" button lines="none" onClick={handleTap}>
+                <IonIcon icon={cartOutline} className="shop-list-card-icon" slot="start" />
+                <div className="shop-list-card-body">
+                    <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
+                    <span className="shop-list-card-summary">
+                        {summary.count} item{summary.count !== 1 ? 's' : ''} · ${summary.total.toFixed(2)}
+                        {summary.count > 0 && (
+                            <IonChip className="shop-list-card-progress">
+                                <IonIcon icon={checkmarkCircleOutline} style={{ marginRight: 2, fontSize: 10 }} />
+                                {doneCount}/{summary.count}
+                            </IonChip>
+                        )}
+                    </span>
+                </div>
+            </IonItem>
         );
     };
 
@@ -85,24 +87,33 @@ const ShoppingOverview: React.FC = () => {
                     </p>
                 </div>
 
-                <IonCard className="shop-overview-create-card">
-                    <IonCardContent className="shop-overview-create-input-row">
-                        <IonInput
-                            className="shop-overview-create-input"
-                            value={newListName}
-                            placeholder="New list name..."
-                            onIonInput={(e) => setNewListName(e.detail.value ?? '')}
-                            onKeyDown={handleKeyDown}
-                            aria-label="New shopping list name"
-                        />
-                        <IonButton
-                            className="shop-overview-create-btn"
-                            onClick={handleCreateList}
-                            disabled={!newListName.trim()}
-                            aria-label="Create shopping list"
-                        >
-                            <IonIcon icon={addOutline} />
-                        </IonButton>
+                <IonCard className="composer-card shop-create-card">
+                    <IonCardContent className="composer-content">
+                        <IonGrid className="composer-input-grid">
+                            <IonRow className="composer-input-row">
+                                <IonCol className="composer-input-col">
+                                    <IonInput
+                                        className="composer-title-input"
+                                        value={newListName}
+                                        placeholder="New list name..."
+                                        onIonInput={(e) => setNewListName(e.detail.value ?? '')}
+                                        onKeyDown={handleKeyDown}
+                                        aria-label="New shopping list name"
+                                    />
+                                </IonCol>
+                                <IonCol size="auto" className="composer-input-actions">
+                                    <IonButton
+                                        className="composer-add-button shop-create-add-btn"
+                                        fill="clear"
+                                        onClick={handleCreateList}
+                                        disabled={!newListName.trim()}
+                                        aria-label="Create shopping list"
+                                    >
+                                        <IonIcon icon={addOutline} />
+                                    </IonButton>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
                     </IonCardContent>
                 </IonCard>
 
