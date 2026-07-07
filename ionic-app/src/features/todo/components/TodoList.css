@@ -109,7 +109,6 @@
   --border-radius: var(--dotodo-radius-lg);
   --background: var(--dotodo-card);
   margin: 30px 0 8px;
-  border: 1px solid var(--dotodo-card-border);
   box-shadow: var(--dotodo-shadow-card);
   text-align: center;
 }
