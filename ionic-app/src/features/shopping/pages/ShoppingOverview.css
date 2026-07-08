@@ -147,7 +147,7 @@
 /* ── List cards ── */
 
 .shop-list-card {
-    --border-radius: 12px;
+    --border-radius: 0 12px 12px 0;
     --background: var(--dotodo-card);
     --padding-start: 14px;
     --padding-end: 14px;

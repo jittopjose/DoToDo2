@@ -93,6 +93,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                 aria-label={`${item.title}${item.quantity ? `, quantity ${item.quantity}` : ''}`}
             >
                 <IonCheckbox
+                    slot="start"
                     checked={item.isCompleted}
                     onIonChange={onToggle}
                     onClick={(e) => e.stopPropagation()}

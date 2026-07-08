@@ -66,10 +66,12 @@
 }
 
 .shop-item-name {
+    flex: 1;
     font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--dotodo-text);
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

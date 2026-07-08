@@ -14,6 +14,10 @@
   border-left-color: var(--dotodo-muted);
 }
 
+.group--completed .task-row {
+  border-left-color: var(--dotodo-success);
+}
+
 .task-row.is-overdue {
   border-left-color: rgba(var(--dotodo-danger-rgb), 0.55);
   background: linear-gradient(90deg, rgba(var(--dotodo-danger-rgb), 0.09) 0%, var(--dotodo-card) 28%);
@@ -42,7 +46,7 @@
 
 .task-row {
   --background: var(--dotodo-card);
-  --border-radius: 12px;
+  --border-radius: 0 12px 12px 0;
   --padding-top: 8px;
   --padding-end: 14px;
   --padding-bottom: 8px;
