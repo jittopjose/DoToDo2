@@ -18,6 +18,8 @@ import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevro
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
+import { useSettingsStore } from '../../settings/store/settingsStore';
+import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
 import { ShoppingItem } from '../components/ShoppingItem';
 import './ShoppingListDetail.css';
 
@@ -33,6 +35,7 @@ const ShoppingListDetail: React.FC = () => {
     const removeShoppingItem = useDoTodoStore((state) => state.removeShoppingItem);
     const archiveShoppingList = useDoTodoStore((state) => state.archiveShoppingList);
 
+    const currency = useSettingsStore((state) => state.currency);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [newItemText, setNewItemText] = useState('');
     const [newItemQty, setNewItemQty] = useState(1);
@@ -107,7 +110,7 @@ const ShoppingListDetail: React.FC = () => {
                             <div className="shop-detail-total-body">
                                 <div className="shop-detail-total-top">
                                     <span className="shop-detail-total-label">Total</span>
-                                    <span className="shop-detail-total-value">${summary.total.toFixed(2)}</span>
+                                    <span className="shop-detail-total-value">{formatPrice(summary.total, currency)}</span>
                                 </div>
                                 <span className="shop-detail-total-sublabel">
                                     <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 12 }} />
@@ -150,7 +153,7 @@ const ShoppingListDetail: React.FC = () => {
                                     <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyInc} disabled={newItemQty >= 999} aria-label="Increase quantity">+</IonButton>
                                 </div>
                                 <div className="shop-price-input-wrap">
-                                    <span className="shop-price-currency">$</span>
+                                    <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
                                     <IonInput
                                         className="shop-price-input"
                                         type="number"

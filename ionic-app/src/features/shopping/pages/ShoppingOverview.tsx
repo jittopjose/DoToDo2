@@ -18,10 +18,13 @@ import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevro
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectActiveShoppingLists, selectArchivedShoppingLists, selectShoppingListSummary } from '../../shared/store/doTodoStore';
+import { useSettingsStore } from '../../settings/store/settingsStore';
+import { formatPrice } from '../../shared/utils/formatPrice';
 import './ShoppingOverview.css';
 
 const ShoppingOverview: React.FC = () => {
     const history = useHistory();
+    const currency = useSettingsStore((state) => state.currency);
     const [newListName, setNewListName] = useState('');
     const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
@@ -64,7 +67,7 @@ const ShoppingOverview: React.FC = () => {
                 <div className="shop-list-card-body">
                     <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
                     <span className="shop-list-card-summary">
-                        {summary.count} item{summary.count !== 1 ? 's' : ''} · ${summary.total.toFixed(2)}
+                        {summary.count} item{summary.count !== 1 ? 's' : ''} · {formatPrice(summary.total, currency)}
                         {summary.count > 0 && (
                             <IonChip className="shop-list-card-progress">
                                 <IonIcon icon={checkmarkCircleOutline} style={{ marginRight: 2, fontSize: 10 }} />

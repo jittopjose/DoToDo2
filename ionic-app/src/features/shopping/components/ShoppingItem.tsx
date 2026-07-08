@@ -9,6 +9,8 @@ import {
 } from '@ionic/react';
 import { chevronDownOutline, trashOutline } from 'ionicons/icons';
 import type { ShoppingItem as ShoppingItemType } from '../../shared/types';
+import { useSettingsStore } from '../../settings/store/settingsStore';
+import { getCurrencySymbol, formatPrice } from '../../shared/utils/formatPrice';
 import './ShoppingItem.css';
 
 interface ShoppingItemProps {
@@ -32,6 +34,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     onCancel,
     index,
 }) => {
+    const currency = useSettingsStore((state) => state.currency);
     const [editTitle, setEditTitle] = useState(item.title);
     const [editQty, setEditQty] = useState(item.quantity ?? 1);
     const [editPrice, setEditPrice] = useState(item.price ? item.price.toFixed(2) : '');
@@ -107,7 +110,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                             <IonChip className="shop-item-qty">×{item.quantity}</IonChip>
                         )}
                         {item.price && (
-                            <IonChip className="shop-item-price">${item.price.toFixed(2)}</IonChip>
+                            <IonChip className="shop-item-price">{formatPrice(item.price, currency)}</IonChip>
                         )}
                     </div>
                 </div>
@@ -152,7 +155,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                         <div className="shop-editor-price">
                             <span className="shop-editor-label">Price</span>
                             <div className="shop-price-input-wrap">
-                                <span className="shop-price-currency">$</span>
+                                <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
                                 <IonInput
                                     className="shop-price-input"
                                     type="number"
