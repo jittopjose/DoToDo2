@@ -13,16 +13,19 @@
     "build:clickable": "npm run build && cd .. && clickable clean && clickable desktop"
   },
   "dependencies": {
-    "@capacitor/app": "8.0.0",
-    "@capacitor/core": "8.0.0",
-    "@capacitor/haptics": "8.0.0",
-    "@capacitor/keyboard": "8.0.0",
-    "@capacitor/status-bar": "8.0.0",
+    "@capacitor-mlkit/barcode-scanning": "^8.1.0",
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/status-bar": "^8.0.2",
     "@ionic/react": "^8.5.0",
     "@ionic/react-router": "^8.5.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "@types/uuid": "^10.0.0",
+    "barcode-detector": "^3.2.0",
     "idb-keyval": "^6.2.6",
     "ionicons": "^7.4.0",
     "react": "19.0.0",
@@ -33,7 +36,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.0.0",
+    "@capacitor/cli": "^8.4.1",
     "@testing-library/dom": ">=7.21.4",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^16.2.0",

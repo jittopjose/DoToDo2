@@ -44,9 +44,14 @@ MainView {
 
     WebEngineView {
         anchors.fill: parent
-        url: "qrc:/web/index.html"  // or a remote URL
+        url: "qrc:/web/index.html"
         webChannel: channel
         zoomFactor: dpRatio >= 2 ? 1.0 : 0.8
+        onFeaturePermissionRequested: {
+            if (feature === WebEngineView.MediaVideoCapture) {
+                grantFeaturePermission(securityOrigin, feature, true);
+            }
+        }
     }
 }
 

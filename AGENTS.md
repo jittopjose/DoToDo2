@@ -24,6 +24,16 @@ npm run test.e2e             # Cypress
 npm run build:clickable      # npm run build + clickable clean + clickable desktop
 ```
 
+Capacitor commands (Node >=22 required — switch via `nvm use 22`):
+```sh
+cd ionic-app
+source "$HOME/.nvm/nvm.sh"
+nvm use 22
+npx cap add android        # one-time platform add
+npx cap sync               # sync plugins + web assets to native
+npx cap open android       # open in Android Studio
+```
+
 Full-stack build (requires Qt5 dev packages + intltool):
 ```sh
 # from root dir:
@@ -42,6 +52,7 @@ clickable desktop   # from root dir
 - **Build output = web/**: `vite.config.ts` writes `app.js`, `app.css`, etc. to `../web/`. This is the runtime content the QML shell loads. **Never edit `web/` directly** — it's generated and gitignored.
 - **State**: Zustand store at `src/features/todos/store/`.
 - **Storage**: `@ionic/storage` (IndexedDB-backed), initialized in `src/services/storage.service.ts`.
+- **Barcode scanning**: Dual-path architecture — `src/services/barcode.service.ts` checks `Capacitor.isNativePlatform()`. Native: `@capacitor-mlkit/barcode-scanning`. Web: `barcode-detector` ponyfill (ZXing WASM in `public/wasm/`). Camera requires Qt WebEngine `onFeaturePermissionRequested` handler (`qml/Main.qml`) and `"camera"` AppArmor policy (`dotodo2.apparmor`).
 - **Types**: `Todo`, `TodoSubtask`, `TodoPriority`, `TodoFilter` at `src/features/todos/types.ts`.
 - **Dark mode**: System-preference only (`dark.system.css`), not toggleable in-app.
 - **Translations**: intltool + gettext (`po/` directory). Desktop file `.desktop.in` uses `_Name`. Not wired into the Ionic SPA.

@@ -1,6 +1,7 @@
 /build/
 /.clickable/
 /web/
+/android/
 opencode.json
 .gitnexus
 .agents

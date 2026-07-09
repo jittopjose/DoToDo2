@@ -97,6 +97,33 @@
     min-height: 34px;
 }
 
+.shop-detail-composer-scan-btn {
+    --border-radius: 999px;
+    --background: var(--ion-color-primary);
+    --background-activated: var(--ion-color-primary-shade);
+    --color: var(--ion-color-primary-contrast);
+    --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.25);
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    margin: 0;
+}
+
+.shop-detail-composer-scan-btn:disabled {
+    --background: rgba(var(--ion-color-primary-rgb), 0.2);
+    --box-shadow: none;
+    opacity: 0.5;
+}
+
+.shop-detail-native-scanning {
+    text-align: center;
+    padding: 16px;
+    color: var(--dotodo-muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
 .shop-detail-composer-add-btn {
     --border-radius: 999px;
     --background: var(--ion-color-tertiary);

@@ -14,13 +14,15 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
 import { ShoppingItem } from '../components/ShoppingItem';
+import ScannerOverlay from '../components/ScannerOverlay';
+import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import './ShoppingListDetail.css';
 
 const ShoppingListDetail: React.FC = () => {
@@ -41,6 +43,8 @@ const ShoppingListDetail: React.FC = () => {
     const [newItemQty, setNewItemQty] = useState(1);
     const [newItemPrice, setNewItemPrice] = useState('');
     const [showMore, setShowMore] = useState(false);
+    const [scannerOpen, setScannerOpen] = useState(false);
+    const [isScanningNative, setIsScanningNative] = useState(false);
 
     const handleAddItem = useCallback(() => {
         const trimmed = newItemText.trim();
@@ -74,6 +78,37 @@ const ShoppingListDetail: React.FC = () => {
         archiveShoppingList(listId);
         history.goBack();
     }, [listId, archiveShoppingList, history]);
+
+    const handleScanResult = useCallback(async (barcode: string | null) => {
+        if (!barcode) {
+            setIsScanningNative(false);
+            return;
+        }
+        const product = await lookupProduct(barcode);
+        if (product) {
+            setNewItemText(product.productName ?? barcode);
+            if (product.quantity) {
+                const match = product.quantity.match(/^(\d+)/);
+                if (match) setNewItemQty(parseInt(match[1], 10));
+            }
+            if (product.productName || product.brand) {
+                setShowMore(true);
+            }
+        } else {
+            setNewItemText(barcode);
+        }
+        setIsScanningNative(false);
+    }, []);
+
+    const handleScanClick = useCallback(async () => {
+        if (isNativeBarcodeScanAvailable()) {
+            setIsScanningNative(true);
+            const barcode = await scanBarcode();
+            handleScanResult(barcode);
+        } else {
+            setScannerOpen(true);
+        }
+    }, [handleScanResult]);
 
     if (!entry) {
         return (
@@ -132,6 +167,14 @@ const ShoppingListDetail: React.FC = () => {
                                 onKeyDown={handleAddKeyDown}
                                 aria-label="Item name"
                             />
+                            <IonButton
+                                className="shop-detail-composer-scan-btn"
+                                onClick={handleScanClick}
+                                disabled={isScanningNative}
+                                aria-label="Scan barcode"
+                            >
+                                <IonIcon icon={scanOutline} />
+                            </IonButton>
                             <IonButton
                                 className="shop-detail-composer-add-btn"
                                 onClick={handleAddItem}
@@ -199,6 +242,21 @@ const ShoppingListDetail: React.FC = () => {
                         ))}
                     </IonList>
                 )}
+
+                {isScanningNative && (
+                    <div className="shop-detail-native-scanning">
+                        <p>Opening scanner…</p>
+                    </div>
+                )}
+
+                <ScannerOverlay
+                    isOpen={scannerOpen}
+                    onScanResult={(barcode) => {
+                        setScannerOpen(false);
+                        handleScanResult(barcode);
+                    }}
+                    onDismiss={() => setScannerOpen(false)}
+                />
             </IonContent>
         </IonPage>
     );

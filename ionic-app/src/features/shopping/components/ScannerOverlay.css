@@ -1,0 +1,69 @@
+.scanner-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+.scanner-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanner-canvas {
+    display: none;
+}
+
+.scanner-viewfinder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px;
+    height: 240px;
+}
+
+.scanner-viewfinder-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #fff;
+    border-style: solid;
+}
+
+.scanner-viewfinder-corner.tl {
+    top: 0;
+    left: 0;
+    border-width: 3px 0 0 3px;
+}
+
+.scanner-viewfinder-corner.tr {
+    top: 0;
+    right: 0;
+    border-width: 3px 3px 0 0;
+}
+
+.scanner-viewfinder-corner.bl {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 3px 3px;
+}
+
+.scanner-viewfinder-corner.br {
+    bottom: 0;
+    right: 0;
+    border-width: 0 3px 3px 0;
+}
+
+.scanner-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 24px;
+    text-align: center;
+    gap: 16px;
+}
