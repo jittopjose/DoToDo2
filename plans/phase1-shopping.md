@@ -12,19 +12,25 @@ Active/Archived sections.
 - Quantity/price input is collapsed by default (quick-add by name only)
 - Completed items stay visible with strikethrough (like tasks)
 - Archive is a manual action on the whole list (not auto-archived)
+- Shopping list identified by `itemType === 'shopping'` AND `shoppingItems !== undefined`
+- **Shadow-only containers** — all cards use `box-shadow` only, no `border` + shadow mix
+- **Cards use `border-left` accent bar** with `--border-radius: 0 12px 12px 0` (flat left edge so the accent bar runs straight)
+- **Per-type independent UI directories** — `shared/`, `todo/`, `shopping/`, `note/`, `checklist/`
+- **Prefer Ionic components over custom CSS** — audited post-polish to ensure compliance
+- **Never commit without user approval** — present diff for review first
 
 ---
 
-## Step 1 — Data Model + Store (Priority: HIGH)
+## Step 1 — Data Model + Store (Priority: HIGH) ✅ DONE
 
 **Goal**: Add `ShoppingItem` type, extend `DoTodo`, add store actions and selectors.
 
-### Files to modify
+### Files modified
 
 | File | Change |
 |------|--------|
 | `src/features/shared/types.ts` | Add `ShoppingItem` interface; add `shoppingItems` and `isArchived` to `DoTodo` |
-| `src/features/shared/store/doTodoStore.ts` | Add 6 new actions + 3 new selectors |
+| `src/features/shared/store/doTodoStore.ts` | Add 6 new actions + 4 new selectors. **Critical fix**: `addEntry` no longer overrides `itemType` with `typeFilter`; only todo items get default due date |
 
 ### New type
 
@@ -65,9 +71,13 @@ export interface DoTodo extends BaseItem {
 |----------|---------|
 | `selectActiveShoppingLists` | Entries where `itemType === 'shopping' && shoppingItems !== undefined && !isArchived` |
 | `selectArchivedShoppingLists` | Same but `isArchived === true` |
+| `selectShoppingListItems(listId)` | The `shoppingItems` array for a given list |
 | `selectShoppingListSummary(listId)` | `{ count, total, completedCount }` from items array |
 
-### Acceptance criteria
+### Refinements vs original plan
+- 4 selectors (not 3) — added `selectShoppingListItems` for convenience
+
+### Acceptance criteria ✅
 
 - TypeScript compiles clean
 - Calling `addShoppingList('Weekly Groceries')` creates a store entry with empty items array
@@ -76,39 +86,41 @@ export interface DoTodo extends BaseItem {
 
 ### Dependencies
 
-- Zustand store persistence (already wired up — `schedulePersist` runs on store changes)
+- Zustand store persistence (already wired up — `schedulePersist` runs on store changes, debounced 500ms)
+- Default list renamed: `"All Lists"` → `"all-lists"`
 
 ---
 
-## Step 2 — ShoppingItem with Inline Expand-to-Edit (Priority: HIGH)
+## Step 2 — ShoppingItem with Inline Expand-to-Edit (Priority: HIGH) ✅ DONE
 
 **Goal**: A single component that displays a shopping item and lets the user
 edit it inline by expanding the row.
 
-### Existing files to repurpose
+### Files modified
 
 | File | Action |
 |------|--------|
-| `src/features/shopping/components/ShoppingItem.tsx` | Rewrite with inline edit |
-| `src/features/shopping/components/ShoppingItem.css` | Rewrite with expand animation |
+| `src/features/shopping/components/ShoppingItem.tsx` | Rewritten with inline edit, `slot="start"` on checkbox |
+| `src/features/shopping/components/ShoppingItem.css` | Rewritten with expand animation; `.shop-item-name` has `flex: 1` + `text-align: left` |
 
 ### ShoppingItem — Collapsed state (default)
 
 ```
 ┌────────────────────────────────────────────┐
-│  ☐ 🛒 Milk                   ×2    $3.99  │
+│  ☐ Milk                       ×2    $3.99  │
 └────────────────────────────────────────────┘
 ```
 
-- Checkbox toggles completion (strikethrough when done)
-- Cart icon, name, quantity badge (`×N`), price chip (`$3.99`)
+- Checkbox toggles completion (strikethrough when done) — uses `slot="start"` (was missing initially, fixed)
+- Name has `flex: 1` + `text-align: left` for correct alignment
+- Quantity badge (`×N`), price chip (`$3.99`)
 - Tap anywhere on the body (not checkbox) → expands to edit
 
 ### ShoppingItem — Expanded state
 
 ```
 ┌────────────────────────────────────────────┐
-│  ☐ 🛒 Milk                   ×2    $3.99  │
+│  ☐ Milk                       ×2    $3.99  │
 ├────────────────────────────────────────────┤
 │  Name                                      │
 │  ┌────────────────────────────────────────┐│
@@ -125,22 +137,13 @@ edit it inline by expanding the row.
 - Save → calls `updateShoppingItem`, collapses
 - Delete → calls `removeShoppingItem`, collapses
 - Animation: `max-height` + opacity transition
+- Price input uses dynamic currency symbol from settings (see Step 3a)
 
-### Props interface
+### Refinements vs original plan
+- No cart icon in the item row (only in the overview list cards)
+- Price chip formatting reads `currency` from `useSettingsStore`
 
-```ts
-interface ShoppingItemProps {
-    item: ShoppingItem;
-    isEditing: boolean;
-    onToggle: () => void;
-    onStartEdit: () => void;
-    onSave: (updates: Partial<ShoppingItem>) => void;
-    onDelete: () => void;
-    onCancel: () => void;
-}
-```
-
-### Acceptance criteria
+### Acceptance criteria ✅
 
 - Item shows name, checkbox, quantity badge, price chip
 - Checking the checkbox → strikethrough style
@@ -151,55 +154,48 @@ interface ShoppingItemProps {
 
 ---
 
-## Step 3 — Shopping List Detail Page (Priority: HIGH)
+## Step 3 — Shopping List Detail Page (Priority: HIGH) ✅ DONE
 
 **Goal**: A page showing items in a single shopping list with add-input, total bar, and archive.
 
-### New files
+### Files created
 
 | File | Purpose |
 |------|---------|
 | `src/features/shopping/pages/ShoppingListDetail.tsx` | Items in one list |
 | `src/features/shopping/pages/ShoppingListDetail.css` | Detail page styles |
 
-### Existing files to repurpose
+### Old files deleted (replaced by this page)
+- `ShoppingInput.tsx` / `.css` → replaced by inline input in `ShoppingListDetail`
+- `ShoppingList.tsx` / `.css` → replaced by inline item list in `ShoppingListDetail`
+- `ShoppingEditPage.tsx` / `.css` → replaced by inline expand-to-edit
+- `ShoppingPage.tsx` / `.css` → replaced by `ShoppingListDetail.tsx`
+- `Shopping.styles.ts` → replaced by per-component CSS
 
-| File | Action |
-|------|--------|
-| `src/features/shopping/pages/ShoppingPage.tsx` **→** | Moves to `ShoppingListDetail.tsx` (the old flat page becomes the detail view) |
-
-### Wireframe
+### Wireframe (actual)
 
 ```
 ┌────────────────────────────────────────────┐
-│  ← Shopping Lists    Weekly Groceries   📦 │ ← archive button
+│  ← Lists    Weekly Groceries           📦  │ ← archive button in header
 │                                            │
-│  ┌─ 🔍 Search items... ──────────────────┐│
+│  ┌────────────────────────────────────────┐│
+│  │  🛒  TOTAL                     $34.50  ││ ← dual-stat card
+│  │  ✅ 3 of 6 items                      ││
 │  └────────────────────────────────────────┘│
 │                                            │
 │  ┌────────────────────────────────────────┐│
-│  │  🛒  TOTAL                     $34.50  ││
+│  │  📝 [What to buy?                 ] [+]││ ← collapsed: text + add
+│  │  🔽 Add qty & price                   ││ ← tap to expand extras
+│  +────────────────────────────────────────+│
+│  │  [−] 1 [+]    $ [0.00    ]             ││ ← expanded: stepper + price
 │  └────────────────────────────────────────┘│
 │                                            │
-│  ┌────────────────────────────────────────┐│
-│  │  📝 [What to buy?                  ]   ││
-│  │  (+ qty) (+ price)              [+]   ││
-│  └────────────────────────────────────────┘│
-│                                            │
-│  ☐ 🛒 Milk                   ×2    $3.99  │ ← tap to expand
-│  ☑ 🛒 Eggs                   ×12   $5.99  │ ← strikethrough
-│  ☐ 🛒 Bread                  ×1    $2.49  │
-│  ☐ 🛒 Apples                 ×5    $6.00  │
-│  ☐ 🛒 Chicken breast         ×2    $8.50  │
-│  ☐ 🛒 Olive oil              ×1    $7.99  │
+│  ☐ Milk                       ×2    $3.99  │
+│  ☑ Eggs                       ×12   $5.99  │
+│  ☐ Bread                      ×1    $2.49  │
+│  ...                                       │
 └────────────────────────────────────────────┘
 ```
-
-### Input widget (at bottom of search/total section)
-
-- **Collapsed**: text field + "+" button (for quick adds, no qty/price)
-- **Expanded**: text field + quantity stepper + price field + "+" button
-- User optionally fills quantity/price before adding, or adds first and edits inline later
 
 ### Functionality
 
@@ -210,93 +206,160 @@ interface ShoppingItemProps {
 | **Edit item** | Tap → sets `editingItemId`, only that item expands |
 | **Save edit** | Expand view Save → calls `updateShoppingItem`, clears `editingItemId` |
 | **Delete item** | Expand view Delete → calls `removeShoppingItem`, clears `editingItemId` |
-| **Archive list** | Header button → calls `archiveShoppingList` |
-| **Search** | Filters items by name locally |
-| **Total** | Derives `{ count, total, completedCount }` from items array |
-| **Empty state** | "No items yet — add your first item above" |
+| **Archive list** | Header button → calls `archiveShoppingList`, navigates back |
+| **Total** | Dual-stat card: total price + "N of M items completed" |
+| **Empty state** | "No items yet — add your first item above." |
+| **Composer** | Inline (not IonCard) after design audit; collapsed by default with "Add qty & price" toggle |
 
-### Acceptance criteria
+### Refinements vs original plan
+- **No search bar** — deferred (not essential for v1)
+- **Composer collapsed by default** — "Add qty & price" toggle instead of always-visible extras
+- **Composer styling** — matches TodoInput composer-card pattern (grid layout, 46×46 pill button, 10px 14px padding)
+- **Total card** — dual-stat (total price + completion count), not just price
+- **Cards** — shadow-only with `border-left` accent, `--border-radius: 0 12px 12px 0`
+- **Layout** — horizontal padding unified to 14px, item rows to symmetric 14px
+- **Archive** — header button with archive icon, not "tap to unarchive" in overview
+
+### Acceptance criteria ✅
 
 - Navigate to `/shopping/:id` → see the list detail page
 - Add items with just a name → appear in list
 - Add items with name + qty + price → show quantity badge + price chip
 - Checkbox → strikethrough
 - Tap to expand → edit inline → save → collapse with updates
-- Archive button → list moves to archived (overview no longer shows it)
+- Archive button → list moves to archived, navigates back to overview
 - Total bar updates in real-time
-- Search filters items by name
 
 ---
 
-## Step 4 — Shopping Overview Page (Priority: HIGH)
+## Step 3a — Currency Setting (Priority: HIGH) ✅ DONE
+
+**Goal**: Allow users to choose a currency symbol for price display, persisted globally.
+
+### Files created
+
+| File | Purpose |
+|------|---------|
+| `src/features/shared/utils/formatPrice.ts` | `getCurrencySymbol(code)` and `formatPrice(amount, code)` |
+
+### Files modified
+
+| File | Change |
+|------|--------|
+| `src/features/settings/store/settingsStore.ts` | Added `currency` (default `'USD'`), `setCurrency`, `CurrencyCode` type, `currencyOptions` array |
+| `src/pages/SettingsPage.tsx` | Added "Currency" section with `IonSelect` + `interface="action-sheet"` |
+| `src/features/shopping/components/ShoppingItem.tsx` | Chip display: `formatPrice(price, currency)`; input prefix: `getCurrencySymbol(currency)` |
+| `src/features/shopping/pages/ShoppingListDetail.tsx` | Total: `formatPrice(total, currency)`; input prefix: `getCurrencySymbol(currency)` |
+| `src/features/shopping/pages/ShoppingOverview.tsx` | Card summary: `formatPrice(total, currency)` |
+
+### Currency options
+
+USD ($), EUR (€), GBP (£), CAD (CA$), AUD (A$), INR (₹), JPY (¥)
+
+### Settings screen layout
+
+```
+Settings
+  APPEARANCE
+    ┌───────────────────────────┐
+    │ System default         ●  │
+    │ Light                  ○  │
+    │ Dark                   ○  │
+    └───────────────────────────┘
+
+  CURRENCY
+    ┌───────────────────────────┐
+    │ Currency     USD ($)   >  │  ← tap → action sheet
+    └───────────────────────────┘
+```
+
+---
+
+## Step 4 — Shopping Overview Page (Priority: HIGH) ✅ DONE
 
 **Goal**: Landing page showing all active shopping lists as cards, with create-new-list input.
 
-### New files
+### Files created
 
 | File | Purpose |
 |------|---------|
 | `src/features/shopping/pages/ShoppingOverview.tsx` | List-of-lists page |
 | `src/features/shopping/pages/ShoppingOverview.css` | Overview page styles |
 
-### Wireframe
+### Wireframe (actual)
 
 ```
 ┌────────────────────────────────────────────┐
-│  ← Tasks              Shopping             │
-│                                            │
 │  Shopping Lists                            │
+│  3 active lists                            │
+│                                            │
 │  ┌────────────────────────────────────────┐│
-│  │ 📝 [New list name...            ] [+]  ││ ← input to create list
+│  │ 📝 [New list name...             ] [+] ││ ← composer-card, tertiary color
 │  └────────────────────────────────────────┘│
 │                                            │
-│  ┌─🛒 Weekly Groceries ──────────────────┐│
-│  │  12 items  ·  $34.50               ││
-│  │  ▓▓▓▓▓▓▓░░░░  8/12 done           ││
-│  └────────────────────────────────────────┘│
+│  🛒 ACTIVE                      (3)    ▼  │ ← group header, collapsible
+│  ┊                                         │
+│  │ 🛒 Weekly Groceries                     │ ← IonItem, border-left accent
+│  │   12 items · $34.50            ✅ 8/12  │ ← price formatted with currency
+│  ├─────────────────────────────────────────┤
+│  │ 🛒 Hardware Store                       │
+│  │   5 items · $89.20             ✅ 1/5   │
+│  ├─────────────────────────────────────────┤
+│  │ 🛒 Costco Run                           │
+│  │   0 items · $0.00               0/0     │
 │                                            │
-│  ┌─🛒 Hardware Store ────────────────────┐│
-│  │  5 items  ·  $89.20                  ││
-│  │  ▓░░░░░░░░░  1/5 done               ││
-│  └────────────────────────────────────────┘│
+│  📦 ARCHIVED                     (1)    ▶  │ ← collapsed by default
 │                                            │
-│  ▶ Archived (2)                            │ ← collapsible section
-│    ┌─🛒 Party Supplies ──────────────────┐│
-│    │  8 items  ·  $23.00                  ││
-│    └───────────────────────────────────────┘│
-│    ┌─🛒 Office Run ──────────────────────┐│
-│    │  3 items  ·  $12.75                  ││
-│    └───────────────────────────────────────┘│
+│  (empty state when no lists exist)         │
+│    🛒                                       │
+│    Your shopping lists live here.          │
+│    Start one above.                        │
 └────────────────────────────────────────────┘
 ```
 
-### List card
+### List card (IonItem)
 
 Each card shows:
-- Name (title)
-- Item count + total price
-- Progress bar + "N/M done" label
+- Icon (`cartOutline`, `slot="start"`, 24px, tertiary color)
+- Name (16px, bold, ellipsis overflow)
+- Item count + total price (formatPrice with selected currency)
+- Progress chip: `doneCount/totalCount` (IonChip, primary color badge)
+- **Not** a progress bar — compact badge instead
 - Tap → navigates to `/shopping/:id`
+- `--border-radius: 0 12px 12px 0`, `border-left: 4px solid` accent bar, shadow-only
+- `--padding-start: 14px`, `--padding-end: 14px`, `--padding-top: 12px`, `--padding-bottom: 12px`
 
 ### Active vs Archived
 
-- **Active section**: unarchived lists (default view)
-- **Archived section**: collapsed by default, shows archived lists with tap-to-unarchive
+- **Active section**: unarchived lists, expanded by default
+- **Archived section**: collapsed by default
+- Both use **group headers** matching the TodoList pattern (icons, badges, collapsible chevron, color variants)
+- Tertiary color for active, muted for archived
+- Patch: `group--completed .task-row` border-left-color rule added for consistency
 
-### Acceptance criteria
+### Refinements vs original plan
+- **Group headers** replicate `TodoList` pattern exactly (icons, badges, collapsible, color variants)
+- **No progress bar** — replaced by compact `IonChip` badge (`doneCount/totalCount`)
+- **List cards are `IonItem`** (not `IonCard`) with `slot="start"` icon
+- **Create card** uses `composer-card` pattern with tertiary color overrides, matching `TodoInput`
+- **Shadow-only containers** — no border+shadow ghost-card pattern
+- **Left-border accent** on cards instead of top bar
+- **Icon spacing** — removed `margin: 0` on icon to restore Ionic default ~16px gap
+- **Empty state**: "Your shopping lists live here. Start one above." (not the original text)
+
+### Acceptance criteria ✅
 
 - Create a new list → appears as a card in Active section
 - Tap a card → navigate to the list detail page
 - Archive a list → card moves to Archived section
 - Archived section collapsible
-- Empty state when no lists exist: "No shopping lists yet. Create your first one above."
+- Empty state when no lists exist
 
 ---
 
-## Step 5 — Barcode Scanning (Priority: MEDIUM)
+## Step 5 — Barcode Scanning (Priority: MEDIUM) ⏳ NOT STARTED
 
 **Goal**: Camera-based barcode scanning with Open Food Facts lookup.
-(Unchanged from original plan — implementation details same.)
 
 ### Files to create
 
@@ -311,7 +374,7 @@ Each card shows:
 | File | Change |
 |------|--------|
 | `ShoppingListDetail.tsx` | Add barcode button beside add-input |
-| `dotodo2.apparmor` | Add `"camera"` policy group |
+| `dotodo2.apparmor` | Add `"camera"` policy group (currently empty) |
 | `package.json` | Add `@zxing/library` |
 
 ### Architecture
@@ -338,9 +401,9 @@ User taps 📷
 
 ---
 
-## Step 6 — Real-Time Sharing (Priority: LOW — Deferred)
+## Step 6 — Real-Time Sharing (Priority: LOW — Deferred) ⏳ NOT STARTED
 
-**Goal**: Real-time sync via Firebase. (Unchanged from original plan.)
+**Goal**: Real-time sync via Firebase.
 
 ### Files to create
 
@@ -376,8 +439,9 @@ User taps Share
 
 | Route | Page | Status |
 |-------|------|--------|
-| `/shopping` | `ShoppingOverview` | New (Step 4) |
-| `/shopping/:listId` | `ShoppingListDetail` | Repurposed from old `ShoppingPage` (Step 3) |
+| `/shopping` | `ShoppingOverview` | ✅ Done |
+| `/shopping/:listId` | `ShoppingListDetail` | ✅ Done (repurposed from old `ShoppingPage`) |
+| `/settings` | `SettingsPage` | ✅ Extended with currency picker |
 
 No item-edit route — editing is inline via expand (Step 2).
 
@@ -386,27 +450,37 @@ No item-edit route — editing is inline via expand (Step 2).
 ## Appendix: File Tree After Phase 1
 
 ```
+src/features/settings/store/
+└── settingsStore.ts                    ← extended with currency state
+
+src/features/shared/
+├── types.ts                            ← ShoppingItem, isArchived on DoTodo
+├── store/
+│   └── doTodoStore.ts                  ← 6 new actions, 4 new selectors
+└── utils/
+    └── formatPrice.ts                  ← NEW: getCurrencySymbol, formatPrice
+
 src/features/shopping/
 ├── components/
-│   ├── ScannerOverlay.tsx
-│   ├── ScannerOverlay.css
-│   ├── ShoppingItem.tsx          ← rewritten with inline edit
+│   ├── ShoppingItem.tsx                ← rewritten with inline edit
 │   └── ShoppingItem.css
 ├── pages/
-│   ├── ShoppingListDetail.tsx    ← repurposed from old ShoppingPage
+│   ├── ShoppingListDetail.tsx          ← repurposed from old ShoppingPage
 │   ├── ShoppingListDetail.css
-│   ├── ShoppingOverview.tsx      ← new
+│   ├── ShoppingOverview.tsx            ← new
 │   └── ShoppingOverview.css
-├── services/
-│   └── barcode.service.ts
-└── (utils/ directory — unused, categories deferred)
+└── (barcode/ and sharing/ — not yet created)
+
+src/pages/
+└── SettingsPage.tsx                    ← extended with currency IonSelect
 ```
 
-Old files to delete:
+Old files deleted:
 - `ShoppingInput.tsx` / `.css` → replaced by inline input in `ShoppingListDetail`
 - `ShoppingList.tsx` / `.css` → replaced by inline item list in `ShoppingListDetail`
 - `ShoppingEditPage.tsx` / `.css` → replaced by inline expand-to-edit
 - `ShoppingPage.tsx` / `.css` → replaced by `ShoppingListDetail.tsx`
+- `Shopping.styles.ts` → replaced by per-component CSS
 
 ---
 
@@ -414,19 +488,39 @@ Old files to delete:
 
 ```
 Step 1 (data model + store)
-  └─ Step 2 (ShoppingItem with inline edit) ← depends on store actions
-       └─ Step 3 (ShoppingListDetail) ← depends on ShoppingItem component
-            └─ Step 4 (ShoppingOverview) ← depends on Step 1 (selectors)
-                 └─ Step 5 (barcode) ← depends on Step 3 (detail page integration)
-                      └─ Step 6 (Firebase sharing) ← depends on all steps
+  └─ Step 2 (ShoppingItem with inline edit)
+       └─ Step 3 (ShoppingListDetail)
+            ├─ Step 3a (currency setting) ← added during implementation
+            └─ Step 4 (ShoppingOverview)
+                 └─ Step 5 (barcode) ← not started
+                      └─ Step 6 (Firebase sharing) ← not started
 ```
-
-Steps 3 and 4 are independent once Step 1 and 2 are done — they can be built
-in parallel.
 
 ---
 
 ## Appendix: NPM Dependencies
 
-- `@zxing/library` (Step 5)
-- `firebase` (Step 6)
+Status | Package | Step
+-------|---------|------
+❌ Not added | `@zxing/library` | Step 5
+❌ Not added | `firebase` | Step 6
+
+---
+
+## Appendix: Design System — Card & Container Conventions
+
+All containers in the shopping feature follow these CSS conventions (unified with todo feature):
+
+| Rule | Value |
+|------|-------|
+| **Card container** | `box-shadow: var(--dotodo-shadow-card)` only |
+| **Border accent** | `border-left: 4px solid` accent color |
+| **Border radius** | `border-radius: 0 12px 12px 0` (flat on left edge where accent sits) |
+| **Completion border** | `group--completed .task-row` → `border-left-color: var(--dotodo-success)` |
+| **Shadow only** | No `border` + `box-shadow` ghost-card pattern |
+| **Overview list cards** | `IonItem` (not `IonCard`), icon via `slot="start"` |
+| **Group headers** | Replicated from `TodoList.css` — icons, badges, collapsible, color variants |
+| **Composer card** | Matches `TodoInput` pattern — grid layout, pill button, specific padding |
+| **Create/Detail composer** | Horizontal padding: 14px |
+| **Overview list cards** | Horizontal padding: 12px 14px |
+| **Item rows** | Symmetric padding: 14px |
