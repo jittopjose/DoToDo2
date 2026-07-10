@@ -19,7 +19,9 @@ interface ScannerOverlayProps {
     onDismiss: () => void;
 }
 
-const DETECT_INTERVAL_MS = 500;
+const DETECT_INTERVAL_MS = 200;
+const SCAN_WIDTH = 640;
+const SCAN_HEIGHT = 480;
 
 const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ isOpen, onScanResult, onDismiss }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -51,16 +53,16 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ isOpen, onScanResult, o
         const detector = detectorRef.current;
         if (!video || !canvas || !detector || video.readyState < 2) return;
 
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
+        canvas.width = SCAN_WIDTH;
+        canvas.height = SCAN_HEIGHT;
+        ctx.drawImage(video, 0, 0, SCAN_WIDTH, SCAN_HEIGHT);
 
         let imageData: ImageData;
         try {
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageData = ctx.getImageData(0, 0, SCAN_WIDTH, SCAN_HEIGHT);
         } catch {
             return;
         }
@@ -83,7 +85,11 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ isOpen, onScanResult, o
         setError(null);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' },
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
                 audio: false,
             });
             streamRef.current = stream;

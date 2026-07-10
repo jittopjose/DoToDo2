@@ -80,24 +80,10 @@ const ShoppingListDetail: React.FC = () => {
     }, [listId, archiveShoppingList, history]);
 
     const handleScanResult = useCallback(async (barcode: string | null) => {
-        if (!barcode) {
-            setIsScanningNative(false);
-            return;
-        }
-        const product = await lookupProduct(barcode);
-        if (product) {
-            setNewItemText(product.productName ?? barcode);
-            if (product.quantity) {
-                const match = product.quantity.match(/^(\d+)/);
-                if (match) setNewItemQty(parseInt(match[1], 10));
-            }
-            if (product.productName || product.brand) {
-                setShowMore(true);
-            }
-        } else {
-            setNewItemText(barcode);
-        }
         setIsScanningNative(false);
+        if (!barcode) return;
+        const product = await lookupProduct(barcode);
+        setNewItemText(product?.productName ?? barcode);
     }, []);
 
     const handleScanClick = useCallback(async () => {
