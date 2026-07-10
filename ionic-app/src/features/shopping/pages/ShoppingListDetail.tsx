@@ -159,7 +159,7 @@ const ShoppingListDetail: React.FC = () => {
                                 disabled={isScanningNative}
                                 aria-label="Scan barcode"
                             >
-                                <IonIcon icon={scanOutline} />
+                                <IonIcon icon={scanOutline} style={{ fontSize: 24 }} />
                             </IonButton>
                             <IonButton
                                 className="shop-detail-composer-add-btn"
@@ -167,7 +167,7 @@ const ShoppingListDetail: React.FC = () => {
                                 disabled={!newItemText.trim()}
                                 aria-label="Add item"
                             >
-                                <IonIcon icon={addOutline} />
+                                <IonIcon icon={addOutline} style={{ fontSize: 24 }} />
                             </IonButton>
                         </div>
                         <div className="shop-detail-composer-more-toggle" onClick={() => setShowMore((prev) => !prev)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMore((prev) => !prev); } }}>
