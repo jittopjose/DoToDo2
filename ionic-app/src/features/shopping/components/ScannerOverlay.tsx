@@ -58,7 +58,21 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ isOpen, onScanResult, o
 
         canvas.width = SCAN_WIDTH;
         canvas.height = SCAN_HEIGHT;
-        ctx.drawImage(video, 0, 0, SCAN_WIDTH, SCAN_HEIGHT);
+        const srcAspect = video.videoWidth / video.videoHeight;
+        const dstAspect = SCAN_WIDTH / SCAN_HEIGHT;
+        let sx: number, sy: number, sw: number, sh: number;
+        if (srcAspect > dstAspect) {
+            sw = video.videoHeight * dstAspect;
+            sh = video.videoHeight;
+            sx = (video.videoWidth - sw) / 2;
+            sy = 0;
+        } else {
+            sh = video.videoWidth / dstAspect;
+            sw = video.videoWidth;
+            sx = 0;
+            sy = (video.videoHeight - sh) / 2;
+        }
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, SCAN_WIDTH, SCAN_HEIGHT);
 
         let imageData: ImageData;
         try {
