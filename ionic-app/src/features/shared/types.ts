@@ -34,6 +34,7 @@ export interface ShoppingItem {
     isCompleted: boolean;
     quantity?: number;
     price?: number;
+    category?: string;
 }
 
 export interface DoTodo extends BaseItem {

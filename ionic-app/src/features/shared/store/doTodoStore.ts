@@ -39,9 +39,9 @@ interface EntryState {
   deleteEntry: (id: string) => void;
   updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'shoppingItems' | 'recurrence' | 'isCompleted' | 'isArchived'>>) => void;
   addShoppingList: (title: string) => void;
-  addShoppingItem: (listId: string, title: string, quantity?: number, price?: number) => void;
+  addShoppingItem: (listId: string, title: string, quantity?: number, price?: number, category?: string) => void;
   toggleShoppingItem: (listId: string, itemId: string) => void;
-  updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price'>>) => void;
+  updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price' | 'category'>>) => void;
   removeShoppingItem: (listId: string, itemId: string) => void;
   reorderShoppingItems: (listId: string, itemIds: string[]) => void;
   archiveShoppingList: (listId: string) => void;
@@ -269,7 +269,7 @@ export const useDoTodoStore = create<EntryState>()(
       }));
     },
 
-    addShoppingItem: (listId, title, quantity, price) => set((state) => {
+    addShoppingItem: (listId, title, quantity, price, category) => set((state) => {
       const entry = state.entries[listId];
       if (!entry || !entry.shoppingItems) return state;
       const newItem: ShoppingItem = {
@@ -278,6 +278,7 @@ export const useDoTodoStore = create<EntryState>()(
         isCompleted: false,
         ...(quantity !== undefined && { quantity }),
         ...(price !== undefined && { price }),
+        ...(category !== undefined && { category }),
       };
       return {
         entries: {

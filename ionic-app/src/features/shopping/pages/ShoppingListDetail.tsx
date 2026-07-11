@@ -13,21 +13,41 @@ import {
     IonInput,
     IonList,
     IonPage,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, funnelOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cafeOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronForwardOutline, chevronUpOutline, eggOutline, ellipsisHorizontalOutline, fishOutline, funnelOutline, homeOutline, layersOutline, leafOutline, pizzaOutline, scanOutline, snowOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
 import { ShoppingItem } from '../components/ShoppingItem';
+import { DEFAULT_CATEGORIES, getCategory } from '../types';
+import type { ShoppingCategory } from '../types';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import './ShoppingListDetail.css';
 
 type SortMode = 'custom' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'checked-last' | 'checked-first';
+
+const CATEGORY_ICONS: Record<string, string> = {
+    produce: leafOutline,
+    dairy: eggOutline,
+    meat: fishOutline,
+    bakery: pizzaOutline,
+    frozen: snowOutline,
+    beverages: cafeOutline,
+    pantry: layersOutline,
+    household: homeOutline,
+    other: ellipsisHorizontalOutline,
+};
+
+function getCategoryIcon(key: string): string {
+    return CATEGORY_ICONS[key] ?? ellipsisHorizontalOutline;
+}
 
 const ShoppingListDetail: React.FC = () => {
     const history = useHistory();
@@ -56,6 +76,8 @@ const ShoppingListDetail: React.FC = () => {
     const [showChecked, setShowChecked] = useState(false);
     const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
     const [dragging, setDragging] = useState(false);
+    const [newItemCategory, setNewItemCategory] = useState<string>('');
+    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -118,6 +140,27 @@ const ShoppingListDetail: React.FC = () => {
         dragListRef.current = sortedItems.map((i) => i.id);
     }, [sortedItems]);
 
+    const groupedItems = useMemo(() => {
+        const groups: Record<string, typeof sortedItems> = {};
+        for (const item of sortedItems) {
+            const key = item.category && DEFAULT_CATEGORIES.some((c) => c.key === item.category) ? item.category : 'other';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(item);
+        }
+        return DEFAULT_CATEGORIES
+            .filter((c) => groups[c.key]?.length > 0)
+            .map((c) => ({ key: c.key, category: c, items: groups[c.key] }));
+    }, [sortedItems]);
+
+    const toggleCategory = useCallback((key: string) => {
+        setCollapsedCategories((prev) => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
+            return next;
+        });
+    }, []);
+
     const handleDragHandlePointerDown = useCallback((e: React.PointerEvent, idx: number) => {
         if (sortMode !== 'custom' || dragging) return;
         e.preventDefault();
@@ -173,11 +216,12 @@ const ShoppingListDetail: React.FC = () => {
             trimmed,
             showMore ? Math.max(1, newItemQty) : undefined,
             showMore && newItemPrice ? parseFloat(newItemPrice) : undefined,
+            newItemCategory || undefined,
         );
         setNewItemText('');
         setNewItemQty(1);
         setNewItemPrice('');
-    }, [newItemText, newItemQty, newItemPrice, showMore, listId, addShoppingItem]);
+    }, [newItemText, newItemQty, newItemPrice, newItemCategory, showMore, listId, addShoppingItem]);
 
     const handleAddKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -203,6 +247,9 @@ const ShoppingListDetail: React.FC = () => {
         if (!barcode) return;
         const product = await lookupProduct(barcode);
         setNewItemText(product?.productName ?? barcode);
+        if (product?.category) {
+            setNewItemCategory(product.category);
+        }
     }, []);
 
     const handleScanClick = useCallback(async () => {
@@ -339,6 +386,19 @@ const ShoppingListDetail: React.FC = () => {
                                                 aria-label="Price"
                                             />
                                         </div>
+                                        <IonSelect
+                                            className="shop-composer-category"
+                                            value={newItemCategory}
+                                            placeholder="Category"
+                                            interface="popover"
+                                            onIonChange={(e) => setNewItemCategory(e.detail.value)}
+                                            aria-label="Category"
+                                        >
+                                            <IonSelectOption value="">None</IonSelectOption>
+                                            {DEFAULT_CATEGORIES.map((cat) => (
+                                                <IonSelectOption key={cat.key} value={cat.key}>{cat.label}</IonSelectOption>
+                                            ))}
+                                        </IonSelect>
                                     </div>
                                 )}
                             </IonCardContent>
@@ -416,14 +476,14 @@ const ShoppingListDetail: React.FC = () => {
                             </>
                         )}
                     </>
-                ) : (
+                ) : sortMode === 'custom' ? (
                     <div className="shop-detail-reorder-list">
                         {sortedItems.map((item, idx) => (
                             <ShoppingItem
                                 key={item.id}
                                 item={item}
                                 index={idx}
-                                showReorder={sortMode === 'custom'}
+                                showReorder
                                 dragOver={dragOverIdx === idx}
                                 isEditing={editingItemId === item.id}
                                 onToggle={() => toggleShoppingItem(listId, item.id)}
@@ -437,14 +497,55 @@ const ShoppingListDetail: React.FC = () => {
                                     setEditingItemId(null);
                                 }}
                                 onCancel={() => setEditingItemId(null)}
-                                onDragHandlePointerDown={
-                                    sortMode === 'custom'
-                                        ? (e) => handleDragHandlePointerDown(e, idx)
-                                        : undefined
-                                }
+                                onDragHandlePointerDown={(e) => handleDragHandlePointerDown(e, idx)}
                             />
                         ))}
                     </div>
+                ) : (
+                    <>
+                        {groupedItems.map((group) => (
+                            <div key={group.key} className="shop-category-group">
+                                <div
+                                    className="shop-category-header"
+                                    onClick={() => toggleCategory(group.key)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategory(group.key); } }}
+                                >
+                                    <IonIcon icon={getCategoryIcon(group.key)} className="shop-category-icon" />
+                                    <span className="shop-category-label">{group.category.label}</span>
+                                    <span className="shop-category-count">{group.items.length}</span>
+                                    <IonIcon
+                                        icon={collapsedCategories.has(group.key) ? chevronForwardOutline : chevronDownOutline}
+                                        className="shop-category-chevron"
+                                    />
+                                </div>
+                                {!collapsedCategories.has(group.key) && (
+                                    <div className="shop-category-items">
+                                        {group.items.map((item, idx) => (
+                                            <ShoppingItem
+                                                key={item.id}
+                                                item={item}
+                                                index={idx}
+                                                isEditing={editingItemId === item.id}
+                                                onToggle={() => toggleShoppingItem(listId, item.id)}
+                                                onStartEdit={() => setEditingItemId(item.id)}
+                                                onSave={(updates) => {
+                                                    updateShoppingItem(listId, item.id, updates);
+                                                    setEditingItemId(null);
+                                                }}
+                                                onDelete={() => {
+                                                    removeShoppingItem(listId, item.id);
+                                                    setEditingItemId(null);
+                                                }}
+                                                onCancel={() => setEditingItemId(null)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </>
                 )}
 
                 {isScanningNative && (

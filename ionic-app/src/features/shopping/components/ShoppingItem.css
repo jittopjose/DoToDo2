@@ -259,6 +259,31 @@
     min-height: 28px;
 }
 
+/* ── Editor category ── */
+
+.shop-editor-category {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shop-item-category-select {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --background: var(--dotodo-surface-strong);
+    --border-color: var(--dotodo-card-border);
+    --border-radius: 10px;
+    --border-width: 1px;
+    --border-style: solid;
+    --placeholder-color: var(--dotodo-muted);
+    --color: var(--dotodo-text);
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 36px;
+}
+
 /* ── Editor actions ── */
 
 .shop-editor-actions {

@@ -6,11 +6,14 @@ import {
     IonIcon,
     IonInput,
     IonItem,
+    IonSelect,
+    IonSelectOption,
 } from '@ionic/react';
 import { chevronDownOutline, reorderThreeOutline, trashOutline } from 'ionicons/icons';
 import type { ShoppingItem as ShoppingItemType } from '../../shared/types';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { getCurrencySymbol, formatPrice } from '../../shared/utils/formatPrice';
+import { DEFAULT_CATEGORIES } from '../types';
 import './ShoppingItem.css';
 
 interface ShoppingItemProps {
@@ -18,7 +21,7 @@ interface ShoppingItemProps {
     isEditing: boolean;
     onToggle: () => void;
     onStartEdit: () => void;
-    onSave: (updates: Partial<Pick<ShoppingItemType, 'title' | 'quantity' | 'price'>>) => void;
+    onSave: (updates: Partial<Pick<ShoppingItemType, 'title' | 'quantity' | 'price' | 'category'>>) => void;
     onDelete: () => void;
     onCancel: () => void;
     index?: number;
@@ -46,12 +49,14 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     const [editTitle, setEditTitle] = useState(item.title);
     const [editQty, setEditQty] = useState(item.quantity ?? 1);
     const [editPrice, setEditPrice] = useState(item.price ? item.price.toFixed(2) : '');
+    const [editCategory, setEditCategory] = useState(item.category ?? '');
 
     useEffect(() => {
         setEditTitle(item.title);
         setEditQty(item.quantity ?? 1);
         setEditPrice(item.price ? item.price.toFixed(2) : '');
-    }, [item.title, item.quantity, item.price]);
+        setEditCategory(item.category ?? '');
+    }, [item.title, item.quantity, item.price, item.category]);
 
     const handleSummaryClick = useCallback(() => {
         if (storeMode) {
@@ -72,8 +77,9 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
             title: editTitle.trim(),
             quantity: Math.max(1, editQty),
             price: editPrice ? parseFloat(editPrice) : undefined,
+            category: editCategory || undefined,
         });
-    }, [editTitle, editQty, editPrice, onSave]);
+    }, [editTitle, editQty, editPrice, editCategory, onSave]);
 
     const handleQtyDec = useCallback(() => {
         setEditQty((prev) => Math.max(1, prev - 1));
@@ -190,6 +196,22 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                                     />
                                 </div>
                             </div>
+                        </div>
+                        <div className="shop-editor-category">
+                            <span className="shop-editor-label">Category</span>
+                            <IonSelect
+                                className="shop-item-category-select"
+                                value={editCategory}
+                                placeholder="None"
+                                interface="popover"
+                                onIonChange={(e) => setEditCategory(e.detail.value)}
+                                aria-label="Category"
+                            >
+                                <IonSelectOption value="">None</IonSelectOption>
+                                {DEFAULT_CATEGORIES.map((cat) => (
+                                    <IonSelectOption key={cat.key} value={cat.key}>{cat.label}</IonSelectOption>
+                                ))}
+                            </IonSelect>
                         </div>
                         <div className="shop-editor-actions">
                             <IonButton
