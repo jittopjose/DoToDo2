@@ -234,45 +234,39 @@
 .shop-detail-footer {
     --background: var(--dotodo-card);
     border-top: 1px solid var(--dotodo-card-border);
+    position: relative;
 }
 
-.shop-detail-footer-toolbar {
-    --background: var(--dotodo-card);
-    --padding-start: 12px;
-    --padding-end: 12px;
-    --min-height: 52px;
+.shop-detail-footer-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: var(--ion-color-tertiary);
+    border-radius: 0 3px 0 0;
+    transition: width 0.2s ease;
+    max-width: 100%;
 }
 
-.shop-detail-footer-body {
+.shop-detail-footer-inner {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 1;
+    gap: 8px;
+    padding: 0 16px;
+    min-height: 56px;
 }
 
 .shop-detail-footer-icon {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--ion-color-tertiary);
     flex-shrink: 0;
 }
 
-.shop-detail-footer-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    line-height: 1.3;
-}
-
-.shop-detail-footer-title {
-    font-size: 13px;
-    font-weight: 800;
+.shop-detail-footer-label {
+    font-size: 14px;
+    font-weight: 700;
     color: var(--dotodo-text);
-}
-
-.shop-detail-footer-sublabel {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--dotodo-muted);
+    margin-right: auto;
 }
 
 .shop-detail-footer-exit-btn {

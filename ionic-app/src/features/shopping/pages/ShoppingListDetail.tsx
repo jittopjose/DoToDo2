@@ -347,21 +347,19 @@ const ShoppingListDetail: React.FC = () => {
 
             {storeMode && (
                 <IonFooter className="shop-detail-footer">
-                    <IonToolbar className="shop-detail-footer-toolbar">
-                        <div className="shop-detail-footer-body">
-                            <IonIcon icon={cart} className="shop-detail-footer-icon" />
-                            <div className="shop-detail-footer-text">
-                                <span className="shop-detail-footer-title">Shopping mode</span>
-                                <span className="shop-detail-footer-sublabel">
-                                    <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 11 }} />
-                                    {items.filter((i) => i.isCompleted).length} of {items.length} checked
-                                </span>
-                            </div>
-                        </div>
+                    <div
+                        className="shop-detail-footer-progress"
+                        style={{ width: `${items.length > 0 ? (items.filter((i) => i.isCompleted).length / items.length) * 100 : 0}%` }}
+                    />
+                    <div className="shop-detail-footer-inner">
+                        <IonIcon icon={cart} className="shop-detail-footer-icon" />
+                        <span className="shop-detail-footer-label">
+                            {items.filter((i) => i.isCompleted).length} of {items.length} items
+                        </span>
                         <IonButton className="shop-detail-footer-exit-btn" size="small" fill="outline" onClick={handleToggleStoreMode}>
                             Exit
                         </IonButton>
-                    </IonToolbar>
+                    </div>
                 </IonFooter>
             )}
         </IonPage>
