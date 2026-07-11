@@ -420,37 +420,10 @@ User taps 📷
 
 ---
 
-## Step 6 — Real-Time Sharing (Priority: LOW — Deferred) ⏳ NOT STARTED
+## Step 6 — Real-Time Sharing (Moved to Phase 2) 🔄 MOVED
 
-**Goal**: Real-time sync via Firebase.
-
-### Files to create
-
-| File | Purpose |
-|------|---------|
-| `src/services/firebase.service.ts` | Firebase init, anonymous auth, Firestore refs |
-| `src/services/share.service.ts` | Invite code gen, Firestore merge into Zustand |
-
-### Files to modify
-
-| File | Change |
-|------|--------|
-| `ShoppingListDetail.tsx` | Add Share button in header |
-| `ShoppingOverview.tsx` | Show "shared with N" indicator |
-| `dotodo2.apparmor` | Add `"network"` policy groups |
-| `package.json` | Add `firebase` |
-
-### Architecture
-
-```
-User taps Share
-  → Firebase anonymous auth (silent)
-  → Generate random 6-char invite code
-  → Show code + QR in modal
-  → Remote user enters code → subscribe to Firestore collection
-  → onSnapshot → merge writes into Zustand store
-  → Zustand writes → Firestore writes (bidirectional)
-```
+Real-time sharing via Firebase has been moved to Phase 2 (Step 6 of Phase 2).
+The Phase 1 plan covers Steps 1–5. See `phase2-shopping.md` for the full sharing design.
 
 ---
 
@@ -515,7 +488,7 @@ Step 1 (data model + store)
             ├─ Step 3a (currency setting) ← added during implementation
             └─ Step 4 (ShoppingOverview)
                  └─ Step 5 (barcode) ← done
-                      └─ Step 6 (Firebase sharing) ← deferred
+                      └─ Step 6 (Firebase sharing) → moved to Phase 2
 ```
 
 ---
@@ -524,11 +497,11 @@ Step 1 (data model + store)
 
 Status | Package | Step
 -------|---------|------
-❌ Not added | `firebase` | Step 6
 ✅ Added | `@capacitor-mlkit/barcode-scanning` | Step 5
 ✅ Added | `@capacitor/camera` | Step 5
 ✅ Added | `@capacitor/filesystem` | Step 5
 ✅ Added (vendor) | `barcode-detector/pure` + ZXing WASM | Step 5 (web fallback)
+❌ Not added | `firebase` | Phase 2 Step 6
 
 ---
 
