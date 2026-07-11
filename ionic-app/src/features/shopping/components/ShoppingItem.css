@@ -281,3 +281,31 @@
     min-height: 32px;
     font-weight: 600;
 }
+
+/* ── Store mode ── */
+
+.shop-item-store-mode .shop-item-summary {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+}
+
+.shop-item-store-mode .shop-item-name {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.shop-item-store-mode .shop-item-qty {
+    font-size: 13px;
+    font-weight: 850;
+    min-height: 26px;
+}
+
+.shop-item-store-mode .shop-item-price {
+    font-size: 13px;
+    font-weight: 850;
+    min-height: 26px;
+}
+
+.shop-item-store-mode .shop-item-summary:active {
+    transform: scale(0.995);
+}

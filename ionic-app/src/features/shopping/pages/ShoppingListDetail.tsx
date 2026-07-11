@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     IonBackButton,
     IonButton,
@@ -14,7 +14,7 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -45,6 +45,32 @@ const ShoppingListDetail: React.FC = () => {
     const [showMore, setShowMore] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
     const [isScanningNative, setIsScanningNative] = useState(false);
+    const [storeMode, setStoreMode] = useState(false);
+    const [showChecked, setShowChecked] = useState(false);
+    const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+    const handleToggleStoreMode = useCallback(() => {
+        setStoreMode((prev) => !prev);
+        if (!storeMode) {
+            setShowChecked(false);
+            setEditingItemId(null);
+        }
+    }, [storeMode]);
+
+    useEffect(() => {
+        if (storeMode) {
+            navigator.wakeLock.request('screen').then((sentinel) => {
+                wakeLockRef.current = sentinel;
+            }).catch(() => {});
+        } else {
+            wakeLockRef.current?.release().catch(() => {});
+            wakeLockRef.current = null;
+        }
+        return () => {
+            wakeLockRef.current?.release().catch(() => {});
+            wakeLockRef.current = null;
+        };
+    }, [storeMode]);
 
     const handleAddItem = useCallback(() => {
         const trimmed = newItemText.trim();
@@ -114,8 +140,11 @@ const ShoppingListDetail: React.FC = () => {
                     <IonButtons slot="start">
                         <IonBackButton defaultHref="/shopping" text="Lists" />
                     </IonButtons>
-                    <IonTitle>{entry.title}</IonTitle>
+                    <IonTitle>{storeMode ? `${items.filter((i) => !i.isCompleted).length} items` : entry.title}</IonTitle>
                     <IonButtons slot="end">
+                        <IonButton onClick={handleToggleStoreMode} aria-label={storeMode ? 'Exit shopping mode' : 'Enter shopping mode'}>
+                            <IonIcon icon={storeMode ? cart : cartOutline} />
+                        </IonButton>
                         <IonButton onClick={handleArchive} aria-label={entry.isArchived ? 'Unarchive list' : 'Archive list'}>
                             <IonIcon icon={archiveOutline} />
                         </IonButton>
@@ -123,81 +152,85 @@ const ShoppingListDetail: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
 
-            <IonContent className="shop-detail-content">
-                <div className="shop-detail-total-row">
-                    <IonCard className="shop-detail-total-card">
-                        <IonCardContent className="shop-detail-total-content">
-                            <IonIcon icon={cartOutline} className="shop-detail-total-icon" />
-                            <div className="shop-detail-total-body">
-                                <div className="shop-detail-total-top">
-                                    <span className="shop-detail-total-label">Total</span>
-                                    <span className="shop-detail-total-value">{formatPrice(summary.total, currency)}</span>
-                                </div>
-                                <span className="shop-detail-total-sublabel">
-                                    <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 12 }} />
-                                    {items.filter((i) => i.isCompleted).length} of {items.length} items
-                                </span>
-                            </div>
-                        </IonCardContent>
-                    </IonCard>
-                </div>
+            <IonContent className={`shop-detail-content ${storeMode ? 'shop-detail-store-mode' : ''}`}>
+                {!storeMode && (
+                    <>
+                        <div className="shop-detail-total-row">
+                            <IonCard className="shop-detail-total-card">
+                                <IonCardContent className="shop-detail-total-content">
+                                    <IonIcon icon={cartOutline} className="shop-detail-total-icon" />
+                                    <div className="shop-detail-total-body">
+                                        <div className="shop-detail-total-top">
+                                            <span className="shop-detail-total-label">Total</span>
+                                            <span className="shop-detail-total-value">{formatPrice(summary.total, currency)}</span>
+                                        </div>
+                                        <span className="shop-detail-total-sublabel">
+                                            <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 12 }} />
+                                            {items.filter((i) => i.isCompleted).length} of {items.length} items
+                                        </span>
+                                    </div>
+                                </IonCardContent>
+                            </IonCard>
+                        </div>
 
-                <IonCard className="shop-detail-composer">
-                    <IonCardContent className="shop-detail-composer-inner">
-                        <div className="shop-detail-composer-main">
-                            <IonInput
-                                className="shop-detail-composer-input"
-                                value={newItemText}
-                                placeholder="What to buy?"
-                                onIonInput={(e) => setNewItemText(e.detail.value ?? '')}
-                                onKeyDown={handleAddKeyDown}
-                                aria-label="Item name"
-                            />
-                            <IonButton
-                                className="shop-detail-composer-scan-btn"
-                                onClick={handleScanClick}
-                                disabled={isScanningNative}
-                                aria-label="Scan barcode"
-                            >
-                                <IonIcon icon={scanOutline} style={{ fontSize: 24 }} />
-                            </IonButton>
-                            <IonButton
-                                className="shop-detail-composer-add-btn"
-                                onClick={handleAddItem}
-                                disabled={!newItemText.trim()}
-                                aria-label="Add item"
-                            >
-                                <IonIcon icon={addOutline} style={{ fontSize: 24 }} />
-                            </IonButton>
-                        </div>
-                        <div className="shop-detail-composer-more-toggle" onClick={() => setShowMore((prev) => !prev)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMore((prev) => !prev); } }}>
-                            <IonIcon icon={chevronDownOutline} className={`shop-detail-composer-chevron ${showMore ? 'is-open' : ''}`} />
-                            <span className="shop-detail-composer-more-text">Add qty & price</span>
-                        </div>
-                        {showMore && (
-                            <div className="shop-detail-composer-extras">
-                                <div className="shop-qty-stepper">
-                                    <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyDec} disabled={newItemQty <= 1} aria-label="Decrease quantity">−</IonButton>
-                                    <span className="shop-qty-value">{newItemQty}</span>
-                                    <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyInc} disabled={newItemQty >= 999} aria-label="Increase quantity">+</IonButton>
-                                </div>
-                                <div className="shop-price-input-wrap">
-                                    <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
+                        <IonCard className="shop-detail-composer">
+                            <IonCardContent className="shop-detail-composer-inner">
+                                <div className="shop-detail-composer-main">
                                     <IonInput
-                                        className="shop-price-input"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={newItemPrice}
-                                        placeholder="0.00"
-                                        onIonInput={(e) => setNewItemPrice(e.detail.value ?? '')}
-                                        aria-label="Price"
+                                        className="shop-detail-composer-input"
+                                        value={newItemText}
+                                        placeholder="What to buy?"
+                                        onIonInput={(e) => setNewItemText(e.detail.value ?? '')}
+                                        onKeyDown={handleAddKeyDown}
+                                        aria-label="Item name"
                                     />
+                                    <IonButton
+                                        className="shop-detail-composer-scan-btn"
+                                        onClick={handleScanClick}
+                                        disabled={isScanningNative}
+                                        aria-label="Scan barcode"
+                                    >
+                                        <IonIcon icon={scanOutline} style={{ fontSize: 24 }} />
+                                    </IonButton>
+                                    <IonButton
+                                        className="shop-detail-composer-add-btn"
+                                        onClick={handleAddItem}
+                                        disabled={!newItemText.trim()}
+                                        aria-label="Add item"
+                                    >
+                                        <IonIcon icon={addOutline} style={{ fontSize: 24 }} />
+                                    </IonButton>
                                 </div>
-                            </div>
-                        )}
-                    </IonCardContent>
-                </IonCard>
+                                <div className="shop-detail-composer-more-toggle" onClick={() => setShowMore((prev) => !prev)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMore((prev) => !prev); } }}>
+                                    <IonIcon icon={chevronDownOutline} className={`shop-detail-composer-chevron ${showMore ? 'is-open' : ''}`} />
+                                    <span className="shop-detail-composer-more-text">Add qty & price</span>
+                                </div>
+                                {showMore && (
+                                    <div className="shop-detail-composer-extras">
+                                        <div className="shop-qty-stepper">
+                                            <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyDec} disabled={newItemQty <= 1} aria-label="Decrease quantity">−</IonButton>
+                                            <span className="shop-qty-value">{newItemQty}</span>
+                                            <IonButton className="shop-qty-btn" fill="clear" onClick={handleQtyInc} disabled={newItemQty >= 999} aria-label="Increase quantity">+</IonButton>
+                                        </div>
+                                        <div className="shop-price-input-wrap">
+                                            <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
+                                            <IonInput
+                                                className="shop-price-input"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={newItemPrice}
+                                                placeholder="0.00"
+                                                onIonInput={(e) => setNewItemPrice(e.detail.value ?? '')}
+                                                aria-label="Price"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </IonCardContent>
+                        </IonCard>
+                    </>
+                )}
 
                 {items.length === 0 ? (
                     <div className="shop-detail-empty">
@@ -205,6 +238,57 @@ const ShoppingListDetail: React.FC = () => {
                             No items yet — add your first item above.
                         </p>
                     </div>
+                ) : storeMode ? (
+                    <>
+                        <IonList className="shop-detail-list" lines="none">
+                            {items.filter((i) => !i.isCompleted).map((item, idx) => (
+                                <ShoppingItem
+                                    key={item.id}
+                                    item={item}
+                                    index={idx}
+                                    storeMode
+                                    isEditing={false}
+                                    onToggle={() => toggleShoppingItem(listId, item.id)}
+                                    onStartEdit={() => {}}
+                                    onSave={() => {}}
+                                    onDelete={() => {}}
+                                    onCancel={() => {}}
+                                />
+                            ))}
+                        </IonList>
+                        {items.some((i) => i.isCompleted) && (
+                            <>
+                                <div
+                                    className="shop-detail-checked-toggle"
+                                    onClick={() => setShowChecked((prev) => !prev)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowChecked((prev) => !prev); } }}
+                                >
+                                    <IonIcon icon={showChecked ? chevronDownOutline : chevronUpOutline} className="shop-detail-checked-chevron" />
+                                    <span>Show checked ({items.filter((i) => i.isCompleted).length})</span>
+                                </div>
+                                {showChecked && (
+                                    <IonList className="shop-detail-list" lines="none">
+                                        {items.filter((i) => i.isCompleted).map((item, idx) => (
+                                            <ShoppingItem
+                                                key={item.id}
+                                                item={item}
+                                                index={idx}
+                                                storeMode
+                                                isEditing={false}
+                                                onToggle={() => toggleShoppingItem(listId, item.id)}
+                                                onStartEdit={() => {}}
+                                                onSave={() => {}}
+                                                onDelete={() => {}}
+                                                onCancel={() => {}}
+                                            />
+                                        ))}
+                                    </IonList>
+                                )}
+                            </>
+                        )}
+                    </>
                 ) : (
                     <IonList className="shop-detail-list" lines="none">
                         {items.map((item, idx) => (

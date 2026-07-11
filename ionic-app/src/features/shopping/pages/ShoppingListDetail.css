@@ -206,3 +206,38 @@
     margin: 0;
     line-height: 1.5;
 }
+
+/* ── Store mode ── */
+
+.shop-detail-store-mode {
+    --padding-top: 4px;
+}
+
+.shop-detail-store-mode .shop-detail-total-row,
+.shop-detail-store-mode .shop-detail-composer {
+    display: none;
+}
+
+.shop-detail-checked-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 14px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.shop-detail-checked-toggle:active {
+    opacity: 0.6;
+}
+
+.shop-detail-checked-chevron {
+    font-size: 16px;
+    color: var(--dotodo-muted);
+    transition: transform var(--dotodo-motion-fast);
+}

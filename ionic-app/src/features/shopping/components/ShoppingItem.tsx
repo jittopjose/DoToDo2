@@ -22,6 +22,7 @@ interface ShoppingItemProps {
     onDelete: () => void;
     onCancel: () => void;
     index?: number;
+    storeMode?: boolean;
 }
 
 export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
@@ -33,6 +34,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     onDelete,
     onCancel,
     index,
+    storeMode,
 }) => {
     const currency = useSettingsStore((state) => state.currency);
     const [editTitle, setEditTitle] = useState(item.title);
@@ -46,7 +48,9 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     }, [item.title, item.quantity, item.price]);
 
     const handleSummaryClick = useCallback(() => {
-        if (isEditing) {
+        if (storeMode) {
+            onToggle();
+        } else if (isEditing) {
             onCancel();
         } else {
             setEditTitle(item.title);
@@ -54,7 +58,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
             setEditPrice(item.price ? item.price.toFixed(2) : '');
             onStartEdit();
         }
-    }, [isEditing, item, onCancel, onStartEdit]);
+    }, [storeMode, isEditing, item, onCancel, onStartEdit, onToggle]);
 
     const handleSave = useCallback(() => {
         if (!editTitle.trim()) return;
@@ -84,7 +88,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
 
     return (
         <div
-            className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''}`}
+            className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''} ${storeMode ? 'shop-item-store-mode' : ''}`}
             style={{ '--item-index': index ?? 0 } as React.CSSProperties}
         >
             <IonItem
@@ -114,83 +118,87 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                         )}
                     </div>
                 </div>
-                <IonIcon
-                    icon={chevronDownOutline}
-                    className={`shop-item-chevron ${isEditing ? 'is-open' : ''}`}
-                />
+                {!storeMode && (
+                    <IonIcon
+                        icon={chevronDownOutline}
+                        className={`shop-item-chevron ${isEditing ? 'is-open' : ''}`}
+                    />
+                )}
             </IonItem>
 
-            <div className={`shop-item-editor-collapse ${isEditing ? 'is-open' : ''}`}>
-                <div className="shop-item-editor" onKeyDown={handleKeyDown}>
-                    <div className="shop-editor-field">
-                        <IonInput
-                            className="shop-editor-name"
-                            value={editTitle}
-                            onIonInput={(e) => setEditTitle(e.detail.value ?? '')}
-                            placeholder="Item name"
-                            aria-label="Item name"
-                        />
-                    </div>
-                    <div className="shop-editor-row">
-                        <div className="shop-editor-qty">
-                            <span className="shop-editor-label">Qty</span>
-                            <div className="shop-qty-stepper">
-                                <IonButton
-                                    className="shop-qty-btn"
-                                    fill="clear"
-                                    onClick={handleQtyDec}
-                                    disabled={editQty <= 1}
-                                    aria-label="Decrease quantity"
-                                >−</IonButton>
-                                <span className="shop-qty-value">{editQty}</span>
-                                <IonButton
-                                    className="shop-qty-btn"
-                                    fill="clear"
-                                    onClick={handleQtyInc}
-                                    disabled={editQty >= 999}
-                                    aria-label="Increase quantity"
-                                >+</IonButton>
+            {!storeMode && (
+                <div className={`shop-item-editor-collapse ${isEditing ? 'is-open' : ''}`}>
+                    <div className="shop-item-editor" onKeyDown={handleKeyDown}>
+                        <div className="shop-editor-field">
+                            <IonInput
+                                className="shop-editor-name"
+                                value={editTitle}
+                                onIonInput={(e) => setEditTitle(e.detail.value ?? '')}
+                                placeholder="Item name"
+                                aria-label="Item name"
+                            />
+                        </div>
+                        <div className="shop-editor-row">
+                            <div className="shop-editor-qty">
+                                <span className="shop-editor-label">Qty</span>
+                                <div className="shop-qty-stepper">
+                                    <IonButton
+                                        className="shop-qty-btn"
+                                        fill="clear"
+                                        onClick={handleQtyDec}
+                                        disabled={editQty <= 1}
+                                        aria-label="Decrease quantity"
+                                    >−</IonButton>
+                                    <span className="shop-qty-value">{editQty}</span>
+                                    <IonButton
+                                        className="shop-qty-btn"
+                                        fill="clear"
+                                        onClick={handleQtyInc}
+                                        disabled={editQty >= 999}
+                                        aria-label="Increase quantity"
+                                    >+</IonButton>
+                                </div>
+                            </div>
+                            <div className="shop-editor-price">
+                                <span className="shop-editor-label">Price</span>
+                                <div className="shop-price-input-wrap">
+                                    <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
+                                    <IonInput
+                                        className="shop-price-input"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={editPrice}
+                                        placeholder="0.00"
+                                        onIonInput={(e) => setEditPrice(e.detail.value ?? '')}
+                                        aria-label="Price"
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <div className="shop-editor-price">
-                            <span className="shop-editor-label">Price</span>
-                            <div className="shop-price-input-wrap">
-                                <span className="shop-price-currency">{getCurrencySymbol(currency)}</span>
-                                <IonInput
-                                    className="shop-price-input"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={editPrice}
-                                    placeholder="0.00"
-                                    onIonInput={(e) => setEditPrice(e.detail.value ?? '')}
-                                    aria-label="Price"
-                                />
-                            </div>
+                        <div className="shop-editor-actions">
+                            <IonButton
+                                className="shop-editor-save-btn"
+                                size="small"
+                                onClick={handleSave}
+                                disabled={!editTitle.trim()}
+                            >
+                                Save
+                            </IonButton>
+                            <IonButton
+                                className="shop-editor-delete-btn"
+                                size="small"
+                                fill="outline"
+                                color="danger"
+                                onClick={onDelete}
+                            >
+                                <IonIcon icon={trashOutline} slot="start" />
+                                Delete
+                            </IonButton>
                         </div>
-                    </div>
-                    <div className="shop-editor-actions">
-                        <IonButton
-                            className="shop-editor-save-btn"
-                            size="small"
-                            onClick={handleSave}
-                            disabled={!editTitle.trim()}
-                        >
-                            Save
-                        </IonButton>
-                        <IonButton
-                            className="shop-editor-delete-btn"
-                            size="small"
-                            fill="outline"
-                            color="danger"
-                            onClick={onDelete}
-                        >
-                            <IonIcon icon={trashOutline} slot="start" />
-                            Delete
-                        </IonButton>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 });
