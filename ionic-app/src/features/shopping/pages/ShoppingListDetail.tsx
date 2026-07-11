@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+    IonActionSheet,
     IonBackButton,
     IonButton,
     IonButtons,
@@ -15,7 +16,7 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, funnelOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -25,6 +26,8 @@ import { ShoppingItem } from '../components/ShoppingItem';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import './ShoppingListDetail.css';
+
+type SortMode = 'custom' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'checked-last' | 'checked-first';
 
 const ShoppingListDetail: React.FC = () => {
     const history = useHistory();
@@ -36,9 +39,12 @@ const ShoppingListDetail: React.FC = () => {
     const toggleShoppingItem = useDoTodoStore((state) => state.toggleShoppingItem);
     const updateShoppingItem = useDoTodoStore((state) => state.updateShoppingItem);
     const removeShoppingItem = useDoTodoStore((state) => state.removeShoppingItem);
+    const reorderShoppingItems = useDoTodoStore((state) => state.reorderShoppingItems);
     const archiveShoppingList = useDoTodoStore((state) => state.archiveShoppingList);
 
     const currency = useSettingsStore((state) => state.currency);
+    const [sortMode, setSortMode] = useState<SortMode>('custom');
+    const [sortOpen, setSortOpen] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [newItemText, setNewItemText] = useState('');
     const [newItemQty, setNewItemQty] = useState(1);
@@ -48,6 +54,10 @@ const ShoppingListDetail: React.FC = () => {
     const [isScanningNative, setIsScanningNative] = useState(false);
     const [storeMode, setStoreMode] = useState(false);
     const [showChecked, setShowChecked] = useState(false);
+    const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+    const [dragging, setDragging] = useState(false);
+    const dragFromRef = useRef<number | null>(null);
+    const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
     const handleToggleStoreMode = useCallback(() => {
@@ -55,6 +65,9 @@ const ShoppingListDetail: React.FC = () => {
             if (!prev) {
                 setShowChecked(false);
                 setEditingItemId(null);
+                setSortMode('checked-last');
+            } else {
+                setSortMode('custom');
             }
             return !prev;
         });
@@ -74,6 +87,83 @@ const ShoppingListDetail: React.FC = () => {
             wakeLockRef.current = null;
         };
     }, [storeMode]);
+
+    const sortedItems = useMemo(() => {
+        if (sortMode === 'custom') return items;
+        const sorted = [...items];
+        switch (sortMode) {
+            case 'name-asc':
+                sorted.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            case 'name-desc':
+                sorted.sort((a, b) => b.title.localeCompare(a.title));
+                break;
+            case 'price-asc':
+                sorted.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+                break;
+            case 'price-desc':
+                sorted.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
+                break;
+            case 'checked-last':
+                sorted.sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted));
+                break;
+            case 'checked-first':
+                sorted.sort((a, b) => Number(b.isCompleted) - Number(a.isCompleted));
+                break;
+        }
+        return sorted;
+    }, [items, sortMode]);
+
+    useEffect(() => {
+        dragListRef.current = sortedItems.map((i) => i.id);
+    }, [sortedItems]);
+
+    const handleDragHandlePointerDown = useCallback((e: React.PointerEvent, idx: number) => {
+        if (sortMode !== 'custom' || dragging) return;
+        e.preventDefault();
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        dragFromRef.current = idx;
+        setDragOverIdx(idx);
+        setDragging(true);
+    }, [sortMode, dragging]);
+
+    useEffect(() => {
+        if (!dragging) return;
+
+        const handleMove = (e: PointerEvent) => {
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if (!el) return;
+            const wrap = (el as HTMLElement).closest('[data-shop-item-index]');
+            if (!wrap) return;
+            const targetIdx = parseInt(wrap.getAttribute('data-shop-item-index')!, 10);
+            if (isNaN(targetIdx)) return;
+
+            const from = dragFromRef.current;
+            if (from === null || from === targetIdx) return;
+
+            const ids = dragListRef.current;
+            const newIds = [...ids];
+            const [moved] = newIds.splice(from, 1);
+            newIds.splice(targetIdx, 0, moved);
+            reorderShoppingItems(listId, newIds);
+            dragListRef.current = newIds;
+            dragFromRef.current = targetIdx;
+            setDragOverIdx(targetIdx);
+        };
+
+        const handleUp = () => {
+            setDragging(false);
+            setDragOverIdx(null);
+            dragFromRef.current = null;
+        };
+
+        document.addEventListener('pointermove', handleMove);
+        document.addEventListener('pointerup', handleUp);
+        return () => {
+            document.removeEventListener('pointermove', handleMove);
+            document.removeEventListener('pointerup', handleUp);
+        };
+    }, [dragging, listId, reorderShoppingItems]);
 
     const handleAddItem = useCallback(() => {
         const trimmed = newItemText.trim();
@@ -148,12 +238,33 @@ const ShoppingListDetail: React.FC = () => {
                         <IonButton onClick={handleToggleStoreMode} aria-label={storeMode ? 'Exit shopping mode' : 'Enter shopping mode'}>
                             <IonIcon icon={storeMode ? cart : cartOutline} />
                         </IonButton>
+                        {!storeMode && (
+                            <IonButton onClick={() => setSortOpen(true)} aria-label="Sort items" className={sortMode !== 'custom' ? 'shop-header-sort-active' : ''}>
+                                <IonIcon icon={funnelOutline} />
+                            </IonButton>
+                        )}
                         <IonButton onClick={handleArchive} aria-label={entry.isArchived ? 'Unarchive list' : 'Archive list'}>
                             <IonIcon icon={archiveOutline} />
                         </IonButton>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
+
+            <IonActionSheet
+                isOpen={sortOpen}
+                onDidDismiss={() => setSortOpen(false)}
+                header="Sort items"
+                buttons={[
+                    { text: sortMode === 'custom' ? '✓ Custom order' : 'Custom order', handler: () => { setSortMode('custom'); return false; } },
+                    { text: sortMode === 'name-asc' ? '✓ Name A–Z' : 'Name A–Z', handler: () => { setSortMode('name-asc'); return false; } },
+                    { text: sortMode === 'name-desc' ? '✓ Name Z–A' : 'Name Z–A', handler: () => { setSortMode('name-desc'); return false; } },
+                    { text: sortMode === 'price-asc' ? '✓ Price: Low to high' : 'Price: Low to high', handler: () => { setSortMode('price-asc'); return false; } },
+                    { text: sortMode === 'price-desc' ? '✓ Price: High to low' : 'Price: High to low', handler: () => { setSortMode('price-desc'); return false; } },
+                    { text: sortMode === 'checked-last' ? '✓ Unchecked first' : 'Unchecked first', handler: () => { setSortMode('checked-last'); return false; } },
+                    { text: sortMode === 'checked-first' ? '✓ Checked first' : 'Checked first', handler: () => { setSortMode('checked-first'); return false; } },
+                    { text: 'Cancel', role: 'cancel' },
+                ]}
+            />
 
             <IonContent className={`shop-detail-content ${storeMode ? 'shop-detail-store-mode' : ''}`}>
                 {!storeMode && (
@@ -257,7 +368,7 @@ const ShoppingListDetail: React.FC = () => {
                 ) : storeMode ? (
                     <>
                         <IonList className="shop-detail-list" lines="none">
-                            {items.filter((i) => !i.isCompleted).map((item, idx) => (
+                            {sortedItems.filter((i) => !i.isCompleted).map((item, idx) => (
                                 <ShoppingItem
                                     key={item.id}
                                     item={item}
@@ -272,7 +383,7 @@ const ShoppingListDetail: React.FC = () => {
                                 />
                             ))}
                         </IonList>
-                        {items.some((i) => i.isCompleted) && (
+                        {sortedItems.some((i) => i.isCompleted) && (
                             <>
                                 <div
                                     className="shop-detail-checked-toggle"
@@ -282,11 +393,11 @@ const ShoppingListDetail: React.FC = () => {
                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowChecked((prev) => !prev); } }}
                                 >
                                     <IonIcon icon={showChecked ? chevronDownOutline : chevronUpOutline} className="shop-detail-checked-chevron" />
-                                    <span>Show checked ({items.filter((i) => i.isCompleted).length})</span>
+                                    <span>Show checked ({sortedItems.filter((i) => i.isCompleted).length})</span>
                                 </div>
                                 {showChecked && (
                                     <IonList className="shop-detail-list" lines="none">
-                                        {items.filter((i) => i.isCompleted).map((item, idx) => (
+                                        {sortedItems.filter((i) => i.isCompleted).map((item, idx) => (
                                             <ShoppingItem
                                                 key={item.id}
                                                 item={item}
@@ -306,12 +417,14 @@ const ShoppingListDetail: React.FC = () => {
                         )}
                     </>
                 ) : (
-                    <IonList className="shop-detail-list" lines="none">
-                        {items.map((item, idx) => (
+                    <div className="shop-detail-reorder-list">
+                        {sortedItems.map((item, idx) => (
                             <ShoppingItem
                                 key={item.id}
                                 item={item}
                                 index={idx}
+                                showReorder={sortMode === 'custom'}
+                                dragOver={dragOverIdx === idx}
                                 isEditing={editingItemId === item.id}
                                 onToggle={() => toggleShoppingItem(listId, item.id)}
                                 onStartEdit={() => setEditingItemId(item.id)}
@@ -324,9 +437,14 @@ const ShoppingListDetail: React.FC = () => {
                                     setEditingItemId(null);
                                 }}
                                 onCancel={() => setEditingItemId(null)}
+                                onDragHandlePointerDown={
+                                    sortMode === 'custom'
+                                        ? (e) => handleDragHandlePointerDown(e, idx)
+                                        : undefined
+                                }
                             />
                         ))}
-                    </IonList>
+                    </div>
                 )}
 
                 {isScanningNative && (

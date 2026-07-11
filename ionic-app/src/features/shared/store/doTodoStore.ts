@@ -43,6 +43,7 @@ interface EntryState {
   toggleShoppingItem: (listId: string, itemId: string) => void;
   updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price'>>) => void;
   removeShoppingItem: (listId: string, itemId: string) => void;
+  reorderShoppingItems: (listId: string, itemIds: string[]) => void;
   archiveShoppingList: (listId: string) => void;
   setFilter: (filter: DoTodoFilter) => void;
   setTypeFilter: (typeFilter: DoTodo['itemType'] | 'all') => void;
@@ -331,6 +332,21 @@ export const useDoTodoStore = create<EntryState>()(
             ...entry,
             shoppingItems: entry.shoppingItems.filter((item) => item.id !== itemId),
           },
+        },
+      };
+    }),
+
+    reorderShoppingItems: (listId, itemIds) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry || !entry.shoppingItems) return state;
+      const items = entry.shoppingItems;
+      const reordered = itemIds
+        .map((id) => items.find((item) => item.id === id))
+        .filter((x): x is ShoppingItem => x !== undefined);
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: { ...entry, shoppingItems: reordered },
         },
       };
     }),

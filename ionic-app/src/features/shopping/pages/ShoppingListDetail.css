@@ -281,6 +281,16 @@
     flex-shrink: 0;
 }
 
+/* ── Sort ── */
+
+.shop-header-sort-active {
+    --color: var(--ion-color-tertiary);
+}
+
+.shop-item-reorder-slot {
+    margin-bottom: 6px;
+}
+
 /* ── Store mode ── */
 
 .shop-detail-store-mode {

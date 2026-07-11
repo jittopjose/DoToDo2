@@ -309,3 +309,25 @@
 .shop-item-store-mode .shop-item-summary:active {
     transform: scale(0.995);
 }
+
+/* ── Drag handle ── */
+
+.shop-item-drag-handle {
+    font-size: 20px;
+    color: var(--dotodo-muted);
+    margin: 0 4px 0 -4px;
+    touch-action: none;
+    cursor: grab;
+}
+
+.shop-item-drag-handle:active {
+    cursor: grabbing;
+}
+
+.shop-item-wrap.is-drag-source {
+    opacity: 0.85;
+}
+
+.shop-item-wrap.is-drag-over {
+    border-top: 2px solid var(--ion-color-tertiary);
+}

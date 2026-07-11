@@ -7,7 +7,7 @@ import {
     IonInput,
     IonItem,
 } from '@ionic/react';
-import { chevronDownOutline, trashOutline } from 'ionicons/icons';
+import { chevronDownOutline, reorderThreeOutline, trashOutline } from 'ionicons/icons';
 import type { ShoppingItem as ShoppingItemType } from '../../shared/types';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { getCurrencySymbol, formatPrice } from '../../shared/utils/formatPrice';
@@ -23,6 +23,9 @@ interface ShoppingItemProps {
     onCancel: () => void;
     index?: number;
     storeMode?: boolean;
+    showReorder?: boolean;
+    dragOver?: boolean;
+    onDragHandlePointerDown?: (e: React.PointerEvent) => void;
 }
 
 export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
@@ -35,6 +38,9 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     onCancel,
     index,
     storeMode,
+    showReorder,
+    dragOver,
+    onDragHandlePointerDown,
 }) => {
     const currency = useSettingsStore((state) => state.currency);
     const [editTitle, setEditTitle] = useState(item.title);
@@ -88,8 +94,9 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
 
     return (
         <div
-            className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''} ${storeMode ? 'shop-item-store-mode' : ''}`}
+            className={`shop-item-wrap ${item.isCompleted ? 'is-completed' : ''} ${isEditing ? 'is-editing' : ''} ${storeMode ? 'shop-item-store-mode' : ''} ${dragOver ? 'is-drag-over' : ''}`}
             style={{ '--item-index': index ?? 0 } as React.CSSProperties}
+            data-shop-item-index={index}
         >
             <IonItem
                 className="shop-item-summary"
@@ -99,6 +106,14 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                 onClick={handleSummaryClick}
                 aria-label={`${item.title}${item.quantity ? `, quantity ${item.quantity}` : ''}`}
             >
+                {showReorder && (
+                    <IonIcon
+                        icon={reorderThreeOutline}
+                        slot="start"
+                        className="shop-item-drag-handle"
+                        onPointerDown={onDragHandlePointerDown}
+                    />
+                )}
                 <IonCheckbox
                     slot="start"
                     checked={item.isCompleted}

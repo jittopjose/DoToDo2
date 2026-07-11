@@ -13,10 +13,11 @@ sorting, templates, recent products, and real-time sharing via Firebase.
 - System-preference dark mode only (no in-app toggle)
 - Shadow-only containers, `border-left` accent bar, `--border-radius: 0 12px 12px 0`
 - Per-type independent UI directories (`shared/`, `shopping/`, etc.)
+- Drag-reorder uses pointer events + `setPointerCapture` + `elementFromPoint` (not `IonReorderGroup` — the wrapper div structure with `overflow: hidden` and custom `border-radius` clips Ionic's reorder clone animation, and the dual `slot="start"` elements conflict)
 
 ---
 
-## Step 1 — Store Mode (Priority: HIGH)
+## Step 1 — Store Mode (Priority: HIGH) ✅ DONE
 
 **Goal**: One-tap "I'm shopping" mode with large tap targets, auto-check on tap,
 hide completed items, keep screen awake.
@@ -25,8 +26,8 @@ hide completed items, keep screen awake.
 
 | File | Change |
 |------|--------|
-| `ShoppingListDetail.tsx` | Add store-mode toggle button in header; branch rendering when active |
-| `ShoppingListDetail.css` | Add store-mode styles (larger rows, bigger checkboxes, bigger text) |
+| `ShoppingListDetail.tsx` | Add store-mode toggle button in header; branch rendering when active; outline pill CTA button ("Start/Continue shopping"); `IonFooter` with progress bar for exit |
+| `ShoppingListDetail.css` | Store-mode styles (larger rows, bigger checkboxes, bigger text); pill button outline styles; footer + progress bar styles |
 | `ShoppingItem.tsx` | Add `storeMode` prop: disable edit-on-tap, auto-check on tap, no expand/editor |
 | `ShoppingItem.css` | Store-mode variant styles (bigger fonts, more padding) |
 
@@ -35,7 +36,7 @@ hide completed items, keep screen awake.
 ```
 Normal view:
 ┌────────────────────────────────────────────┐
-│  ← Lists    Weekly Groceries    [🛒] [📦]  │ ← store mode toggle
+│  ← Lists    Weekly Groceries    [🛒] [📦]  │ ← store mode toggle (header)
 │                                            │
 │  🛒  TOTAL                     $34.50      │
 │  ✅ 3 of 6 items                           │
@@ -43,42 +44,50 @@ Normal view:
 │  ☐ Milk                       ×2    $3.99  │
 │  ☑ Eggs                       ×12   $5.99  │
 │  ...                                       │
+│                                            │
+│  ┌── 🛒  Start shopping ──────────────────┐│ ← tertiary outline pill, 16px
+│  └─────────────────────────────────────────┘│    "Continue shopping" if checked
+│                                             │    items exist
 
 Store mode:
 ┌────────────────────────────────────────────┐
-│  ← Lists    🛒 Shopping...       [📦] [✓]  │ ← "✓ N" count, exit
+│  ← Lists    🛒 5 items left      [🛒] [📦]  │ ← header: item count
 │                                            │
-│  ┌────────────────────────────────────────┐│
-│  │  ☐  Milk                         ×2   ││ ← bigger font, bigger tap
-│  │      $3.99                            ││
-│  ├────────────────────────────────────────┤│
-│  │  ☐  Bread                        ×1   ││
-│  │      $2.49                            ││
-│  ├────────────────────────────────────────┤│
-│  │  (no completed items shown)           ││ ← hidden by default
-│  └────────────────────────────────────────┘│
+│  ☐  Milk                         ×2        │
+│      $3.99                                 │
 │                                            │
-│  [Show checked (3)]                        │ ← collapsible at bottom
+│  ☐  Bread                        ×1        │
+│      $2.49                                 │
+│                                            │
+│  ↑ Show checked (3)                        │ ← collapsible
+│                                            │
+├────────────────────────────────────────────┤ ← border-top
+│  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░   (50%)      │ ← 4px tertiary progress bar
+│  🛒  3 of 6 items                [Exit]   │ ← IonFooter, 56px, 16px pad
 └────────────────────────────────────────────┘
 ```
 
 ### Behaviour
 
-- **Toggle**: Header icon button (`cartOutline` / `cart`), switches between modes
+- **Toggle**: Header icon button (`cartOutline` / `cart`) switches modes; also toggled by CTA pill button (entry) and Exit button in footer (exit)
+- **Entry CTA**: Outline tertiary pill button (`IonButton fill="outline"`) shown below composer when items exist & not in store mode. Label is "Start shopping" (none checked) or "Continue shopping" (≥1 checked), 16px horizontal padding
 - **Tap item**: Immediately toggles completion (no expand-to-edit) — single tap, done
-- **Hide completed**: Items with `isCompleted === true` are moved below a "Show checked (N)" row (collapsed by default)
-- **Screen idle**: `navigator.wakeLock.request('screen')` while store mode is active; release on exit
-- **Exit**: Tap store-mode icon again, or back button exits store mode (not the page)
+- **Hide completed**: Items with `isCompleted === true` moved below "Show checked (N)" row (collapsed by default)
+- **Screen idle**: `navigator.wakeLock.request('screen')` while active; release on exit
+- **Exit**: Footer "Exit" button, header cart icon, or back button — all exit mode
 - **Composer**: Hidden in store mode (you don't add items while shopping)
-- **Total card**: Hidden in store mode (replaced by the header count)
+- **Total card**: Hidden in store mode (replaced by footer progress bar + header count)
+- **Footer bar**: `IonFooter` pinned at page bottom outside `IonContent`; 4px tertiary progress bar at top (width = completion %), cart icon + "N of M items" label + outline Exit button below; 56px tall with 16px horizontal padding
 
 ### Acceptance criteria
 
-- Store-mode icon in header → toggles between normal and shopping view
+- Store-mode icon in header + entry pill + footer bar toggle store mode
 - Tapping an item in store mode immediately toggles completion (no inline edit)
 - Completed items hidden behind collapsible "Show checked" row
 - Screen stays on during shopping (wake lock)
-- Exit returns to normal view; composer hidden while shopping
+- Footer progress bar reflects checked/total ratio
+- "Start shopping" / "Continue shopping" label adapts dynamically
+- Exit footer pinned at bottom, visually aligned with content (16px padding)
 
 ---
 
@@ -193,7 +202,7 @@ const CATEGORY_MAP: Record<string, string> = {
 
 ---
 
-## Step 3 — Sort Items (Priority: HIGH)
+## Step 3 — Sort Items (Priority: HIGH) ✅ DONE
 
 **Goal**: Sort items by name, price, checked/unchecked, or custom drag-reorder.
 
@@ -201,9 +210,11 @@ const CATEGORY_MAP: Record<string, string> = {
 
 | File | Change |
 |------|--------|
-| `ShoppingListDetail.tsx` | Add sort control in header; pass sorted items to list; add drag-reorder on custom sort |
-| `ShoppingListDetail.css` | Sort button styles |
-| `src/features/shared/store/doTodoStore.ts` | Add `reorderShoppingItems` action |
+| `ShoppingListDetail.tsx` | Add sort control in header via `IonActionSheet`; pass sorted items to list via `useMemo`; add pointer-event-based drag-reorder on custom sort |
+| `ShoppingListDetail.css` | Sort button active state styles (`--color: var(--ion-color-tertiary)`) |
+| `ShoppingItem.tsx` | Accept `showReorder`, `dragOver`, `onDragHandlePointerDown` props; render drag handle icon with `touch-action: none` |
+| `ShoppingItem.css` | Drag handle styles (`.shop-item-drag-handle` with `cursor: grab`, `touch-action: none`); `.is-drag-over` highlight (tertiary `border-top`) |
+| `src/features/shared/store/doTodoStore.ts` | Add `reorderShoppingItems` action (accepts array of item IDs) |
 
 ### Sort modes
 
@@ -219,33 +230,55 @@ const CATEGORY_MAP: Record<string, string> = {
 
 ### Sort control
 
-A sort button in the header opens a popover or action sheet listing all sort modes.
-The active mode is shown with a checkmark.
+A funnel icon button in the header opens an `IonActionSheet` listing all 7 sort modes.
+The active mode is shown with a checkmark. When a non-custom mode is active, the
+funnel icon turns tertiary (teal) via `.shop-header-sort-active` CSS class.
 
 ### Store action
 
 ```ts
-reorderShoppingItems: (listId: string, fromIndex: number, toIndex: number) => void;
+reorderShoppingItems: (listId: string, itemIds: string[]) => void;
 ```
 
-This modifies the `shoppingItems` array in-place (splice + insert). It's only meaningful
-when sort mode is `custom` — other modes recompute order deterministically.
+Accepts a full array of item IDs in the desired order. The store rebuilds the
+`shoppingItems` array by mapping IDs back to item objects (with type-safe filtering).
+This was changed from the original `(fromIndex, toIndex)` signature to support
+live reorder during drag-over events.
+
+### Drag-reorder implementation (pointer events)
+
+`IonReorderGroup` was not viable — the `div.shop-item-wrap` wrapper with
+`overflow: hidden` and `border-radius` clips Ionic's reorder clone animation,
+and the dual `slot="start"` elements (handle + checkbox) compete for layout.
+Instead, a custom pointer-event system is used:
+
+1. **`onPointerDown` on drag handle** — calls `e.preventDefault()` + `setPointerCapture(e.pointerId)`. Capturing redirects all subsequent pointer events (move/up) to the handle even when the pointer leaves it.
+2. **`pointermove` on `document`** (via `useEffect` mount/unmount when `dragging` state is true) — uses `document.elementFromPoint(e.clientX, e.clientY)` to find what's under the pointer, then `el.closest('[data-shop-item-index]')` walks up to the wrapper whose `data-shop-item-index` attribute was set during render.
+3. **Live reorder** — each `pointermove` computes the new ID array, calls `reorderShoppingItems`, and updates `dragListRef.current` synchronously (avoiding stale-closure bugs from React's async render cycle).
+4. **`pointerup` cleanup** — sets `dragging` to `false`, unregisters document listeners via the `useEffect` cleanup.
+
+Key refs:
+- `dragFromRef` — tracks the current index of the dragged item (changes as items swap beneath it)
+- `dragListRef` — mirrors the current ID order, updated synchronously on each move
+- `dragOverIdx` (state) — drives the `.is-drag-over` CSS class (tertiary border-top indicator)
 
 ### Behaviour
 
 - Default sort mode: `custom` (insertion order, respects drag-reorder)
 - Changing sort mode re-renders items in sorted order
 - Items return to `custom` order when mode switches back (original insertion order preserved)
-- Drag-reorder is only active in `custom` mode (shows drag handles via `IonReorderGroup`)
-- In store mode, `checked-last` is auto-applied as the default
+- Drag-reorder is only active in `custom` mode (shows drag handle icon, enables pointer capture)
+- In store mode, `checked-last` is auto-applied on entry, reset to `custom` on exit
 - Sort state is local to the page (not persisted per list)
 
 ### Acceptance criteria
 
-- Sort button visible in header, tap shows sort mode picker
-- Items reorder by selected sort mode
-- Drag handles visible in `custom` mode, reorder persists through save
-- Store mode auto-sets `checked-last`
+- ✅ Sort button visible in header, tap shows sort mode picker with checkmark
+- ✅ Items reorder by selected sort mode via `useMemo` + `sortedItems`
+- ✅ Drag handles visible in `custom` mode, reorder persists through save
+- ✅ Store mode auto-sets `checked-last`
+- ✅ Drag-reorder works on both mouse and touch (pointer events, not HTML5 DnD)
+- ✅ Tapping item body still opens editing (drag only initiates from handle)
 
 ---
 
@@ -462,14 +495,14 @@ Owner can revoke → remove uid from sharedWith → onSnapshot unsubscribe remot
 ## Dependency Graph
 
 ```
-Step 1 (Store mode) — UI only, no data model changes
+Step 1 (Store mode) — UI only, no data model changes ✅ DONE
    └─ independent
 
 Step 2 (Categories) — requires category field on ShoppingItem
    └─ composes with Step 1 (categories visible in store mode)
    └─ composes with Step 3 (categories + sort work together)
 
-Step 3 (Sort) — requires reorderShoppingItems action
+Step 3 (Sort) — requires reorderShoppingItems action ✅ DONE
    └─ Step 1 auto-sets checked-last in store mode
 
 Step 4 (Templates) — requires isTemplate/templateId/recurrence on DoTodo
@@ -489,7 +522,10 @@ Step 6 (Sharing) — Firebase, entirely independent data flow
 
 ```
 1 → 3 → 2 → 5 → 4 → 6
+  ✅    ✅
 ```
+
+Progress: Step 1 (Store mode) and Step 3 (Sort) are complete. Next up: Step 2 (Categories).
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
@@ -562,5 +598,4 @@ Phase 1 conventions (see `phase1-shopping.md` appendix). Key reminders:
 - Cards use `box-shadow` only, `border-left` accent, `--border-radius: 0 12px 12px 0`
 - Composer matches TodoInput pattern (grid layout, pill buttons, 10px 14px padding)
 - All prices formatted via `formatPrice()` with settings currency
-- Prefer Ionic components (IonButton, IonChip, IonPopover, IonModal, IonReorderGroup)
-  over custom CSS
+- Prefer Ionic components (IonButton, IonChip, IonPopover, IonModal) over custom CSS — however, `IonReorderGroup` is not used for drag-reorder (pointer-event custom implementation instead)
