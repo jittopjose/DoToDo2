@@ -8,14 +8,6 @@
     margin-bottom: 24px;
 }
 
-.shop-overview-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    color: var(--dotodo-text);
-    margin: 0 0 2px;
-}
-
 .shop-overview-subtitle {
     font-size: 13px;
     font-weight: 600;

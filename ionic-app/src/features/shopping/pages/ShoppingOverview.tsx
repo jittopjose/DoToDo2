@@ -1,18 +1,23 @@
 import React, { useCallback, useState } from 'react';
 import {
+    IonBackButton,
     IonBadge,
     IonButton,
+    IonButtons,
     IonCard,
     IonCardContent,
     IonChip,
     IonCol,
     IonContent,
     IonGrid,
+    IonHeader,
     IonIcon,
     IonInput,
     IonItem,
     IonPage,
     IonRow,
+    IonTitle,
+    IonToolbar,
 } from '@ionic/react';
 import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -82,9 +87,16 @@ const ShoppingOverview: React.FC = () => {
 
     return (
         <IonPage>
+            <IonHeader>
+                <IonToolbar>
+                    <IonButtons slot="start">
+                        <IonBackButton defaultHref="/list/all-lists" text="Home" />
+                    </IonButtons>
+                    <IonTitle>Shopping Lists</IonTitle>
+                </IonToolbar>
+            </IonHeader>
             <IonContent className="shop-overview-content">
                 <div className="shop-overview-header">
-                    <h1 className="shop-overview-title">Shopping Lists</h1>
                     <p className="shop-overview-subtitle">
                         {activeLists.length} active list{activeLists.length !== 1 ? 's' : ''}
                     </p>
