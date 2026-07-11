@@ -11,43 +11,25 @@ import {
     IonHeader,
     IonIcon,
     IonInput,
-    IonList,
     IonPage,
     IonSelect,
     IonSelectOption,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cafeOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronForwardOutline, chevronUpOutline, eggOutline, ellipsisHorizontalOutline, fishOutline, funnelOutline, homeOutline, layersOutline, leafOutline, pizzaOutline, scanOutline, snowOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, funnelOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
 import { ShoppingItem } from '../components/ShoppingItem';
-import { DEFAULT_CATEGORIES, getCategory } from '../types';
-import type { ShoppingCategory } from '../types';
+import { DEFAULT_CATEGORIES } from '../types';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import './ShoppingListDetail.css';
 
 type SortMode = 'custom' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'checked-last' | 'checked-first';
-
-const CATEGORY_ICONS: Record<string, string> = {
-    produce: leafOutline,
-    dairy: eggOutline,
-    meat: fishOutline,
-    bakery: pizzaOutline,
-    frozen: snowOutline,
-    beverages: cafeOutline,
-    pantry: layersOutline,
-    household: homeOutline,
-    other: ellipsisHorizontalOutline,
-};
-
-function getCategoryIcon(key: string): string {
-    return CATEGORY_ICONS[key] ?? ellipsisHorizontalOutline;
-}
 
 const ShoppingListDetail: React.FC = () => {
     const history = useHistory();
@@ -77,7 +59,6 @@ const ShoppingListDetail: React.FC = () => {
     const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
     const [dragging, setDragging] = useState(false);
     const [newItemCategory, setNewItemCategory] = useState<string>('');
-    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -151,15 +132,6 @@ const ShoppingListDetail: React.FC = () => {
             .filter((c) => groups[c.key]?.length > 0)
             .map((c) => ({ key: c.key, category: c, items: groups[c.key] }));
     }, [sortedItems]);
-
-    const toggleCategory = useCallback((key: string) => {
-        setCollapsedCategories((prev) => {
-            const next = new Set(prev);
-            if (next.has(key)) next.delete(key);
-            else next.add(key);
-            return next;
-        });
-    }, []);
 
     const handleDragHandlePointerDown = useCallback((e: React.PointerEvent, idx: number) => {
         if (sortMode !== 'custom' || dragging) return;
@@ -427,22 +399,26 @@ const ShoppingListDetail: React.FC = () => {
                     </div>
                 ) : storeMode ? (
                     <>
-                        <IonList className="shop-detail-list" lines="none">
-                            {sortedItems.filter((i) => !i.isCompleted).map((item, idx) => (
-                                <ShoppingItem
-                                    key={item.id}
-                                    item={item}
-                                    index={idx}
-                                    storeMode
-                                    isEditing={false}
-                                    onToggle={() => toggleShoppingItem(listId, item.id)}
-                                    onStartEdit={() => {}}
-                                    onSave={() => {}}
-                                    onDelete={() => {}}
-                                    onCancel={() => {}}
-                                />
-                            ))}
-                        </IonList>
+                        {groupedItems.filter((g) => g.items.some((i) => !i.isCompleted)).map((group) => (
+                            <React.Fragment key={group.key}>
+                                <div className="shop-category-minimal-header">
+                                    <span className="shop-category-minimal-label">{group.category.label}</span>
+                                </div>
+                                {group.items.filter((i) => !i.isCompleted).map((item) => (
+                                    <ShoppingItem
+                                        key={item.id}
+                                        item={item}
+                                        storeMode
+                                        isEditing={false}
+                                        onToggle={() => toggleShoppingItem(listId, item.id)}
+                                        onStartEdit={() => {}}
+                                        onSave={() => {}}
+                                        onDelete={() => {}}
+                                        onCancel={() => {}}
+                                    />
+                                ))}
+                            </React.Fragment>
+                        ))}
                         {sortedItems.some((i) => i.isCompleted) && (
                             <>
                                 <div
@@ -456,36 +432,44 @@ const ShoppingListDetail: React.FC = () => {
                                     <span>Show checked ({sortedItems.filter((i) => i.isCompleted).length})</span>
                                 </div>
                                 {showChecked && (
-                                    <IonList className="shop-detail-list" lines="none">
-                                        {sortedItems.filter((i) => i.isCompleted).map((item, idx) => (
-                                            <ShoppingItem
-                                                key={item.id}
-                                                item={item}
-                                                index={idx}
-                                                storeMode
-                                                isEditing={false}
-                                                onToggle={() => toggleShoppingItem(listId, item.id)}
-                                                onStartEdit={() => {}}
-                                                onSave={() => {}}
-                                                onDelete={() => {}}
-                                                onCancel={() => {}}
-                                            />
+                                    <>
+                                        {groupedItems.filter((g) => g.items.some((i) => i.isCompleted)).map((group) => (
+                                            <React.Fragment key={group.key}>
+                                                <div className="shop-category-minimal-header">
+                                                    <span className="shop-category-minimal-label">{group.category.label}</span>
+                                                </div>
+                                                {group.items.filter((i) => i.isCompleted).map((item) => (
+                                                    <ShoppingItem
+                                                        key={item.id}
+                                                        item={item}
+                                                        storeMode
+                                                        isEditing={false}
+                                                        onToggle={() => toggleShoppingItem(listId, item.id)}
+                                                        onStartEdit={() => {}}
+                                                        onSave={() => {}}
+                                                        onDelete={() => {}}
+                                                        onCancel={() => {}}
+                                                    />
+                                                ))}
+                                            </React.Fragment>
                                         ))}
-                                    </IonList>
+                                    </>
                                 )}
                             </>
                         )}
                     </>
                 ) : sortMode === 'custom' ? (
-                    <div className="shop-detail-reorder-list">
+                    <div className="shop-detail-list">
                         {sortedItems.map((item, idx) => (
                             <ShoppingItem
                                 key={item.id}
                                 item={item}
                                 index={idx}
                                 showReorder
-                                dragOver={dragOverIdx === idx}
+                                showCategory
                                 isEditing={editingItemId === item.id}
+                                dragOver={dragOverIdx === idx}
+                                onDragHandlePointerDown={(e) => handleDragHandlePointerDown(e, idx)}
                                 onToggle={() => toggleShoppingItem(listId, item.id)}
                                 onStartEdit={() => setEditingItemId(item.id)}
                                 onSave={(updates) => {
@@ -497,53 +481,35 @@ const ShoppingListDetail: React.FC = () => {
                                     setEditingItemId(null);
                                 }}
                                 onCancel={() => setEditingItemId(null)}
-                                onDragHandlePointerDown={(e) => handleDragHandlePointerDown(e, idx)}
                             />
                         ))}
                     </div>
                 ) : (
                     <>
                         {groupedItems.map((group) => (
-                            <div key={group.key} className="shop-category-group">
-                                <div
-                                    className="shop-category-header"
-                                    onClick={() => toggleCategory(group.key)}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategory(group.key); } }}
-                                >
-                                    <IonIcon icon={getCategoryIcon(group.key)} className="shop-category-icon" />
-                                    <span className="shop-category-label">{group.category.label}</span>
-                                    <span className="shop-category-count">{group.items.length}</span>
-                                    <IonIcon
-                                        icon={collapsedCategories.has(group.key) ? chevronForwardOutline : chevronDownOutline}
-                                        className="shop-category-chevron"
-                                    />
+                            <React.Fragment key={group.key}>
+                                <div className="shop-category-minimal-header">
+                                    <span className="shop-category-minimal-label">{group.category.label}</span>
                                 </div>
-                                {!collapsedCategories.has(group.key) && (
-                                    <div className="shop-category-items">
-                                        {group.items.map((item, idx) => (
-                                            <ShoppingItem
-                                                key={item.id}
-                                                item={item}
-                                                index={idx}
-                                                isEditing={editingItemId === item.id}
-                                                onToggle={() => toggleShoppingItem(listId, item.id)}
-                                                onStartEdit={() => setEditingItemId(item.id)}
-                                                onSave={(updates) => {
-                                                    updateShoppingItem(listId, item.id, updates);
-                                                    setEditingItemId(null);
-                                                }}
-                                                onDelete={() => {
-                                                    removeShoppingItem(listId, item.id);
-                                                    setEditingItemId(null);
-                                                }}
-                                                onCancel={() => setEditingItemId(null)}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                {group.items.map((item) => (
+                                    <ShoppingItem
+                                        key={item.id}
+                                        item={item}
+                                        isEditing={editingItemId === item.id}
+                                        onToggle={() => toggleShoppingItem(listId, item.id)}
+                                        onStartEdit={() => setEditingItemId(item.id)}
+                                        onSave={(updates) => {
+                                            updateShoppingItem(listId, item.id, updates);
+                                            setEditingItemId(null);
+                                        }}
+                                        onDelete={() => {
+                                            removeShoppingItem(listId, item.id);
+                                            setEditingItemId(null);
+                                        }}
+                                        onCancel={() => setEditingItemId(null)}
+                                    />
+                                ))}
+                            </React.Fragment>
                         ))}
                     </>
                 )}

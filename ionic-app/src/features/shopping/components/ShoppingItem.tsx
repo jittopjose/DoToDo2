@@ -13,7 +13,7 @@ import { chevronDownOutline, reorderThreeOutline, trashOutline } from 'ionicons/
 import type { ShoppingItem as ShoppingItemType } from '../../shared/types';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { getCurrencySymbol, formatPrice } from '../../shared/utils/formatPrice';
-import { DEFAULT_CATEGORIES } from '../types';
+import { DEFAULT_CATEGORIES, getCategory } from '../types';
 import './ShoppingItem.css';
 
 interface ShoppingItemProps {
@@ -27,6 +27,7 @@ interface ShoppingItemProps {
     index?: number;
     storeMode?: boolean;
     showReorder?: boolean;
+    showCategory?: boolean;
     dragOver?: boolean;
     onDragHandlePointerDown?: (e: React.PointerEvent) => void;
 }
@@ -42,6 +43,7 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
     index,
     storeMode,
     showReorder,
+    showCategory,
     dragOver,
     onDragHandlePointerDown,
 }) => {
@@ -131,6 +133,14 @@ export const ShoppingItem: React.FC<ShoppingItemProps> = memo(({
                 <div className="shop-item-body">
                     <span className="shop-item-name">{item.title}</span>
                     <div className="shop-item-meta">
+                        {showCategory && item.category && (() => {
+                            const cat = getCategory(item.category);
+                            return (
+                                <IonChip className="shop-item-category-chip">
+                                    {cat.label}
+                                </IonChip>
+                            );
+                        })()}
                         {item.quantity && item.quantity > 0 && (
                             <IonChip className="shop-item-qty">×{item.quantity}</IonChip>
                         )}
