@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { setZXingModuleOverrides } from 'barcode-detector/pure';
+import { prepareZXingModule } from 'barcode-detector/pure';
 
 export interface ProductInfo {
   barcode: string;
@@ -9,8 +9,10 @@ export interface ProductInfo {
   quantity: string | null;
 }
 
-setZXingModuleOverrides({
-  locateFile: (path: string) => `wasm/${path}`,
+prepareZXingModule({
+  overrides: { locateFile: (path: string) => `wasm/${path}` },
+  equalityFn: Object.is,
+  fireImmediately: false,
 });
 
 export async function scanBarcode(): Promise<string | null> {

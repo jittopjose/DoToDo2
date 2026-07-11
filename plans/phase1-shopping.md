@@ -357,47 +357,66 @@ Each card shows:
 
 ---
 
-## Step 5 — Barcode Scanning (Priority: MEDIUM) ⏳ NOT STARTED
+## Step 5 — Barcode Scanning (Priority: MEDIUM) ✅ DONE
 
 **Goal**: Camera-based barcode scanning with Open Food Facts lookup.
 
-### Files to create
+### Files created
 
 | File | Purpose |
 |------|---------|
-| `src/features/shopping/components/ScannerOverlay.tsx` | Full-screen camera preview in IonModal |
+| `src/features/shopping/components/ScannerOverlay.tsx` | Full-screen camera preview in IonModal (web path) |
 | `src/features/shopping/components/ScannerOverlay.css` | Overlay styles |
-| `src/features/shopping/services/barcode.service.ts` | @zxing/library wrapper + Open Food Facts API |
+| `src/features/shopping/services/barcode.service.ts` | Dual-path scanner: Capacitor native + web WASM fallback |
 
-### Files to modify
+### Files modified
 
 | File | Change |
 |------|--------|
-| `ShoppingListDetail.tsx` | Add barcode button beside add-input |
-| `dotodo2.apparmor` | Add `"camera"` policy group (currently empty) |
-| `package.json` | Add `@zxing/library` |
+| `ShoppingListDetail.tsx` | Add scan button beside add-input |
+| `dotodo2.apparmor` | Add `"camera"` policy group |
+| `qml/Main.qml` | Add `onFeaturePermissionRequested` handler for camera |
+| `qml/qml.qrc` | Add `wasm/zxing_reader.wasm` under `/web` prefix |
+| `capacitor.config.ts` | Created for Android platform |
+| `ionic-app/.gitignore` | Add `/android/` |
 
-### Architecture
+### Architecture (dual-path)
 
 ```
 User taps 📷
-  → ScannerOverlay opens (IonModal)
-  → navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-  → @zxing BrowserMultiFormatReader decodes in real-time
-  → On decode success:
-      → GET https://world.openfoodfacts.org/api/v2/product/{barcode}.json
-      → Extract product_name, categories_tags, image_url
-      → Close overlay, pre-fill input fields (name + category)
-  → Manual entry fallback always visible
-  → If getUserMedia fails → show "Camera not available"
+  ├─ Capacitor.isNativePlatform() === true
+  │   → @capacitor-mlkit/barcode-scanning native scan
+  │   → openFoodFacts lookup by barcode
+  │   → pre-fill name, close scanner
+  │
+  └─ Capacitor.isNativePlatform() === false (web/Qt)
+      → ScannerOverlay opens (IonModal)
+      → navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      → barcode-detector/pure + ZXing WASM decodes frames at 640×480 (downsampled)
+      → On decode success:
+          → GET https://world.openfoodfacts.org/api/v2/product/{barcode}.json
+          → Extract product_name
+          → Close overlay, pre-fill input name
+      → If getUserMedia fails → toast "Camera not available"
 ```
 
-### Acceptance criteria
+### Refinements vs plan
 
-- Barcode button → opens camera overlay
-- Scan real barcode → auto-fills name
-- Manual barcode entry available
-- Graceful camera permission denial
+- **Native (Android)** uses `@capacitor-mlkit/barcode-scanning` (not @zxing/library), via `Capacitor.isNativePlatform()` check
+- **Web/Qt** uses `barcode-detector/pure` + ZXing WASM (not @zxing BrowserMultiFormatReader) for WebEngine compatibility
+- ZXing WASM (`zxing_reader.wasm`) committed to `public/wasm/` with `locateFile: wasm/` relative path (works on `qrc:`, `file://`, and HTTP dev server)
+- Qt WebEngine requires `onFeaturePermissionRequested` in Main.qml + AppArmor `"camera"` policy
+- Scan frames downsampled to 640×480 with center-crop (avoids orientation distortion), 200ms detection interval, 1280×720 camera hint
+- Each scan adds quantity 1 (package-size parsing removed after "500 g" inflated item count to 500)
+- Camera permission fallback: toast message (no in-page button for denial)
+- Capacitor 8.x; Android platform requires Node 22 via `nvm use 22`
+
+### Acceptance criteria ✅
+
+- Barcode button → scan via native ML Kit (Android) or camera overlay (web/Qt)
+- Scan real barcode → auto-fills name from Open Food Facts
+- Each scan adds exactly 1 item (no quantity parsing from package size)
+- Graceful camera permission denial → toast
 
 ---
 
@@ -462,6 +481,8 @@ src/features/shared/
 
 src/features/shopping/
 ├── components/
+│   ├── ScannerOverlay.tsx              ← NEW: web camera scanner modal
+│   ├── ScannerOverlay.css
 │   ├── ShoppingItem.tsx                ← rewritten with inline edit
 │   └── ShoppingItem.css
 ├── pages/
@@ -469,7 +490,8 @@ src/features/shopping/
 │   ├── ShoppingListDetail.css
 │   ├── ShoppingOverview.tsx            ← new
 │   └── ShoppingOverview.css
-└── (barcode/ and sharing/ — not yet created)
+└── services/
+    └── barcode.service.ts              ← NEW: dual-path scanning
 
 src/pages/
 └── SettingsPage.tsx                    ← extended with currency IonSelect
@@ -492,8 +514,8 @@ Step 1 (data model + store)
        └─ Step 3 (ShoppingListDetail)
             ├─ Step 3a (currency setting) ← added during implementation
             └─ Step 4 (ShoppingOverview)
-                 └─ Step 5 (barcode) ← not started
-                      └─ Step 6 (Firebase sharing) ← not started
+                 └─ Step 5 (barcode) ← done
+                      └─ Step 6 (Firebase sharing) ← deferred
 ```
 
 ---
@@ -502,8 +524,11 @@ Step 1 (data model + store)
 
 Status | Package | Step
 -------|---------|------
-❌ Not added | `@zxing/library` | Step 5
 ❌ Not added | `firebase` | Step 6
+✅ Added | `@capacitor-mlkit/barcode-scanning` | Step 5
+✅ Added | `@capacitor/camera` | Step 5
+✅ Added | `@capacitor/filesystem` | Step 5
+✅ Added (vendor) | `barcode-detector/pure` + ZXing WASM | Step 5 (web fallback)
 
 ---
 
