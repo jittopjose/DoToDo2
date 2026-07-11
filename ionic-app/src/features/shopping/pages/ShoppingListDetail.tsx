@@ -6,6 +6,7 @@ import {
     IonCard,
     IonCardContent,
     IonContent,
+    IonFooter,
     IonHeader,
     IonIcon,
     IonInput,
@@ -50,12 +51,14 @@ const ShoppingListDetail: React.FC = () => {
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
     const handleToggleStoreMode = useCallback(() => {
-        setStoreMode((prev) => !prev);
-        if (!storeMode) {
-            setShowChecked(false);
-            setEditingItemId(null);
-        }
-    }, [storeMode]);
+        setStoreMode((prev) => {
+            if (!prev) {
+                setShowChecked(false);
+                setEditingItemId(null);
+            }
+            return !prev;
+        });
+    }, []);
 
     useEffect(() => {
         if (storeMode) {
@@ -232,6 +235,19 @@ const ShoppingListDetail: React.FC = () => {
                     </>
                 )}
 
+                {!storeMode && items.length > 0 && (
+                    <IonButton
+                        className="shop-detail-start-btn"
+                        expand="block"
+                        fill="outline"
+                        onClick={handleToggleStoreMode}
+                        aria-label="Start shopping"
+                    >
+                        <IonIcon icon={cartOutline} slot="start" />
+                        {items.some((i) => i.isCompleted) ? 'Continue shopping' : 'Start shopping'}
+                    </IonButton>
+                )}
+
                 {items.length === 0 ? (
                     <div className="shop-detail-empty">
                         <p className="shop-detail-empty-text">
@@ -328,6 +344,26 @@ const ShoppingListDetail: React.FC = () => {
                     onDismiss={() => setScannerOpen(false)}
                 />
             </IonContent>
+
+            {storeMode && (
+                <IonFooter className="shop-detail-footer">
+                    <IonToolbar className="shop-detail-footer-toolbar">
+                        <div className="shop-detail-footer-body">
+                            <IonIcon icon={cart} className="shop-detail-footer-icon" />
+                            <div className="shop-detail-footer-text">
+                                <span className="shop-detail-footer-title">Shopping mode</span>
+                                <span className="shop-detail-footer-sublabel">
+                                    <IonIcon icon={checkmarkCircleOutline} style={{ verticalAlign: 'middle', marginRight: 3, fontSize: 11 }} />
+                                    {items.filter((i) => i.isCompleted).length} of {items.length} checked
+                                </span>
+                            </div>
+                        </div>
+                        <IonButton className="shop-detail-footer-exit-btn" size="small" fill="outline" onClick={handleToggleStoreMode}>
+                            Exit
+                        </IonButton>
+                    </IonToolbar>
+                </IonFooter>
+            )}
         </IonPage>
     );
 };

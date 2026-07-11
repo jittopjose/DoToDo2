@@ -207,6 +207,86 @@
     line-height: 1.5;
 }
 
+/* ── Start shopping pill button ── */
+
+.shop-detail-start-btn {
+    --border-radius: 999px;
+    --border-color: var(--ion-color-tertiary);
+    --border-width: 2px;
+    --color: var(--ion-color-tertiary);
+    --background: transparent;
+    --background-activated: rgba(var(--ion-color-tertiary-rgb), 0.06);
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    min-height: 50px;
+}
+
+.shop-detail-start-btn:active {
+    transform: scale(0.995);
+}
+
+/* ── Shopping mode footer ── */
+
+.shop-detail-footer {
+    --background: var(--dotodo-card);
+    border-top: 1px solid var(--dotodo-card-border);
+}
+
+.shop-detail-footer-toolbar {
+    --background: var(--dotodo-card);
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --min-height: 52px;
+}
+
+.shop-detail-footer-body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.shop-detail-footer-icon {
+    font-size: 20px;
+    color: var(--ion-color-tertiary);
+    flex-shrink: 0;
+}
+
+.shop-detail-footer-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.3;
+}
+
+.shop-detail-footer-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--dotodo-text);
+}
+
+.shop-detail-footer-sublabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dotodo-muted);
+}
+
+.shop-detail-footer-exit-btn {
+    --border-color: var(--dotodo-card-border);
+    --color: var(--dotodo-muted);
+    --border-radius: 8px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 32px;
+    flex-shrink: 0;
+}
+
 /* ── Store mode ── */
 
 .shop-detail-store-mode {
