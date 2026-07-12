@@ -361,3 +361,27 @@
     color: var(--dotodo-muted);
     transition: transform var(--dotodo-motion-fast);
 }
+
+/* ── Recent products chip row ── */
+
+.shop-recent-row {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 0 4px 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.shop-recent-row::-webkit-scrollbar {
+    display: none;
+}
+
+.shop-recent-chip {
+    font-size: 12px;
+    font-weight: 600;
+    --background: var(--dotodo-surface-strong);
+    --color: var(--dotodo-text);
+    flex-shrink: 0;
+    cursor: pointer;
+}

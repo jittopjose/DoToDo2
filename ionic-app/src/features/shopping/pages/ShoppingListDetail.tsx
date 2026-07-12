@@ -6,6 +6,7 @@ import {
     IonButtons,
     IonCard,
     IonCardContent,
+    IonChip,
     IonContent,
     IonFooter,
     IonHeader,
@@ -27,6 +28,7 @@ import { ShoppingItem } from '../components/ShoppingItem';
 import { DEFAULT_CATEGORIES } from '../types';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
+import { useRecentProductsStore } from '../store/recentProductsStore';
 import './ShoppingListDetail.css';
 
 type SortMode = 'custom' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'checked-last' | 'checked-first';
@@ -59,6 +61,10 @@ const ShoppingListDetail: React.FC = () => {
     const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
     const [dragging, setDragging] = useState(false);
     const [newItemCategory, setNewItemCategory] = useState<string>('');
+    const [inputFocused, setInputFocused] = useState(false);
+    const recentProducts = useRecentProductsStore((s) => s.products);
+    const recordUsage = useRecentProductsStore((s) => s.recordUsage);
+    const showRecents = inputFocused && newItemText === '' && recentProducts.length > 0;
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -190,10 +196,11 @@ const ShoppingListDetail: React.FC = () => {
             showMore && newItemPrice ? parseFloat(newItemPrice) : undefined,
             newItemCategory || undefined,
         );
+        recordUsage(trimmed);
         setNewItemText('');
         setNewItemQty(1);
         setNewItemPrice('');
-    }, [newItemText, newItemQty, newItemPrice, newItemCategory, showMore, listId, addShoppingItem]);
+    }, [newItemText, newItemQty, newItemPrice, newItemCategory, showMore, listId, addShoppingItem, recordUsage]);
 
     const handleAddKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -218,11 +225,15 @@ const ShoppingListDetail: React.FC = () => {
         setIsScanningNative(false);
         if (!barcode) return;
         const product = await lookupProduct(barcode);
-        setNewItemText(product?.productName ?? barcode);
+        const name = product?.productName ?? barcode;
+        setNewItemText(name);
+        if (product?.productName) {
+            recordUsage(product.productName);
+        }
         if (product?.category) {
             setNewItemCategory(product.category);
         }
-    }, []);
+    }, [recordUsage]);
 
     const handleScanClick = useCallback(async () => {
         if (isNativeBarcodeScanAvailable()) {
@@ -314,6 +325,8 @@ const ShoppingListDetail: React.FC = () => {
                                         value={newItemText}
                                         placeholder="What to buy?"
                                         onIonInput={(e) => setNewItemText(e.detail.value ?? '')}
+                                        onIonFocus={() => setInputFocused(true)}
+                                        onIonBlur={() => setInputFocused(false)}
                                         onKeyDown={handleAddKeyDown}
                                         aria-label="Item name"
                                     />
@@ -375,6 +388,20 @@ const ShoppingListDetail: React.FC = () => {
                                 )}
                             </IonCardContent>
                         </IonCard>
+
+                        {showRecents && (
+                            <div className="shop-recent-row">
+                                {recentProducts.map((p) => (
+                                    <IonChip
+                                        key={p.title}
+                                        className="shop-recent-chip"
+                                        onClick={() => setNewItemText(p.title)}
+                                    >
+                                        {p.title}
+                                    </IonChip>
+                                ))}
+                            </div>
+                        )}
                     </>
                 )}
 
