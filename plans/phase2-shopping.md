@@ -348,10 +348,10 @@ by checking `isTemplate === true`.
 
 ---
 
-## Step 5 — Recent Products / Quick-Add from History (Priority: MEDIUM)
+## Step 5 — Recent Products / Quick-Add from History (Priority: MEDIUM) ✅ DONE
 
-**Goal**: Show the last 10–15 scanned/added products as quick-add chips when the
-composer input is focused and empty.
+**Goal**: Show the last 15 scanned/added products as quick-add chips that filter as
+the user types. Tapping a chip fills the input.
 
 ### Files to create
 
@@ -363,8 +363,8 @@ composer input is focused and empty.
 
 | File | Change |
 |------|--------|
-| `ShoppingListDetail.tsx` | Add recent-products chip row above/below composer when input is empty and focused |
-| `ShoppingListDetail.css` | Recent-products chip row styles |
+| `ShoppingListDetail.tsx` | Add recent-products chip row below composer; filter chips by typed text via `useMemo`; call `recordUsage` after `addShoppingItem` and barcode scan |
+| `ShoppingListDetail.css` | Recent-products chip row styles (`.shop-recent-row`, `.shop-recent-chip`) |
 
 ### RecentProduct type
 
@@ -394,17 +394,21 @@ interface RecentProductsState {
 - Max 15 items; evicts least-recently-used on overflow
 - Duplicates increment `useCount` and update `lastUsed`
 - Chips sorted by `lastUsed` descending
-- Tapping a chip fills the composer input with the product name
-- Only shown when: composer input is focused AND empty AND recent products exist
-- Add callback: `ShoppingListDetail` calls `recordUsage(item.title)` after `addShoppingItem` succeeds
+- Tapping a chip fills the composer input (user presses Enter or + to confirm — does NOT auto-submit)
+- **Chips filter as user types**: when input is focused, chips narrow to case-insensitive substring matches of the typed text. Empty input shows all. Row hides when no matches or input loses focus
+- `recordUsage` called after `addShoppingItem` and after barcode scan resolves a product name
+- Barcode scan results also recorded in recent products
+- Hidden when input has text with no matching products, or input is blurred
 
 ### Acceptance criteria
 
-- Recently added products appear as chips below the composer
-- Tapping a chip fills the input
-- Max 15 items, LRU eviction on overflow
-- Duplicates increment usage count
-- Persisted across app restarts
+- ✅ Recently added products appear as chips below composer when input is focused
+- ✅ Chips filter by typed text (case-insensitive substring match)
+- ✅ Tapping a chip fills the input (does not auto-submit)
+- ✅ Max 15 items, LRU eviction on overflow
+- ✅ Duplicates increment usage count and update timestamp
+- ✅ Persisted across app restarts (localStorage via Zustand persist)
+- ✅ Barcode scan results also recorded
 
 ---
 
@@ -518,9 +522,10 @@ Step 4 (Templates) — requires isTemplate/templateId/recurrence on DoTodo
    └─ independent of Steps 1-3
    └─ ShoppingOverview changes independent of detail page changes
 
-Step 5 (Recent products) — new standalone store, taps into addShoppingItem
-   └─ independent of Steps 1-4 (composer area change only)
-   └─ ShoppingListDetail changes small and non-conflicting
+Step 5 (Recent products) — new standalone store, taps into addShoppingItem ✅ DONE
+    └─ independent of Steps 1-4 (composer area change only)
+    └─ ShoppingListDetail changes small and non-conflicting
+    └─ design change: chips filter by typed text (not only shown when empty) — see Step 5 details
 
 Step 6 (Sharing) — Firebase, entirely independent data flow
    └─ touches ShoppingListDetail (share button) + ShoppingOverview (badges)
@@ -531,13 +536,13 @@ Step 6 (Sharing) — Firebase, entirely independent data flow
 
 ```
 1 → 3 → 2 → 5 → 4 → 6
-  ✅    ✅    ✅
+  ✅    ✅    ✅    ✅
 ```
 
-Progress: Steps 1, 2, and 3 are complete. Step 2 was redesigned from the original
+Progress: Steps 1, 2, 3, and 5 are complete. Step 2 was redesigned from the original
 plan — see Step 2 section for details on the minimal-header approach (no collapsible
-sections, no per-item category chips, no color field). Next up: Step 5 (Recent Products)
-or Step 4 (Templates).
+sections, no per-item category chips, no color field). Step 5 chips filter by typed
+text rather than hiding when non-empty. Next up: Step 4 (Templates) or Step 6 (Sharing).
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
