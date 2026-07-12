@@ -276,7 +276,7 @@ export const useDoTodoStore = create<EntryState>()(
         id: uuidv4(),
         title,
         isCompleted: false,
-        ...(quantity !== undefined && { quantity }),
+        quantity: quantity ?? 1,
         ...(price !== undefined && { price }),
         ...(category !== undefined && { category }),
       };

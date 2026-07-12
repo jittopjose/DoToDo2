@@ -202,7 +202,7 @@ const ShoppingListDetail: React.FC = () => {
             showMore && newItemPrice ? parseFloat(newItemPrice) : undefined,
             newItemCategory || undefined,
         );
-        recordUsage(trimmed);
+        recordUsage(trimmed, newItemCategory || undefined);
         setNewItemText('');
         setNewItemQty(1);
         setNewItemPrice('');
@@ -234,7 +234,7 @@ const ShoppingListDetail: React.FC = () => {
         const name = product?.productName ?? barcode;
         setNewItemText(name);
         if (product?.productName) {
-            recordUsage(product.productName);
+            recordUsage(product.productName, product.category ?? undefined);
         }
         if (product?.category) {
             setNewItemCategory(product.category);
@@ -401,7 +401,10 @@ const ShoppingListDetail: React.FC = () => {
                                     <IonChip
                                         key={p.title}
                                         className="shop-recent-chip"
-                                        onClick={() => setNewItemText(p.title)}
+                                        onClick={() => {
+                                            setNewItemText(p.title);
+                                            setNewItemCategory(p.category || '');
+                                        }}
                                     >
                                         {p.title}
                                     </IonChip>
@@ -506,6 +509,9 @@ const ShoppingListDetail: React.FC = () => {
                                 onStartEdit={() => setEditingItemId(item.id)}
                                 onSave={(updates) => {
                                     updateShoppingItem(listId, item.id, updates);
+                                    if ('category' in updates) {
+                                        recordUsage(item.title, updates.category ?? undefined);
+                                    }
                                     setEditingItemId(null);
                                 }}
                                 onDelete={() => {
@@ -532,6 +538,9 @@ const ShoppingListDetail: React.FC = () => {
                                         onStartEdit={() => setEditingItemId(item.id)}
                                         onSave={(updates) => {
                                             updateShoppingItem(listId, item.id, updates);
+                                            if ('category' in updates) {
+                                                recordUsage(item.title, updates.category ?? undefined);
+                                            }
                                             setEditingItemId(null);
                                         }}
                                         onDelete={() => {

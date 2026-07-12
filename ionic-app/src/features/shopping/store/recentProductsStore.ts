@@ -5,11 +5,12 @@ export interface RecentProduct {
     title: string;
     lastUsed: number;
     useCount: number;
+    category?: string;
 }
 
 interface RecentProductsState {
     products: RecentProduct[];
-    recordUsage: (title: string) => void;
+    recordUsage: (title: string, category?: string) => void;
     clearHistory: () => void;
 }
 
@@ -19,7 +20,7 @@ export const useRecentProductsStore = create<RecentProductsState>()(
     persist(
         (set) => ({
             products: [],
-            recordUsage: (title) =>
+            recordUsage: (title, category?) =>
                 set((state) => {
                     const trimmed = title.trim();
                     if (!trimmed) return state;
@@ -29,11 +30,11 @@ export const useRecentProductsStore = create<RecentProductsState>()(
                     if (existing) {
                         updated = state.products.map((p) =>
                             p.title.toLowerCase() === lower
-                                ? { ...p, lastUsed: Date.now(), useCount: p.useCount + 1 }
+                                ? { ...p, lastUsed: Date.now(), useCount: p.useCount + 1, category: category ?? p.category }
                                 : p,
                         );
                     } else {
-                        updated = [...state.products, { title: trimmed, lastUsed: Date.now(), useCount: 1 }];
+                        updated = [...state.products, { title: trimmed, lastUsed: Date.now(), useCount: 1, category }];
                     }
                     updated.sort((a, b) => b.lastUsed - a.lastUsed);
                     if (updated.length > MAX_PRODUCTS) {
