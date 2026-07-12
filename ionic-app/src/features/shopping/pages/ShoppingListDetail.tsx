@@ -466,7 +466,6 @@ const ShoppingListDetail: React.FC = () => {
                                 item={item}
                                 index={idx}
                                 showReorder
-                                showCategory
                                 isEditing={editingItemId === item.id}
                                 dragOver={dragOverIdx === idx}
                                 onDragHandlePointerDown={(e) => handleDragHandlePointerDown(e, idx)}

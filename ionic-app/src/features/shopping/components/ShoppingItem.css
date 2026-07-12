@@ -102,14 +102,6 @@
     margin: 0;
 }
 
-.shop-item-category-chip {
-    min-height: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    margin: 0;
-    padding: 0 8px;
-}
-
 .shop-item-chevron {
     font-size: 14px;
     color: var(--dotodo-muted);
