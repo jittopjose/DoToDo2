@@ -64,7 +64,13 @@ const ShoppingListDetail: React.FC = () => {
     const [inputFocused, setInputFocused] = useState(false);
     const recentProducts = useRecentProductsStore((s) => s.products);
     const recordUsage = useRecentProductsStore((s) => s.recordUsage);
-    const showRecents = inputFocused && newItemText === '' && recentProducts.length > 0;
+    const filteredRecents = useMemo(() => {
+        const lower = newItemText.toLowerCase().trim();
+        return lower
+            ? recentProducts.filter((p) => p.title.toLowerCase().includes(lower))
+            : recentProducts;
+    }, [recentProducts, newItemText]);
+    const showRecents = inputFocused && filteredRecents.length > 0;
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -391,7 +397,7 @@ const ShoppingListDetail: React.FC = () => {
 
                         {showRecents && (
                             <div className="shop-recent-row">
-                                {recentProducts.map((p) => (
+                                {filteredRecents.map((p) => (
                                     <IonChip
                                         key={p.title}
                                         className="shop-recent-chip"

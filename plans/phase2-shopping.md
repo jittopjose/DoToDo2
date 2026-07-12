@@ -91,10 +91,10 @@ Store mode:
 
 ---
 
-## Step 2 — Categories within a List (Priority: HIGH)
+## Step 2 — Categories within a List (Priority: HIGH) ✅ DONE (with design changes)
 
 **Goal**: Group items by store department (Produce, Dairy, Meat, Bakery, etc.)
-with collapsible sections. Categories auto-suggested from Open Food Facts on scan.
+with minimal visual grouping. Categories auto-suggested from Open Food Facts on scan.
 
 ### Files to create
 
@@ -107,11 +107,11 @@ with collapsible sections. Categories auto-suggested from Open Food Facts on sca
 | File | Change |
 |------|--------|
 | `src/features/shared/types.ts` | Add optional `category` field to `ShoppingItem` |
-| `ShoppingListDetail.tsx` | Group items by category with collapsible sections; add category picker to composer & ShoppingItem editor |
-| `ShoppingListDetail.css` | Category section styles (group headers, badges) |
-| `ShoppingItem.tsx` | Add category selector in expanded editor |
-| `ShoppingItem.css` | Category chip styles |
-| `src/services/barcode.service.ts` | Extract `categories_tags` from Open Food Facts, map to known categories |
+| `ShoppingListDetail.tsx` | Group items by category with minimal "aisle sign" headers; add category `IonSelect` in composer extras & ShoppingItem editor |
+| `ShoppingListDetail.css` | Category group header styles (`.shop-category-minimal-header`, `.shop-category-minimal-label`) — 11px uppercase muted label, no backgrounds, no icons, no chevrons |
+| `ShoppingItem.tsx` | Add category `IonSelect` in expanded editor; **no `showCategory` prop, no category chip on item** |
+| `ShoppingItem.css` | Category editor styles (`.shop-editor-category`); **no `.shop-item-category-chip`** |
+| `src/services/barcode.service.ts` | Extract `categories_tags` from Open Food Facts, map to known categories via `CATEGORY_MAP` |
 
 ### Data model change
 
@@ -133,21 +133,22 @@ export interface ShoppingCategory {
     key: string;
     label: string;
     icon: string;
-    color: string;
 }
 
 export const DEFAULT_CATEGORIES: ShoppingCategory[] = [
-    { key: 'produce',   label: 'Produce',      icon: 'leafOutline',                 color: '--ion-color-success' },
-    { key: 'dairy',     label: 'Dairy & Eggs',  icon: 'eggOutline',                 color: '--ion-color-warning' },
-    { key: 'meat',      label: 'Meat & Fish',   icon: 'fishOutline',                color: '--ion-color-danger' },
-    { key: 'bakery',    label: 'Bakery',        icon: 'pizzaOutline',               color: '--ion-color-tertiary' },
-    { key: 'frozen',    label: 'Frozen',        icon: 'snowOutline',                color: '--ion-color-primary' },
-    { key: 'beverages', label: 'Beverages',     icon: 'cafeOutline',                color: '--ion-color-secondary' },
-    { key: 'pantry',    label: 'Pantry',        icon: 'layersOutline',              color: '--ion-color-medium' },
-    { key: 'household', label: 'Household',     icon: 'homeOutline',                color: '--ion-color-tertiary' },
-    { key: 'other',     label: 'Other',         icon: 'ellipsisHorizontalOutline',  color: '--dotodo-muted' },
+    { key: 'produce',   label: 'Produce',      icon: 'leafOutline' },
+    { key: 'dairy',     label: 'Dairy & Eggs',  icon: 'eggOutline' },
+    { key: 'meat',      label: 'Meat & Fish',   icon: 'fishOutline' },
+    { key: 'bakery',    label: 'Bakery',        icon: 'pizzaOutline' },
+    { key: 'frozen',    label: 'Frozen',        icon: 'snowOutline' },
+    { key: 'beverages', label: 'Beverages',     icon: 'cafeOutline' },
+    { key: 'pantry',    label: 'Pantry',        icon: 'layersOutline' },
+    { key: 'household', label: 'Household',     icon: 'homeOutline' },
+    { key: 'other',     label: 'Other',         icon: 'ellipsisHorizontalOutline' },
 ];
 ```
+
+> **Note**: `ShoppingCategory` has `key`, `label`, and `icon` only. The `color` field from the original plan was dropped — category is communicated only through section headers, not per-item chips or color accents.
 
 ### Categories mapping from Open Food Facts
 
@@ -167,38 +168,45 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 ```
 
-### Wireframe
+### Wireframe (as implemented — minimal "aisle sign" headers)
 
 ```
-┌── PRODUCE ──────────────────────────────── ▼ ──┐
-│  ☐ Avocado                            ×2 $1.50  │
-│  ☐ Bananas                            ×1 $0.89  │
-└──────────────────────────────────────────────────┘
-┌── DAIRY & EGGS ────────────────────────── ▼ ──┐
-│  ☑ Eggs                              ×12 $5.99  │
-│  ☐ Milk                               ×2 $3.99  │
-└──────────────────────────────────────────────────┘
-┌── PANTRY ─────────────────────────────── ▼ ──┐
-│  ☐ Pasta                              ×2 $2.49  │
-│  ☐ Olive Oil                          ×1 $8.99  │
-└──────────────────────────────────────────────────┘
+PRODUCE                                                    (11px uppercase, muted)
+  ☐ Avocado                            ×2 $1.50
+  ☐ Bananas                            ×1 $0.89
+
+DAIRY & EGGS
+  ☑ Eggs                              ×12 $5.99
+  ☐ Milk                               ×2 $3.99
+
+PANTRY
+  ☐ Pasta                              ×2 $2.49
+  ☐ Olive Oil                          ×1 $8.99
 ```
+
+Section headers are plain text labels — no background card, no icon, no chevron, no collapsibility.
+This applies uniformly in store mode (where categories help navigate the store by section)
+and in grouped non-custom sort modes.
 
 ### Behaviour
 
 - **Default**: Items without a category go into an "Other" (uncategorized) section
-- **Composer**: Category selector chip row below the price/qty extras (horizontal scroll, small chips)
-- **Edit item**: Category chip added to the expanded editor, tap to change
+- **Composer**: Category `IonSelect` (with `interface="popover"`), available in the "show more" extras area alongside qty stepper + price input
+- **Edit item**: Category `IonSelect` in the expanded editor's save panel
+- **Category NOT shown on item cards**: No category chip, dot, or color stripe on individual items — the only visual indicator of category is the section header above a group. This keeps item rows clean and avoids crowding, especially in custom (ungrouped) mode
+- **Grouping applies in**: all non-custom sort modes + store mode. In `custom` sort mode, items are flat (no headers, no grouping) and drag-reorder is active
 - **Store mode**: Categories still apply (helps you navigate the store by section)
 - **Sort**: Categories respect the sort order (Step 3) but items are grouped visually
+- **Not collapsible**: Section headers are static labels only — no expand/collapse toggle
 
 ### Acceptance criteria
 
-- New item can be assigned a category at add-time
-- Existing item category can be changed in the expanded editor
-- List shows items grouped by category with collapsible group headers
-- Uncategorized items appear in "Other" section
-- Barcode scan auto-assigns category from Open Food Facts `categories_tags`
+- ✅ New item can be assigned a category at add-time
+- ✅ Existing item category can be changed in the expanded editor
+- ✅ List shows items grouped by category with minimal text-only headers (ungrouped in `custom` mode)
+- ✅ Uncategorized items appear in "Other" section
+- ✅ Barcode scan auto-assigns category from Open Food Facts `categories_tags`
+- ✅ No per-item category chip — category visible only through section headers + editor
 
 ---
 
@@ -498,9 +506,10 @@ Owner can revoke → remove uid from sharedWith → onSnapshot unsubscribe remot
 Step 1 (Store mode) — UI only, no data model changes ✅ DONE
    └─ independent
 
-Step 2 (Categories) — requires category field on ShoppingItem
-   └─ composes with Step 1 (categories visible in store mode)
-   └─ composes with Step 3 (categories + sort work together)
+Step 2 (Categories) — requires category field on ShoppingItem ✅ DONE
+    └─ composes with Step 1 (categories visible in store mode)
+    └─ composes with Step 3 (categories + sort work together)
+    └─ design change: minimal text-only headers (no collapsible, no chips) — see Step 2 details
 
 Step 3 (Sort) — requires reorderShoppingItems action ✅ DONE
    └─ Step 1 auto-sets checked-last in store mode
@@ -522,10 +531,13 @@ Step 6 (Sharing) — Firebase, entirely independent data flow
 
 ```
 1 → 3 → 2 → 5 → 4 → 6
-  ✅    ✅
+  ✅    ✅    ✅
 ```
 
-Progress: Step 1 (Store mode) and Step 3 (Sort) are complete. Next up: Step 2 (Categories).
+Progress: Steps 1, 2, and 3 are complete. Step 2 was redesigned from the original
+plan — see Step 2 section for details on the minimal-header approach (no collapsible
+sections, no per-item category chips, no color field). Next up: Step 5 (Recent Products)
+or Step 4 (Templates).
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
@@ -560,26 +572,26 @@ Status | Package | Step
 src/features/shared/
 ├── types.ts                            ← + category on ShoppingItem, + isTemplate/templateId/recurrence on DoTodo
 └── store/
-    └── doTodoStore.ts                  ← + reorderShoppingItems, + saveAsTemplate/getTemplates/createFromTemplate
+    └── doTodoStore.ts                  ← + reorderShoppingItems, + addShoppingItem(category param), + saveAsTemplate/getTemplates/createFromTemplate
 
 src/features/shopping/
 ├── components/
 │   ├── ScannerOverlay.tsx
 │   ├── ScannerOverlay.css
-│   ├── ShoppingItem.tsx                ← + storeMode prop, + category selector in editor
-│   ├── ShoppingItem.css                ← + store-mode variants, + category chip
-│   ├── TemplatePicker.tsx              ← NEW
-│   └── TemplatePicker.css              ← NEW
+│   ├── ShoppingItem.tsx                ← + storeMode prop, + category IonSelect in editor (no showCategory prop)
+│   ├── ShoppingItem.css                ← + store-mode variants, + .shop-editor-category (no .shop-item-category-chip)
+│   ├── TemplatePicker.tsx              ← NEW (Step 4)
+│   └── TemplatePicker.css              ← NEW (Step 4)
 ├── pages/
-│   ├── ShoppingListDetail.tsx          ← + store mode, + categories, + sort, + recent products, + share button
-│   ├── ShoppingListDetail.css          ← + store mode, + categories, + sort, + recents styles
-│   ├── ShoppingOverview.tsx            ← + templates section, + shared badges, + join list
-│   └── ShoppingOverview.css            ← + template badge, + shared indicator
+│   ├── ShoppingListDetail.tsx          ← + store mode, + categories (minimal headers), + sort, + drag-reorder, + recent products (Step 5), + share button (Step 6)
+│   ├── ShoppingListDetail.css          ← + store mode, + .shop-category-minimal-header, + sort, + recents styles
+│   ├── ShoppingOverview.tsx            ← + templates section (Step 4), + shared badges (Step 6), + join list (Step 6)
+│   └── ShoppingOverview.css            ← + template badge (Step 4), + shared indicator (Step 6)
 ├── services/
-│   └── barcode.service.ts              ← + category mapping from Open Food Facts
+│   └── barcode.service.ts              ← + CATEGORY_MAP from Open Food Facts categories_tags
 ├── store/
-│   └── recentProductsStore.ts          ← NEW
-└── types.ts                            ← NEW: ShoppingCategory + DEFAULT_CATEGORIES
+│   └── recentProductsStore.ts          ← NEW (Step 5)
+└── types.ts                            ← ShoppingCategory (key/label/icon only, no color) + DEFAULT_CATEGORIES
 
 src/services/
 ├── barcode.service.ts                  ← (already exists)
@@ -594,7 +606,7 @@ src/services/
 All Phase 2 features follow the existing design system from `DESIGN.md` and
 Phase 1 conventions (see `phase1-shopping.md` appendix). Key reminders:
 
-- Group headers match the TodoList pattern (icons, badges, collapsible chevron)
+- Category group headers are minimal "aisle sign" text labels (11px uppercase, muted, no icons/backgrounds/chevrons). Not collapsible. Only rendered in non-custom sort modes and store mode
 - Cards use `box-shadow` only, `border-left` accent, `--border-radius: 0 12px 12px 0`
 - Composer matches TodoInput pattern (grid layout, pill buttons, 10px 14px padding)
 - All prices formatted via `formatPrice()` with settings currency
