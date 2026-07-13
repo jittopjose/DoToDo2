@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
+    IonActionSheet,
     IonBackButton,
     IonBadge,
     IonButton,
@@ -19,12 +20,13 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline, documentOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
-import { useDoTodoStore, selectActiveShoppingLists, selectArchivedShoppingLists, selectShoppingListSummary } from '../../shared/store/doTodoStore';
+import { useDoTodoStore, selectActiveShoppingLists, selectArchivedShoppingLists, selectShoppingListSummary, selectTemplates } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice } from '../../shared/utils/formatPrice';
+import TemplatePickerModal from '../components/TemplatePickerModal';
 import './ShoppingOverview.css';
 
 const ShoppingOverview: React.FC = () => {
@@ -32,9 +34,14 @@ const ShoppingOverview: React.FC = () => {
     const currency = useSettingsStore((state) => state.currency);
     const [newListName, setNewListName] = useState('');
     const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
+    const [templateModalOpen, setTemplateModalOpen] = useState(false);
+    const [actionListId, setActionListId] = useState<string | null>(null);
+
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
+    const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
     const activeLists = useDoTodoStore(useShallow(selectActiveShoppingLists));
     const archivedLists = useDoTodoStore(useShallow(selectArchivedShoppingLists));
+    const templates = useDoTodoStore(useShallow(selectTemplates));
 
     const handleCreateList = useCallback(() => {
         const trimmed = newListName.trim();
@@ -58,16 +65,80 @@ const ShoppingOverview: React.FC = () => {
         });
     }, []);
 
-    const ListCard: React.FC<{ listId: string }> = ({ listId }) => {
+    const handleSaveAsTemplate = useCallback(() => {
+        if (actionListId) {
+            saveAsTemplate(actionListId);
+            setActionListId(null);
+        }
+    }, [actionListId, saveAsTemplate]);
+
+    const ListCard: React.FC<{ listId: string; isTemplate?: boolean }> = ({ listId, isTemplate }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);
         const summary = useDoTodoStore(useShallow(selectShoppingListSummary(listId)));
         const doneCount = (entry?.shoppingItems ?? []).filter((i) => i.isCompleted).length;
+        const longPressTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
         const handleTap = useCallback(() => {
             history.push(`/shopping/${encodeURIComponent(listId)}`);
         }, [history, listId]);
 
+        const handlePointerDown = useCallback(() => {
+            longPressTimer.current = setTimeout(() => {
+                setActionListId(listId);
+            }, 500);
+        }, [listId]);
+
+        const handlePointerUp = useCallback(() => {
+            if (longPressTimer.current) {
+                clearTimeout(longPressTimer.current);
+                longPressTimer.current = undefined;
+            }
+        }, []);
+
+        const handleUseTemplate = useCallback(() => {
+            const tpl = templates.find((t) => t.id === listId);
+            if (!tpl) return;
+            const newId = addShoppingList(tpl.title + ' (copy)');
+            history.push(`/shopping/${encodeURIComponent(newId)}`);
+        }, [listId, templates, addShoppingList, history]);
+
+        if (isTemplate) {
+            const catCount = entry?.shoppingItems?.reduce<string[]>((acc, item) => {
+                const cat = item.category || 'other';
+                if (!acc.includes(cat)) acc.push(cat);
+                return acc;
+            }, []) ?? [];
+
+            return (
+                <IonItem
+                    className="shop-list-card shop-template-card"
+                    button
+                    lines="none"
+                    onClick={handleUseTemplate}
+                >
+                    <IonIcon icon={documentOutline} className="shop-list-card-icon shop-template-card-icon" slot="start" />
+                    <div className="shop-list-card-body">
+                        <span className="shop-list-card-name">{entry?.title ?? 'Unknown template'}</span>
+                        <span className="shop-list-card-summary">
+                            {summary.count} item{summary.count !== 1 ? 's' : ''}
+                            {catCount.length > 0 && ` · ${catCount.length} categor${catCount.length !== 1 ? 'ies' : 'y'}`}
+                            <IonChip className="shop-template-badge">Template</IonChip>
+                        </span>
+                    </div>
+                </IonItem>
+            );
+        }
+
         return (
-            <IonItem className="shop-list-card" button lines="none" onClick={handleTap}>
+            <IonItem
+                className="shop-list-card"
+                button
+                lines="none"
+                onClick={handleTap}
+                onPointerDown={handlePointerDown}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+            >
                 <IonIcon icon={cartOutline} className="shop-list-card-icon" slot="start" />
                 <div className="shop-list-card-body">
                     <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
@@ -129,6 +200,17 @@ const ShoppingOverview: React.FC = () => {
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
+                        <div className="shop-from-template-row">
+                            <IonButton
+                                className="shop-from-template-btn"
+                                fill="clear"
+                                size="small"
+                                onClick={() => setTemplateModalOpen(true)}
+                            >
+                                <IonIcon icon={documentOutline} slot="start" />
+                                From template
+                            </IonButton>
+                        </div>
                     </IonCardContent>
                 </IonCard>
 
@@ -155,14 +237,37 @@ const ShoppingOverview: React.FC = () => {
                     </div>
                 )}
 
-                    {activeLists.length === 0 && archivedLists.length === 0 && (
-                        <div className="shop-overview-empty">
-                            <IonIcon icon={cartOutline} className="shop-overview-empty-icon" />
-                            <p className="shop-overview-empty-text">
-                                Your shopping lists live here.<br />Start one above.
-                            </p>
+                {templates.length > 0 && (
+                    <div className="shop-overview-section">
+                        <div
+                            className="dotodo-group-header group--template"
+                            onClick={() => toggleGroup('Templates')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup('Templates'); } }}
+                            aria-expanded={expanded.has('Templates')}
+                        >
+                            <IonIcon icon={documentOutline} className="dotodo-group-icon" />
+                            <h2 className="dotodo-group-title">Templates</h2>
+                            <IonBadge className="dotodo-group-badge">{templates.length}</IonBadge>
+                            <IonIcon icon={chevronDownOutline} className={`dotodo-group-chevron ${expanded.has('Templates') ? 'is-expanded' : ''}`} />
                         </div>
-                    )}
+                        <div className={`dotodo-group-items group--template ${expanded.has('Templates') ? 'is-expanded' : ''}`}>
+                            {expanded.has('Templates') && templates.map((tpl) => (
+                                <ListCard key={tpl.id} listId={tpl.id} isTemplate />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {activeLists.length === 0 && archivedLists.length === 0 && (
+                    <div className="shop-overview-empty">
+                        <IonIcon icon={cartOutline} className="shop-overview-empty-icon" />
+                        <p className="shop-overview-empty-text">
+                            Your shopping lists live here.<br />Start one above.
+                        </p>
+                    </div>
+                )}
 
                 {archivedLists.length > 0 && (
                     <div className="shop-overview-section">
@@ -186,6 +291,21 @@ const ShoppingOverview: React.FC = () => {
                         </div>
                     </div>
                 )}
+
+                <IonActionSheet
+                    isOpen={actionListId !== null}
+                    onDidDismiss={() => setActionListId(null)}
+                    header="List options"
+                    buttons={[
+                        { text: 'Save as template', handler: handleSaveAsTemplate },
+                        { text: 'Cancel', role: 'cancel' },
+                    ]}
+                />
+
+                <TemplatePickerModal
+                    isOpen={templateModalOpen}
+                    onDismiss={() => setTemplateModalOpen(false)}
+                />
             </IonContent>
         </IonPage>
     );

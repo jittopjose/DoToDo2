@@ -13,19 +13,23 @@ import {
     IonIcon,
     IonInput,
     IonPage,
+    IonPopover,
     IonSelect,
     IonSelectOption,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, funnelOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, repeatOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
+import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
 import { ShoppingItem } from '../components/ShoppingItem';
 import { DEFAULT_CATEGORIES } from '../types';
+import { Recurrence } from '../../shared/types';
+import { RepeatSection } from '../../todo/components/RepeatSection';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import { useRecentProductsStore } from '../store/recentProductsStore';
@@ -45,6 +49,8 @@ const ShoppingListDetail: React.FC = () => {
     const removeShoppingItem = useDoTodoStore((state) => state.removeShoppingItem);
     const reorderShoppingItems = useDoTodoStore((state) => state.reorderShoppingItems);
     const archiveShoppingList = useDoTodoStore((state) => state.archiveShoppingList);
+    const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
+    const updateShoppingListRecurrence = useDoTodoStore((state) => state.updateShoppingListRecurrence);
 
     const currency = useSettingsStore((state) => state.currency);
     const [sortMode, setSortMode] = useState<SortMode>('custom');
@@ -61,6 +67,8 @@ const ShoppingListDetail: React.FC = () => {
     const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
     const [dragging, setDragging] = useState(false);
     const [newItemCategory, setNewItemCategory] = useState<string>('');
+    const [repeatOpen, setRepeatOpen] = useState(false);
+    const [moreOpen, setMoreOpen] = useState(false);
     const [inputFocused, setInputFocused] = useState(false);
     const recentProducts = useRecentProductsStore((s) => s.products);
     const recordUsage = useRecentProductsStore((s) => s.recordUsage);
@@ -251,6 +259,19 @@ const ShoppingListDetail: React.FC = () => {
         }
     }, [handleScanResult]);
 
+    const handleMore = useCallback(() => {
+        setMoreOpen(true);
+    }, []);
+
+    const handleSaveAsTemplate = useCallback(() => {
+        saveAsTemplate(listId);
+        setMoreOpen(false);
+    }, [listId, saveAsTemplate]);
+
+    const handleRecurrenceChange = useCallback((recurrence: Recurrence | undefined) => {
+        updateShoppingListRecurrence(listId, recurrence);
+    }, [listId, updateShoppingListRecurrence]);
+
     if (!entry) {
         return (
             <IonPage>
@@ -282,6 +303,11 @@ const ShoppingListDetail: React.FC = () => {
                         <IonButton onClick={handleArchive} aria-label={entry.isArchived ? 'Unarchive list' : 'Archive list'}>
                             <IonIcon icon={archiveOutline} />
                         </IonButton>
+                        {!storeMode && (
+                            <IonButton onClick={handleMore} aria-label="More options">
+                                <IonIcon icon={ellipsisHorizontalOutline} />
+                            </IonButton>
+                        )}
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
@@ -302,9 +328,50 @@ const ShoppingListDetail: React.FC = () => {
                 ]}
             />
 
+            <IonActionSheet
+                isOpen={moreOpen}
+                onDidDismiss={() => setMoreOpen(false)}
+                header="More"
+                buttons={[
+                    { text: 'Save as template', handler: handleSaveAsTemplate },
+                    { text: 'Cancel', role: 'cancel' },
+                ]}
+            />
+
             <IonContent className={`shop-detail-content ${storeMode ? 'shop-detail-store-mode' : ''}`}>
                 {!storeMode && (
                     <>
+                        {entry.recurrence && (
+                            <div className="shop-repeat-banner" onClick={() => setRepeatOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRepeatOpen(true); } }}>
+                                <IonIcon icon={repeatOutline} className="shop-repeat-banner-icon" />
+                                <div className="shop-repeat-banner-body">
+                                    <span className="shop-repeat-banner-label">Repeats: {formatRecurrenceSummary(entry.recurrence)}</span>
+                                    <span className="shop-repeat-banner-action">Tap to change</span>
+                                </div>
+                            </div>
+                        )}
+                        {!entry.recurrence && (
+                            <div className="shop-repeat-banner shop-repeat-banner--inactive" onClick={() => setRepeatOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRepeatOpen(true); } }}>
+                                <IonIcon icon={repeatOutline} className="shop-repeat-banner-icon" />
+                                <div className="shop-repeat-banner-body">
+                                    <span className="shop-repeat-banner-label">Repeat</span>
+                                    <span className="shop-repeat-banner-action">Set a schedule</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <IonPopover
+                            isOpen={repeatOpen}
+                            onDidDismiss={() => setRepeatOpen(false)}
+                            className="shop-repeat-popover"
+                        >
+                            <RepeatSection
+                                value={entry.recurrence}
+                                dueDate={entry.dueDate}
+                                onChange={handleRecurrenceChange}
+                            />
+                        </IonPopover>
+
                         <div className="shop-detail-total-row">
                             <IonCard className="shop-detail-total-card">
                                 <IonCardContent className="shop-detail-total-content">
@@ -553,6 +620,20 @@ const ShoppingListDetail: React.FC = () => {
                             </React.Fragment>
                         ))}
                     </>
+                )}
+
+                {!storeMode && (
+                    <div className="shop-detail-template-row">
+                        <IonButton
+                            className="shop-detail-template-btn"
+                            fill="clear"
+                            size="small"
+                            onClick={handleSaveAsTemplate}
+                        >
+                            <IonIcon icon={documentOutline} slot="start" />
+                            Save as template
+                        </IonButton>
+                    </div>
                 )}
 
                 {isScanningNative && (

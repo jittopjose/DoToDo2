@@ -222,7 +222,7 @@ and in grouped non-custom sort modes.
 | `ShoppingListDetail.css` | Sort button active state styles (`--color: var(--ion-color-tertiary)`) |
 | `ShoppingItem.tsx` | Accept `showReorder`, `dragOver`, `onDragHandlePointerDown` props; render drag handle icon with `touch-action: none` |
 | `ShoppingItem.css` | Drag handle styles (`.shop-item-drag-handle` with `cursor: grab`, `touch-action: none`); `.is-drag-over` highlight (tertiary `border-top`) |
-| `src/features/shared/store/doTodoStore.ts` | Add `reorderShoppingItems` action (accepts array of item IDs) |
+| `src/features/shared/store/doTodoStore.ts` | Add `reorderShoppingItems` action (accepts array of item IDs); `addShoppingItem` defaults `quantity` to 1 when omitted |
 
 ### Sort modes
 
@@ -373,6 +373,7 @@ interface RecentProduct {
     title: string;
     lastUsed: number;    // timestamp
     useCount: number;    // how many times added
+    category?: string;   // last-used category key
 }
 ```
 
@@ -383,7 +384,7 @@ A small standalone Zustand store (persisted via `zustand/middleware/persist` to 
 ```ts
 interface RecentProductsState {
     products: RecentProduct[];
-    recordUsage: (title: string) => void;  // upsert, increment useCount, cap at 15
+    recordUsage: (title: string, category?: string) => void;  // upsert, increment useCount, cap at 15, store category
     clearHistory: () => void;
 }
 ```
@@ -392,23 +393,30 @@ interface RecentProductsState {
 
 - Products are recorded whenever an item is added to any list (global, not per-list)
 - Max 15 items; evicts least-recently-used on overflow
-- Duplicates increment `useCount` and update `lastUsed`
+- Duplicates increment `useCount`, update `lastUsed`, and merge `category` (last-used category wins)
 - Chips sorted by `lastUsed` descending
-- Tapping a chip fills the composer input (user presses Enter or + to confirm — does NOT auto-submit)
+- Tapping a chip fills the composer input **and** auto-selects the stored category (user presses Enter or + to confirm — does NOT auto-submit)
 - **Chips filter as user types**: when input is focused, chips narrow to case-insensitive substring matches of the typed text. Empty input shows all. Row hides when no matches or input loses focus
-- `recordUsage` called after `addShoppingItem` and after barcode scan resolves a product name
+- `recordUsage` called after `addShoppingItem` (passes `newItemCategory`), after barcode scan (passes `product.category`), and when editing an item's category via the editor
 - Barcode scan results also recorded in recent products
 - Hidden when input has text with no matching products, or input is blurred
+
+### `addShoppingItem` quantity default
+
+When `quantity` is omitted (composer "show more" collapsed), the store defaults it to `1` via `quantity: quantity ?? 1` — every shopping item always has a quantity.
 
 ### Acceptance criteria
 
 - ✅ Recently added products appear as chips below composer when input is focused
 - ✅ Chips filter by typed text (case-insensitive substring match)
-- ✅ Tapping a chip fills the input (does not auto-submit)
+- ✅ Tapping a chip fills the input **and** auto-selects the stored category
 - ✅ Max 15 items, LRU eviction on overflow
 - ✅ Duplicates increment usage count and update timestamp
 - ✅ Persisted across app restarts (localStorage via Zustand persist)
 - ✅ Barcode scan results also recorded
+- ✅ Category saved alongside product name; last-used category stored per product
+- ✅ Editing an item's category updates the recent-product record
+- ✅ Adding an item without qty defaults to 1
 
 ---
 
@@ -542,7 +550,9 @@ Step 6 (Sharing) — Firebase, entirely independent data flow
 Progress: Steps 1, 2, 3, and 5 are complete. Step 2 was redesigned from the original
 plan — see Step 2 section for details on the minimal-header approach (no collapsible
 sections, no per-item category chips, no color field). Step 5 chips filter by typed
-text rather than hiding when non-empty. Next up: Step 4 (Templates) or Step 6 (Sharing).
+text rather than hiding when non-empty, and now store the last-used category per
+product (auto-filled on chip tap). `addShoppingItem` defaults quantity to 1 when
+omitted. Next up: Step 4 (Templates) or Step 6 (Sharing).
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
@@ -577,7 +587,7 @@ Status | Package | Step
 src/features/shared/
 ├── types.ts                            ← + category on ShoppingItem, + isTemplate/templateId/recurrence on DoTodo
 └── store/
-    └── doTodoStore.ts                  ← + reorderShoppingItems, + addShoppingItem(category param), + saveAsTemplate/getTemplates/createFromTemplate
+    └── doTodoStore.ts                  ← + reorderShoppingItems, + addShoppingItem(category param, qty defaults to 1), + saveAsTemplate/getTemplates/createFromTemplate
 
 src/features/shopping/
 ├── components/

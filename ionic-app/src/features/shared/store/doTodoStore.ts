@@ -37,8 +37,12 @@ interface EntryState {
   toggleEntry: (id: string) => void;
   toggleSubtask: (entryId: string, subtaskId: string) => void;
   deleteEntry: (id: string) => void;
-  updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'shoppingItems' | 'recurrence' | 'isCompleted' | 'isArchived'>>) => void;
-  addShoppingList: (title: string) => void;
+  updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'shoppingItems' | 'recurrence' | 'isCompleted' | 'isArchived' | 'isTemplate'>>) => void;
+  addShoppingList: (title: string, recurrence?: Recurrence) => string;
+  saveAsTemplate: (listId: string) => string;
+  createFromTemplate: (templateId: string, title: string, recurrence?: Recurrence) => string;
+  deleteTemplate: (templateId: string) => void;
+  updateShoppingListRecurrence: (listId: string, recurrence: Recurrence | undefined) => void;
   addShoppingItem: (listId: string, title: string, quantity?: number, price?: number, category?: string) => void;
   toggleShoppingItem: (listId: string, itemId: string) => void;
   updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price' | 'category'>>) => void;
@@ -58,7 +62,7 @@ function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): (.
 }
 
 export const useDoTodoStore = create<EntryState>()(
-  (set, get) => ({
+  (set) => ({
     entries: {},
     entryIds: [],
     filter: 'all',
@@ -252,7 +256,7 @@ export const useDoTodoStore = create<EntryState>()(
       return { customLists: [...state.customLists, normalized] };
     }),
 
-    addShoppingList: (title) => {
+    addShoppingList: (title, recurrence) => {
       const id = uuidv4();
       const entry: DoTodo = {
         id,
@@ -262,11 +266,13 @@ export const useDoTodoStore = create<EntryState>()(
         list: 'all-lists',
         itemType: 'shopping',
         shoppingItems: [],
+        ...(recurrence !== undefined && { recurrence }),
       };
       set((state) => ({
         entries: { ...state.entries, [id]: entry },
         entryIds: [id, ...state.entryIds],
       }));
+      return id;
     },
 
     addShoppingItem: (listId, title, quantity, price, category) => set((state) => {
@@ -355,10 +361,118 @@ export const useDoTodoStore = create<EntryState>()(
     archiveShoppingList: (listId) => set((state) => {
       const entry = state.entries[listId];
       if (!entry) return state;
+
+      if (!entry.isArchived && entry.recurrence) {
+        const nextDue = getNextDueDate({
+          ...entry,
+          dueDate: entry.dueDate ?? Date.now(),
+        });
+        if (nextDue) {
+          const cloneId = uuidv4();
+          const clone: DoTodo = {
+            ...entry,
+            id: cloneId,
+            isArchived: false,
+            isCompleted: false,
+            completedAt: undefined,
+            createdAt: Date.now(),
+            dueDate: nextDue,
+            shoppingItems: entry.shoppingItems?.map((item) => ({
+              ...item,
+              isCompleted: false,
+            })),
+            recurrence: { ...entry.recurrence, originDate: Date.now() },
+          };
+          return {
+            entries: {
+              ...state.entries,
+              [listId]: { ...entry, isArchived: true },
+              [cloneId]: clone,
+            },
+            entryIds: [cloneId, ...state.entryIds],
+          };
+        }
+      }
+
       return {
         entries: {
           ...state.entries,
           [listId]: { ...entry, isArchived: !entry.isArchived },
+        },
+      };
+    }),
+
+    saveAsTemplate: (listId) => {
+      const entry = useDoTodoStore.getState().entries[listId];
+      if (!entry || entry.itemType !== 'shopping') return '';
+      const id = uuidv4();
+      const template: DoTodo = {
+        ...entry,
+        id,
+        title: entry.title,
+        isTemplate: true,
+        isArchived: false,
+        isCompleted: false,
+        completedAt: undefined,
+        createdAt: Date.now(),
+        recurrence: undefined,
+        dueDate: undefined,
+        shoppingItems: entry.shoppingItems?.map((item) => ({
+          ...item,
+          id: uuidv4(),
+          isCompleted: false,
+          price: item.price,
+        })),
+        list: 'all-lists',
+      };
+      set((state) => ({
+        entries: { ...state.entries, [id]: template },
+        entryIds: [id, ...state.entryIds],
+      }));
+      return id;
+    },
+
+    createFromTemplate: (templateId, title, recurrence) => {
+      const template = useDoTodoStore.getState().entries[templateId];
+      if (!template || !template.shoppingItems) return '';
+      const id = uuidv4();
+      const entry: DoTodo = {
+        id,
+        title,
+        isCompleted: false,
+        createdAt: Date.now(),
+        list: 'all-lists',
+        itemType: 'shopping',
+        shoppingItems: template.shoppingItems.map((item) => ({
+          ...item,
+          id: uuidv4(),
+          isCompleted: false,
+        })),
+        ...(recurrence !== undefined && { recurrence }),
+      };
+      set((state) => ({
+        entries: { ...state.entries, [id]: entry },
+        entryIds: [id, ...state.entryIds],
+      }));
+      return id;
+    },
+
+    deleteTemplate: (templateId) => set((state) => {
+      const rest = { ...state.entries };
+      delete rest[templateId];
+      return {
+        entries: rest,
+        entryIds: state.entryIds.filter((id) => id !== templateId),
+      };
+    }),
+
+    updateShoppingListRecurrence: (listId, recurrence) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: { ...entry, recurrence },
         },
       };
     }),
@@ -440,7 +554,7 @@ export const selectEntryCountByListAndType = (list: string) => (state: EntryStat
   }).length;
 
 const isShoppingList = (entry: DoTodo): boolean =>
-  entry.itemType === 'shopping' && entry.shoppingItems !== undefined;
+  entry.itemType === 'shopping' && entry.shoppingItems !== undefined && !entry.isTemplate;
 
 export const selectActiveShoppingLists = (state: EntryState): DoTodo[] =>
   state.entryIds
@@ -451,6 +565,11 @@ export const selectArchivedShoppingLists = (state: EntryState): DoTodo[] =>
   state.entryIds
     .map((id) => state.entries[id])
     .filter((entry) => isShoppingList(entry) && entry.isArchived);
+
+export const selectTemplates = (state: EntryState): DoTodo[] =>
+  state.entryIds
+    .map((id) => state.entries[id])
+    .filter((entry) => entry.itemType === 'shopping' && entry.isTemplate);
 
 export const selectShoppingListItems = (listId: string) => (state: EntryState): ShoppingItem[] => {
   const entry = state.entries[listId];
