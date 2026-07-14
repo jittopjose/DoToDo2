@@ -1,15 +1,21 @@
-.template-picker-content {
+.tpl-content {
     --padding-start: 16px;
     --padding-end: 16px;
-    --padding-top: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 16px;
 }
 
-.template-picker-name-row {
-    margin-bottom: 8px;
+/* ── Config row ── */
+
+.tpl-config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
 }
 
-.template-picker-name-input {
-    --background: var(--dotodo-card);
+.tpl-name-input {
+    --background: var(--dotodo-surface-strong);
     --border-radius: 12px;
     --padding-start: 14px;
     --padding-end: 14px;
@@ -17,83 +23,216 @@
     --padding-bottom: 12px;
     --color: var(--dotodo-text);
     --placeholder-color: var(--dotodo-muted);
-    font-size: 16px;
+    --highlight-color: transparent;
+    --highlight-height: 0;
+    font-size: 15px;
     font-weight: 700;
     border: 1px solid var(--dotodo-card-border);
     border-radius: 12px;
     margin: 0;
+    flex: 1;
+    min-width: 0;
 }
 
-.template-picker-repeat-section {
-    margin-bottom: 20px;
+.tpl-name-input:focus-within {
+    border-color: var(--ion-color-primary);
 }
 
-.template-picker-repeat-section .edit-section {
+.tpl-repeat-toggle {
+    --color: var(--dotodo-muted);
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 12px;
+}
+
+.tpl-repeat-toggle.is-active {
+    --color: var(--ion-color-primary);
+    border-color: var(--ion-color-primary);
+    --background: var(--dotodo-primary-soft);
+}
+
+.tpl-repeat-toggle ion-icon {
+    font-size: 22px;
+}
+
+/* ── Repeat section ── */
+
+.tpl-repeat-section {
+    margin: 0 0 12px;
+    padding: 12px;
+    background: var(--dotodo-surface-strong);
+    border-radius: 12px;
+    border: 1px solid var(--dotodo-card-border);
+}
+
+.tpl-repeat-section .edit-section {
     padding: 0;
 }
 
-.template-picker-label {
-    font-size: 13px;
-    font-weight: 600;
+/* ── Section label ── */
+
+.tpl-section-label {
+    font-size: 12px;
+    font-weight: 700;
     color: var(--dotodo-muted);
-    margin: 0 0 8px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
+    margin: 16px 0 8px;
 }
 
-.template-picker-empty {
+/* ── Empty state ── */
+
+.tpl-empty {
     font-size: 14px;
     font-weight: 600;
     color: var(--dotodo-muted);
     text-align: center;
-    padding: 32px 16px;
+    padding: 48px 16px;
     margin: 0;
 }
 
-.template-picker-list {
-    background: transparent;
-    padding: 0;
-    margin: 0;
-}
+/* ── Card list ── */
 
-.template-picker-item {
-    --background: var(--dotodo-card);
-    --border-radius: 12px;
-    --padding-start: 14px;
-    --padding-end: 14px;
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-    --inner-padding-end: 0;
-    --min-height: 0;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    box-shadow: var(--dotodo-shadow-card);
-    overflow: hidden;
-}
-
-.template-picker-item-label {
+.tpl-card-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    margin: 0;
-    min-width: 0;
+    gap: 10px;
+    padding-bottom: 8px;
 }
 
-.template-picker-item-name {
-    font-size: 15px;
-    font-weight: 700;
+/* ── Individual card ── */
+
+.tpl-card {
+    background: var(--dotodo-card);
+    border: 2px solid var(--dotodo-card-border);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        border-color var(--dotodo-motion-fast),
+        background var(--dotodo-motion-fast),
+        box-shadow var(--dotodo-motion-fast),
+        transform var(--dotodo-motion-fast);
+    box-shadow: var(--dotodo-shadow-card);
+}
+
+.tpl-card:active {
+    transform: scale(0.995);
+}
+
+.tpl-card.is-selected {
+    border-color: var(--ion-color-primary);
+    background: color-mix(in srgb, var(--ion-color-primary) 6%, var(--dotodo-card));
+    box-shadow:
+        0 0 0 3px color-mix(in srgb, var(--ion-color-primary) 15%, transparent),
+        var(--dotodo-shadow-card);
+}
+
+.tpl-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tpl-card-name {
+    font-size: 16px;
+    font-weight: 750;
     color: var(--dotodo-text);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.template-picker-item-meta {
+.tpl-card-count {
     font-size: 12px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tpl-card-check {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+}
+
+/* ── Item preview ── */
+
+.tpl-card-preview {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.tpl-card-preview-item {
+    font-size: 13px;
     font-weight: 600;
     color: var(--dotodo-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    opacity: 0.75;
     white-space: nowrap;
+}
+
+.tpl-card-preview-more {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    opacity: 0.6;
+    margin-left: 2px;
+}
+
+/* ── Category chips ── */
+
+.tpl-card-cats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.tpl-card-cat {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dotodo-muted);
+    background: var(--dotodo-surface-strong);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+/* ── Footer ── */
+
+.tpl-footer {
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background: var(--dotodo-bg);
+    border-top: 1px solid var(--dotodo-card-border);
+}
+
+.tpl-create-btn {
+    --border-radius: 14px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0;
+    min-height: 50px;
+    --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.2);
+}
+
+.tpl-create-btn:disabled {
+    --box-shadow: none;
+    opacity: 0.5;
 }

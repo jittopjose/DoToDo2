@@ -1,27 +1,24 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     IonButton,
     IonButtons,
     IonContent,
+    IonFooter,
     IonHeader,
     IonIcon,
     IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
     IonModal,
-    IonRadio,
-    IonRadioGroup,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { closeOutline } from 'ionicons/icons';
+import { closeOutline, checkmarkCircle, repeatOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectTemplates } from '../../shared/store/doTodoStore';
 import { DoTodo } from '../../shared/types';
 import { DEFAULT_CATEGORIES } from '../types';
 import { RepeatSection } from '../../todo/components/RepeatSection';
+import './TemplatePickerModal.css';
 
 interface TemplatePickerModalProps {
     isOpen: boolean
@@ -36,6 +33,12 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
     const [selectedId, setSelectedId] = useState<string>('');
     const [listName, setListName] = useState('');
     const [recurrence, setRecurrence] = useState<DoTodo['recurrence']>();
+    const [showRepeat, setShowRepeat] = useState(false);
+
+    const sel = useMemo(
+        () => templates.find((t) => t.id === selectedId),
+        [templates, selectedId],
+    );
 
     const handleSelect = useCallback((id: string) => {
         setSelectedId(id);
@@ -52,6 +55,7 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         setSelectedId('');
         setListName('');
         setRecurrence(undefined);
+        setShowRepeat(false);
         if (newId) {
             history.push(`/shopping/${encodeURIComponent(newId)}`);
         }
@@ -62,10 +66,12 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         setSelectedId('');
         setListName('');
         setRecurrence(undefined);
+        setShowRepeat(false);
     }, [onDismiss]);
 
     const handleRecurrenceChange = useCallback((r: DoTodo['recurrence'] | undefined) => {
         setRecurrence(r);
+        if (!r) setShowRepeat(false);
     }, []);
 
     return (
@@ -77,67 +83,112 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                             <IonIcon icon={closeOutline} />
                         </IonButton>
                     </IonButtons>
-                    <IonTitle>Create from Template</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton
-                            onClick={handleConfirm}
-                            disabled={!selectedId || !listName.trim()}
-                            strong
-                        >
-                            Create
-                        </IonButton>
-                    </IonButtons>
+                    <IonTitle>Choose a template</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <IonContent className="template-picker-content">
-                <div className="template-picker-name-row">
+
+            <IonContent className="tpl-content">
+                <div className="tpl-config-row">
                     <IonInput
-                        className="template-picker-name-input"
+                        className="tpl-name-input"
                         value={listName}
                         placeholder="List name"
                         onIonInput={(e) => setListName(e.detail.value ?? '')}
                         aria-label="List name"
                     />
+                    <IonButton
+                        className={`tpl-repeat-toggle ${showRepeat || recurrence ? 'is-active' : ''}`}
+                        fill="clear"
+                        onClick={() => setShowRepeat((prev) => !prev)}
+                        aria-label="Set schedule"
+                    >
+                        <IonIcon icon={repeatOutline} />
+                    </IonButton>
                 </div>
 
-                <div className="template-picker-repeat-section">
-                    <RepeatSection value={recurrence} onChange={handleRecurrenceChange} />
-                </div>
-
-                <p className="template-picker-label">Pick a template</p>
+                {showRepeat && (
+                    <div className="tpl-repeat-section">
+                        <RepeatSection value={recurrence} onChange={handleRecurrenceChange} />
+                    </div>
+                )}
 
                 {templates.length === 0 ? (
-                    <p className="template-picker-empty">No templates yet. Save a shopping list as template first.</p>
+                    <p className="tpl-empty">No templates yet. Save a shopping list as template first.</p>
                 ) : (
-                    <IonRadioGroup value={selectedId} onIonChange={(e) => handleSelect(e.detail.value)}>
-                        <IonList className="template-picker-list">
-                            {templates.map((tpl) => {
-                                const itemCount = tpl.shoppingItems?.length ?? 0;
-                                const catList = tpl.shoppingItems?.reduce<string[]>((acc, item) => {
-                                    const cat = item.category && DEFAULT_CATEGORIES.some((c) => c.key === item.category)
-                                        ? item.category
-                                        : 'other';
-                                    if (!acc.includes(cat)) acc.push(cat);
-                                    return acc;
-                                }, []) ?? [];
+                    <div className="tpl-card-list">
+                        {templates.map((tpl) => {
+                            const isSelected = tpl.id === selectedId;
+                            const items = tpl.shoppingItems ?? [];
+                            const itemCount = items.length;
+                            const previewItems = items.slice(0, 3);
+                            const catKeys = items.reduce<string[]>((acc, item) => {
+                                const cat = item.category && DEFAULT_CATEGORIES.some((c) => c.key === item.category)
+                                    ? item.category
+                                    : 'other';
+                                if (!acc.includes(cat)) acc.push(cat);
+                                return acc;
+                            }, []);
+                            const catLabels = catKeys
+                                .map((key) => DEFAULT_CATEGORIES.find((c) => c.key === key)?.label ?? key)
+                                .slice(0, 3);
 
-                                return (
-                                    <IonItem key={tpl.id} className="template-picker-item">
-                                        <IonRadio slot="start" value={tpl.id} />
-                                        <IonLabel className="template-picker-item-label">
-                                            <span className="template-picker-item-name">{tpl.title}</span>
-                                            <span className="template-picker-item-meta">
-                                                {itemCount} item{itemCount !== 1 ? 's' : ''}
-                                                {catList.length > 0 && ` · ${catList.length} categor${catList.length !== 1 ? 'ies' : 'y'}`}
-                                            </span>
-                                        </IonLabel>
-                                    </IonItem>
-                                );
-                            })}
-                        </IonList>
-                    </IonRadioGroup>
+                            return (
+                                <div
+                                    key={tpl.id}
+                                    className={`tpl-card ${isSelected ? 'is-selected' : ''}`}
+                                    onClick={() => handleSelect(tpl.id)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleSelect(tpl.id);
+                                        }
+                                    }}
+                                >
+                                    <div className="tpl-card-top">
+                                        <span className="tpl-card-name">{tpl.title}</span>
+                                        <span className="tpl-card-count">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
+                                        {isSelected && (
+                                            <IonIcon icon={checkmarkCircle} className="tpl-card-check" />
+                                        )}
+                                    </div>
+                                    {previewItems.length > 0 && (
+                                        <div className="tpl-card-preview">
+                                            {previewItems.map((item, i) => (
+                                                <span key={item.id} className="tpl-card-preview-item">
+                                                    {item.title}{i < previewItems.length - 1 ? ',' : ''}
+                                                </span>
+                                            ))}
+                                            {itemCount > 3 && (
+                                                <span className="tpl-card-preview-more">+{itemCount - 3}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {catLabels.length > 0 && (
+                                        <div className="tpl-card-cats">
+                                            {catLabels.map((label) => (
+                                                <span key={label} className="tpl-card-cat">{label}</span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </IonContent>
+
+            <IonFooter className="tpl-footer">
+                <IonButton
+                    className="tpl-create-btn"
+                    expand="block"
+                    onClick={handleConfirm}
+                    disabled={!selectedId || !listName.trim()}
+                >
+                    {sel ? `Create from "${sel.title}"` : 'Select a template'}
+                </IonButton>
+            </IonFooter>
         </IonModal>
     );
 };
