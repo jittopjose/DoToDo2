@@ -11,7 +11,7 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { closeOutline, checkmarkCircle, repeatOutline } from 'ionicons/icons';
+import { cartOutline, checkmarkCircle, closeOutline, repeatOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectTemplates } from '../../shared/store/doTodoStore';
@@ -113,14 +113,23 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                 )}
 
                 {templates.length === 0 ? (
-                    <p className="tpl-empty">No templates yet. Save a shopping list as template first.</p>
+                    <div className="tpl-empty">
+                        <div className="tpl-empty-icon">
+                            <IonIcon icon={cartOutline} />
+                        </div>
+                        <p className="tpl-empty-text">
+                            No templates yet.<br />
+                            Save a shopping list as template first.
+                        </p>
+                    </div>
                 ) : (
                     <div className="tpl-card-list">
-                        {templates.map((tpl) => {
+                        {templates.map((tpl, idx) => {
                             const isSelected = tpl.id === selectedId;
                             const items = tpl.shoppingItems ?? [];
                             const itemCount = items.length;
                             const previewItems = items.slice(0, 3);
+                            const remaining = itemCount - 3;
                             const catKeys = items.reduce<string[]>((acc, item) => {
                                 const cat = item.category && DEFAULT_CATEGORIES.some((c) => c.key === item.category)
                                     ? item.category
@@ -136,6 +145,7 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                                 <div
                                     key={tpl.id}
                                     className={`tpl-card ${isSelected ? 'is-selected' : ''}`}
+                                    style={{ animationDelay: `${idx * 0.04}s` }}
                                     onClick={() => handleSelect(tpl.id)}
                                     role="button"
                                     tabIndex={0}
@@ -146,32 +156,39 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                                         }
                                     }}
                                 >
-                                    <div className="tpl-card-top">
-                                        <span className="tpl-card-name">{tpl.title}</span>
-                                        <span className="tpl-card-count">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
-                                        {isSelected && (
-                                            <IonIcon icon={checkmarkCircle} className="tpl-card-check" />
-                                        )}
-                                    </div>
-                                    {previewItems.length > 0 && (
-                                        <div className="tpl-card-preview">
-                                            {previewItems.map((item, i) => (
-                                                <span key={item.id} className="tpl-card-preview-item">
-                                                    {item.title}{i < previewItems.length - 1 ? ',' : ''}
-                                                </span>
-                                            ))}
-                                            {itemCount > 3 && (
-                                                <span className="tpl-card-preview-more">+{itemCount - 3}</span>
+                                    <div className="tpl-card-inner">
+                                        <div className="tpl-card-icon">
+                                            <IonIcon icon={cartOutline} />
+                                        </div>
+                                        <div className="tpl-card-body">
+                                            <div className="tpl-card-top">
+                                                <span className="tpl-card-name">{tpl.title}</span>
+                                                <span className="tpl-card-count">{itemCount}&nbsp;item{itemCount !== 1 ? 's' : ''}</span>
+                                                {isSelected && (
+                                                    <IonIcon icon={checkmarkCircle} className="tpl-card-check" />
+                                                )}
+                                            </div>
+                                            {previewItems.length > 0 && (
+                                                <div className="tpl-card-preview">
+                                                    {previewItems.map((item, i) => (
+                                                        <span key={item.id} className="tpl-card-preview-item">
+                                                            {item.title}{i < previewItems.length - 1 ? ',' : ''}
+                                                        </span>
+                                                    ))}
+                                                    {remaining > 0 && (
+                                                        <span className="tpl-card-preview-more">+{remaining}</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {catLabels.length > 0 && (
+                                                <div className="tpl-card-cats">
+                                                    {catLabels.map((label) => (
+                                                        <span key={label} className="tpl-card-cat">{label}</span>
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
-                                    )}
-                                    {catLabels.length > 0 && (
-                                        <div className="tpl-card-cats">
-                                            {catLabels.map((label) => (
-                                                <span key={label} className="tpl-card-cat">{label}</span>
-                                            ))}
-                                        </div>
-                                    )}
+                                    </div>
                                 </div>
                             );
                         })}
