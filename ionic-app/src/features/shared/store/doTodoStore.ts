@@ -415,7 +415,6 @@ export const useDoTodoStore = create<EntryState>()(
         isCompleted: false,
         completedAt: undefined,
         createdAt: Date.now(),
-        recurrence: undefined,
         dueDate: undefined,
         shoppingItems: entry.shoppingItems?.map((item) => ({
           ...item,

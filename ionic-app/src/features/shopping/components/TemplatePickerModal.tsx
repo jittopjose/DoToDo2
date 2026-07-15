@@ -17,7 +17,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectTemplates } from '../../shared/store/doTodoStore';
 import { DoTodo } from '../../shared/types';
 import { DEFAULT_CATEGORIES } from '../types';
-import { RepeatSection } from '../../todo/components/RepeatSection';
+import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
 import './TemplatePickerModal.css';
 
 interface TemplatePickerModalProps {
@@ -33,7 +33,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
     const [selectedId, setSelectedId] = useState<string>('');
     const [listName, setListName] = useState('');
     const [recurrence, setRecurrence] = useState<DoTodo['recurrence']>();
-    const [showRepeat, setShowRepeat] = useState(false);
 
     const sel = useMemo(
         () => templates.find((t) => t.id === selectedId),
@@ -45,6 +44,7 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         const tpl = templates.find((t) => t.id === id);
         if (tpl) {
             setListName(tpl.title);
+            setRecurrence(tpl.recurrence);
         }
     }, [templates]);
 
@@ -55,7 +55,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         setSelectedId('');
         setListName('');
         setRecurrence(undefined);
-        setShowRepeat(false);
         if (newId) {
             history.push(`/shopping/${encodeURIComponent(newId)}`);
         }
@@ -66,13 +65,7 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         setSelectedId('');
         setListName('');
         setRecurrence(undefined);
-        setShowRepeat(false);
     }, [onDismiss]);
-
-    const handleRecurrenceChange = useCallback((r: DoTodo['recurrence'] | undefined) => {
-        setRecurrence(r);
-        if (!r) setShowRepeat(false);
-    }, []);
 
     return (
         <IonModal isOpen={isOpen} onDidDismiss={handleDismiss}>
@@ -88,29 +81,13 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
             </IonHeader>
 
             <IonContent className="tpl-content">
-                <div className="tpl-config-row">
-                    <IonInput
-                        className="tpl-name-input"
-                        value={listName}
-                        placeholder="List name"
-                        onIonInput={(e) => setListName(e.detail.value ?? '')}
-                        aria-label="List name"
-                    />
-                    <IonButton
-                        className={`tpl-repeat-toggle ${showRepeat || recurrence ? 'is-active' : ''}`}
-                        fill="clear"
-                        onClick={() => setShowRepeat((prev) => !prev)}
-                        aria-label="Set schedule"
-                    >
-                        <IonIcon icon={repeatOutline} />
-                    </IonButton>
-                </div>
-
-                {showRepeat && (
-                    <div className="tpl-repeat-section">
-                        <RepeatSection value={recurrence} onChange={handleRecurrenceChange} />
-                    </div>
-                )}
+                <IonInput
+                    className="tpl-name-input"
+                    value={listName}
+                    placeholder="Enter list name"
+                    onIonInput={(e) => setListName(e.detail.value ?? '')}
+                    aria-label="List name"
+                />
 
                 {templates.length === 0 ? (
                     <div className="tpl-empty">
@@ -140,6 +117,7 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                             const catLabels = catKeys
                                 .map((key) => DEFAULT_CATEGORIES.find((c) => c.key === key)?.label ?? key)
                                 .slice(0, 3);
+                            const summary = tpl.recurrence ? formatRecurrenceSummary(tpl.recurrence) : null;
 
                             return (
                                 <div
@@ -164,6 +142,12 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                                             <div className="tpl-card-top">
                                                 <span className="tpl-card-name">{tpl.title}</span>
                                                 <span className="tpl-card-count">{itemCount}&nbsp;item{itemCount !== 1 ? 's' : ''}</span>
+                                                {summary && (
+                                                    <span className="tpl-card-recurrence">
+                                                        <IonIcon icon={repeatOutline} />
+                                                        {summary}
+                                                    </span>
+                                                )}
                                                 {isSelected && (
                                                     <IonIcon icon={checkmarkCircle} className="tpl-card-check" />
                                                 )}

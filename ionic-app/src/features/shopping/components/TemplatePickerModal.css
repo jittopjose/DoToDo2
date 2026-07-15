@@ -5,13 +5,6 @@
     --padding-bottom: 4px;
 }
 
-.tpl-config-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 2px;
-}
-
 .tpl-name-input {
     --background: var(--dotodo-card);
     --border-radius: 14px;
@@ -27,9 +20,7 @@
     font-weight: 700;
     border: 1.5px solid var(--dotodo-card-border);
     border-radius: 14px;
-    margin: 0;
-    flex: 1;
-    min-width: 0;
+    margin: 0 0 12px;
     box-shadow: var(--dotodo-shadow-soft);
     transition: border-color var(--dotodo-motion-fast);
 }
@@ -39,50 +30,6 @@
     box-shadow:
         0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.1),
         var(--dotodo-shadow-soft);
-}
-
-.tpl-repeat-toggle {
-    --color: var(--dotodo-muted);
-    --padding-start: 0;
-    --padding-end: 0;
-    width: 48px;
-    height: 48px;
-    margin: 0;
-    flex-shrink: 0;
-    border: 1.5px solid var(--dotodo-card-border);
-    border-radius: 14px;
-    background: var(--dotodo-card);
-    box-shadow: var(--dotodo-shadow-soft);
-    transition:
-        border-color var(--dotodo-motion-fast),
-        background var(--dotodo-motion-fast),
-        box-shadow var(--dotodo-motion-fast);
-}
-
-.tpl-repeat-toggle.is-active {
-    --color: var(--ion-color-primary);
-    border-color: var(--ion-color-primary);
-    --background: var(--dotodo-primary-soft);
-    box-shadow:
-        0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.1),
-        var(--dotodo-shadow-soft);
-}
-
-.tpl-repeat-toggle ion-icon {
-    font-size: 22px;
-}
-
-.tpl-repeat-section {
-    margin: 10px 0 12px;
-    padding: 14px;
-    background: var(--dotodo-card);
-    border-radius: 14px;
-    border: 1.5px solid var(--dotodo-card-border);
-    box-shadow: var(--dotodo-shadow-soft);
-}
-
-.tpl-repeat-section .edit-section {
-    padding: 0;
 }
 
 .tpl-empty {
@@ -245,6 +192,29 @@
     white-space: nowrap;
     flex-shrink: 0;
     letter-spacing: 0.01em;
+}
+
+.tpl-card-recurrence {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    background: var(--dotodo-primary-soft);
+    padding: 2px 8px 2px 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+}
+
+.tpl-card-recurrence ion-icon {
+    font-size: 13px;
+}
+
+.tpl-card.is-selected .tpl-card-recurrence {
+    background: rgba(var(--dotodo-primary-rgb), 0.18);
 }
 
 .tpl-card-check {
