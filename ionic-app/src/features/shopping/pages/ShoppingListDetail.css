@@ -386,72 +386,8 @@
     cursor: pointer;
 }
 
-/* ── Repeat banner ── */
-
-.shop-repeat-banner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    background: var(--dotodo-card);
-    border-radius: 12px;
-    box-shadow: var(--dotodo-shadow-card);
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    border-left: 4px solid var(--ion-color-tertiary);
-    transition: opacity var(--dotodo-motion-fast);
-}
-
-.shop-repeat-banner:active {
-    opacity: 0.7;
-}
-
-.shop-repeat-banner--inactive {
-    border-left-color: var(--dotodo-card-border);
-    opacity: 0.6;
-}
-
-.shop-repeat-banner-icon {
-    font-size: 20px;
-    color: var(--ion-color-tertiary);
-    flex-shrink: 0;
-}
-
-.shop-repeat-banner--inactive .shop-repeat-banner-icon {
-    color: var(--dotodo-muted);
-}
-
-.shop-repeat-banner-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-    flex: 1;
-}
-
-.shop-repeat-banner-label {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--dotodo-text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.shop-repeat-banner-action {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--dotodo-muted);
-}
-
-/* ── Repeat popover ── */
-
-.shop-repeat-popover {
-    --width: calc(100vw - 32px);
-    --max-width: 400px;
-}
+/* ── Repeat card ──
+   Styles for the repeat card live in ShoppingRepeatCard.css */
 
 /* ── Save as template row ── */
 

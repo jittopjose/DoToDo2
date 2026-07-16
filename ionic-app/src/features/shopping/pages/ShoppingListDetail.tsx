@@ -13,23 +13,21 @@ import {
     IonIcon,
     IonInput,
     IonPage,
-    IonPopover,
     IonSelect,
     IonSelectOption,
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, repeatOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
 import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
-import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
 import { ShoppingItem } from '../components/ShoppingItem';
 import { DEFAULT_CATEGORIES } from '../types';
 import { Recurrence } from '../../shared/types';
-import { RepeatSection } from '../../todo/components/RepeatSection';
+import ShoppingRepeatCard from '../components/ShoppingRepeatCard';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import { useRecentProductsStore } from '../store/recentProductsStore';
@@ -67,7 +65,6 @@ const ShoppingListDetail: React.FC = () => {
     const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
     const [dragging, setDragging] = useState(false);
     const [newItemCategory, setNewItemCategory] = useState<string>('');
-    const [repeatOpen, setRepeatOpen] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
     const [inputFocused, setInputFocused] = useState(false);
     const recentProducts = useRecentProductsStore((s) => s.products);
@@ -341,36 +338,11 @@ const ShoppingListDetail: React.FC = () => {
             <IonContent className={`shop-detail-content ${storeMode ? 'shop-detail-store-mode' : ''}`}>
                 {!storeMode && (
                     <>
-                        {entry.recurrence && (
-                            <div className="shop-repeat-banner" onClick={() => setRepeatOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRepeatOpen(true); } }}>
-                                <IonIcon icon={repeatOutline} className="shop-repeat-banner-icon" />
-                                <div className="shop-repeat-banner-body">
-                                    <span className="shop-repeat-banner-label">Repeats: {formatRecurrenceSummary(entry.recurrence)}</span>
-                                    <span className="shop-repeat-banner-action">Tap to change</span>
-                                </div>
-                            </div>
-                        )}
-                        {!entry.recurrence && (
-                            <div className="shop-repeat-banner shop-repeat-banner--inactive" onClick={() => setRepeatOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRepeatOpen(true); } }}>
-                                <IonIcon icon={repeatOutline} className="shop-repeat-banner-icon" />
-                                <div className="shop-repeat-banner-body">
-                                    <span className="shop-repeat-banner-label">Repeat</span>
-                                    <span className="shop-repeat-banner-action">Set a schedule</span>
-                                </div>
-                            </div>
-                        )}
-
-                        <IonPopover
-                            isOpen={repeatOpen}
-                            onDidDismiss={() => setRepeatOpen(false)}
-                            className="shop-repeat-popover"
-                        >
-                            <RepeatSection
-                                value={entry.recurrence}
-                                dueDate={entry.dueDate}
-                                onChange={handleRecurrenceChange}
-                            />
-                        </IonPopover>
+                        <ShoppingRepeatCard
+                            value={entry.recurrence}
+                            dueDate={entry.dueDate}
+                            onChange={handleRecurrenceChange}
+                        />
 
                         <div className="shop-detail-total-row">
                             <IonCard className="shop-detail-total-card">
