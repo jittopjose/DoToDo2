@@ -2,6 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
     IonDatetime,
     IonIcon,
+    IonSelect,
+    IonSelectOption,
     IonToggle,
 } from '@ionic/react';
 import {
@@ -376,15 +378,16 @@ const ShoppingRepeatCard: React.FC<ShoppingRepeatCardProps> = ({ value, dueDate,
                         </button>
                     </div>
                     <div className="shop-repeat-custom-unit">
-                        {CUSTOM_UNITS.map((u) => (
-                            <button
-                                key={u.value}
-                                className={`shop-repeat-unit-btn${customUnit === u.value ? ' is-active' : ''}`}
-                                onClick={() => handleCustomUnitChange(u.value)}
-                            >
-                                {u.label}
-                            </button>
-                        ))}
+                        <IonSelect
+                            className="shop-repeat-unit-select"
+                            value={customUnit}
+                            onIonChange={(e) => handleCustomUnitChange(e.detail.value as Recurrence['frequency'])}
+                            interface="action-sheet"
+                        >
+                            {CUSTOM_UNITS.map((u) => (
+                                <IonSelectOption key={u.value} value={u.value}>{u.label}</IonSelectOption>
+                            ))}
+                        </IonSelect>
                     </div>
                 </div>
             )}

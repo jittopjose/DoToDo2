@@ -234,30 +234,28 @@
 }
 
 .shop-repeat-custom-unit {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
+    flex: 1;
+    max-width: 150px;
 }
 
-.shop-repeat-unit-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--dotodo-muted);
-    background: var(--dotodo-surface-strong);
+.shop-repeat-unit-select {
+    --padding-start: 10px;
+    --padding-end: 28px;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    --background: var(--dotodo-surface-strong);
+    --border-radius: 10px;
+    --highlight-color-focused: var(--dotodo-primary);
+    font-size: 14px;
+    font-weight: 650;
+    min-height: 38px;
+    --placeholder-color: var(--dotodo-muted);
+    --color: var(--dotodo-text);
     border: 1.5px solid var(--dotodo-card-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition:
-        border-color var(--dotodo-motion-fast),
-        background var(--dotodo-motion-fast),
-        color var(--dotodo-motion-fast);
 }
 
-.shop-repeat-unit-btn.is-active {
-    color: #fff;
-    background: var(--ion-color-primary);
-    border-color: transparent;
+.shop-repeat-unit-select::part(text) {
+    padding-left: 2px;
 }
 
 .shop-repeat-end {
