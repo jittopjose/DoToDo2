@@ -24,12 +24,12 @@
 }
 
 .shop-repeat-card--active {
-    border-left: 4px solid var(--ion-color-primary);
+    border-color: var(--ion-color-tertiary);
 }
 
 .shop-repeat-card-icon {
     font-size: 20px;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-tertiary);
     flex-shrink: 0;
 }
 
@@ -78,9 +78,9 @@
     align-items: stretch;
     gap: 14px;
     cursor: default;
-    border-color: var(--ion-color-primary);
+    border-color: var(--ion-color-tertiary);
     box-shadow:
-        0 0 0 3px rgba(var(--dotodo-primary-rgb), 0.1),
+        0 0 0 3px rgba(var(--ion-color-tertiary-rgb), 0.1),
         var(--dotodo-shadow-card);
 }
 
@@ -105,7 +105,7 @@
 
 .shop-repeat-card-done {
     font-size: 20px;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-tertiary);
     flex-shrink: 0;
 }
 
@@ -136,9 +136,9 @@
 
 .shop-repeat-chip.is-active {
     color: #fff;
-    background: linear-gradient(135deg, var(--dotodo-primary), var(--dotodo-secondary));
+    background: var(--ion-color-tertiary);
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(var(--dotodo-primary-rgb), 0.25);
+    box-shadow: 0 4px 12px rgba(var(--ion-color-tertiary-rgb), 0.25);
 }
 
 .shop-repeat-chip-icon {
@@ -172,7 +172,7 @@
 
 .shop-repeat-weekday-btn.is-active {
     color: #fff;
-    background: var(--ion-color-primary);
+    background: var(--ion-color-tertiary);
     border-color: transparent;
 }
 
@@ -210,7 +210,7 @@
     justify-content: center;
     border: none;
     background: transparent;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-tertiary);
     border-radius: 10px;
     cursor: pointer;
 }
@@ -245,7 +245,7 @@
     --padding-bottom: 6px;
     --background: var(--dotodo-surface-strong);
     --border-radius: 10px;
-    --highlight-color-focused: var(--dotodo-primary);
+    --highlight-color-focused: var(--ion-color-tertiary);
     font-size: 14px;
     font-weight: 650;
     min-height: 38px;
@@ -293,7 +293,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 12px;
-    background: var(--dotodo-primary-soft);
+    background: rgba(var(--ion-color-tertiary-rgb), 0.12);
     border-radius: 12px;
     font-size: 13px;
     font-weight: 600;
@@ -302,7 +302,7 @@
 
 .shop-repeat-preview ion-icon {
     font-size: 16px;
-    color: var(--ion-color-primary);
+    color: var(--ion-color-tertiary);
 }
 
 .shop-repeat-remove {
