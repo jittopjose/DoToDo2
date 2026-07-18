@@ -37,10 +37,12 @@ const ShoppingOverview: React.FC = () => {
     const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
     const [actionListId, setActionListId] = useState<string | null>(null);
+    const [templateActionId, setTemplateActionId] = useState<string | null>(null);
     const [presentToast] = useIonToast();
 
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
     const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
+    const deleteTemplate = useDoTodoStore((state) => state.deleteTemplate);
     const activeLists = useDoTodoStore(useShallow(selectActiveShoppingLists));
     const archivedLists = useDoTodoStore(useShallow(selectArchivedShoppingLists));
     const templates = useDoTodoStore(useShallow(selectTemplates));
@@ -80,6 +82,19 @@ const ShoppingOverview: React.FC = () => {
         }
     }, [actionListId, saveAsTemplate, presentToast]);
 
+    const handleDeleteTemplate = useCallback(() => {
+        if (templateActionId) {
+            deleteTemplate(templateActionId);
+            setTemplateActionId(null);
+            presentToast({
+                message: 'Template deleted',
+                duration: 2000,
+                color: 'tertiary',
+                position: 'bottom',
+            });
+        }
+    }, [templateActionId, deleteTemplate, presentToast]);
+
     const ListCard: React.FC<{ listId: string; isTemplate?: boolean }> = ({ listId, isTemplate }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);
         const summary = useDoTodoStore(useShallow(selectShoppingListSummary(listId)));
@@ -103,6 +118,12 @@ const ShoppingOverview: React.FC = () => {
             }
         }, []);
 
+        const handleTemplatePointerDown = useCallback(() => {
+            longPressTimer.current = setTimeout(() => {
+                setTemplateActionId(listId);
+            }, 500);
+        }, [listId]);
+
         const handleUseTemplate = useCallback(() => {
             const tpl = templates.find((t) => t.id === listId);
             if (!tpl) return;
@@ -123,6 +144,9 @@ const ShoppingOverview: React.FC = () => {
                     button
                     lines="none"
                     onClick={handleUseTemplate}
+                    onPointerDown={handleTemplatePointerDown}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerUp}
                 >
                     <IonIcon icon={documentOutline} className="shop-list-card-icon shop-template-card-icon" slot="start" />
                     <div className="shop-list-card-body">
@@ -306,6 +330,16 @@ const ShoppingOverview: React.FC = () => {
                     header="List options"
                     buttons={[
                         { text: 'Save as template', handler: handleSaveAsTemplate },
+                        { text: 'Cancel', role: 'cancel' },
+                    ]}
+                />
+
+                <IonActionSheet
+                    isOpen={templateActionId !== null}
+                    onDidDismiss={() => setTemplateActionId(null)}
+                    header="Template options"
+                    buttons={[
+                        { text: 'Delete template', role: 'destructive', handler: handleDeleteTemplate },
                         { text: 'Cancel', role: 'cancel' },
                     ]}
                 />
