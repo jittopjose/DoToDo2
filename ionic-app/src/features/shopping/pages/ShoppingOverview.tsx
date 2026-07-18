@@ -19,6 +19,7 @@ import {
     IonRow,
     IonTitle,
     IonToolbar,
+    useIonToast,
 } from '@ionic/react';
 import { addOutline, archiveOutline, cartOutline, checkmarkCircleOutline, chevronDownOutline, documentOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -36,6 +37,7 @@ const ShoppingOverview: React.FC = () => {
     const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
     const [actionListId, setActionListId] = useState<string | null>(null);
+    const [presentToast] = useIonToast();
 
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
     const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
@@ -69,8 +71,14 @@ const ShoppingOverview: React.FC = () => {
         if (actionListId) {
             saveAsTemplate(actionListId);
             setActionListId(null);
+            presentToast({
+                message: 'Saved as template',
+                duration: 2000,
+                color: 'tertiary',
+                position: 'bottom',
+            });
         }
-    }, [actionListId, saveAsTemplate]);
+    }, [actionListId, saveAsTemplate, presentToast]);
 
     const ListCard: React.FC<{ listId: string; isTemplate?: boolean }> = ({ listId, isTemplate }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);

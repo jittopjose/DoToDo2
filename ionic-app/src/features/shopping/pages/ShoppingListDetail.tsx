@@ -17,6 +17,7 @@ import {
     IonSelectOption,
     IonTitle,
     IonToolbar,
+    useIonToast,
 } from '@ionic/react';
 import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, scanOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
@@ -260,10 +261,18 @@ const ShoppingListDetail: React.FC = () => {
         setMoreOpen(true);
     }, []);
 
+    const [presentToast] = useIonToast();
+
     const handleSaveAsTemplate = useCallback(() => {
         saveAsTemplate(listId);
         setMoreOpen(false);
-    }, [listId, saveAsTemplate]);
+        presentToast({
+            message: 'Saved as template',
+            duration: 2000,
+            color: 'tertiary',
+            position: 'bottom',
+        });
+    }, [listId, saveAsTemplate, presentToast]);
 
     const handleRecurrenceChange = useCallback((recurrence: Recurrence | undefined) => {
         updateShoppingListRecurrence(listId, recurrence);
