@@ -290,26 +290,36 @@ Key refs:
 
 ---
 
-## Step 4 — Templates / Recurring Lists (Priority: MEDIUM)
+## Step 4 — Templates / Recurring Lists (Priority: MEDIUM) 🔶 PARTIAL
 
 **Goal**: Save a shopping list as a template. Create a new list from a template.
 Schedule a list to auto-create on a recurring basis.
+
+> **Status — as of 2026-07-18**: Template save, template picker modal, "from template"
+> creation, and per-list recurrence configuration are **implemented**. The launch-time
+> auto-generation of recurring lists is **NOT yet implemented** (see gap below).
 
 ### Files to create
 
 | File | Purpose |
 |------|---------|
-| `src/features/shopping/components/TemplatePicker.tsx` | Modal for selecting a template when creating a list |
-| `src/features/shopping/components/TemplatePicker.css` | Template picker styles |
+| `src/features/shopping/components/TemplatePickerModal.tsx` | Modal for selecting a template + naming the new list + choosing recurrence |
+| `src/features/shopping/components/TemplatePickerModal.css` | Template picker styles (card grid, icons, animations, recurrence badge) |
+
+> The actual component is named `TemplatePickerModal` (the original plan said
+> `TemplatePicker`). The modal also carries the recurrence chooser for the new list.
 
 ### Files to modify
 
 | File | Change |
 |------|--------|
-| `ShoppingOverview.tsx` | Add "From template" option in create-list area; add template badge on list cards |
-| `ShoppingOverview.css` | Template badge styles |
-| `src/features/shared/types.ts` | Add optional `templateId`, `isTemplate`, and `recurrence` to `DoTodo` (reuse existing `Recurrence` type) |
-| `src/features/shared/store/doTodoStore.ts` | Add `saveAsTemplate`, `getTemplates`, `createFromTemplate` actions; `selectTemplateLists` selector |
+| `ShoppingOverview.tsx` | "From template" button in create area; dedicated collapsible "Templates" group with template cards (dashed border + "Template" `IonChip` badge); long-press action sheet with "Save as template" |
+| `ShoppingOverview.css` | Template card + badge + group styles |
+| `src/features/shared/types.ts` | `templateId`, `isTemplate`, and `recurrence` added to `DoTodo` (reuse existing `Recurrence` type) |
+| `src/features/shared/store/doTodoStore.ts` | `saveAsTemplate`, `getTemplates`/`selectTemplates`, `createFromTemplate` actions; templates filtered out of active/archived selectors via `isTemplate === true` |
+| `ShoppingListDetail.tsx` | Repeat control now uses `ShoppingRepeatCard` (inline expandable card — see redesign note) |
+| `src/features/shopping/components/ShoppingRepeatCard.tsx` (new) | Inline expandable repeat editor (collapsed summary → expanded editor with freq chips, weekday row, custom stepper + `IonSelect` unit dropdown, inline `IonDatetime` end-date, next-occurrence preview, Remove) |
+| `src/features/shopping/components/ShoppingRepeatCard.css` (new) | Repeat card styles (tertiary teal-green accent to match shopping theme) |
 
 ### Data model
 
@@ -326,25 +336,46 @@ by checking `isTemplate === true`.
 
 ### Behaviour
 
-- **Save as template**: Long-press or swipe on a list card → "Save as template"
-- **Create from template**: In ShoppingOverview, "New from template…" option opens `TemplatePicker`
-  modal showing saved templates. Selecting one calls `createFromTemplate(templateId, title)` which
-  deep-clones the template's `shoppingItems` into a new list
+- **Save as template**: Long-press (card action sheet) on a list card → "Save as template"
+  calls `saveAsTemplate(listId)`. The template **preserves** the source list's recurrence
+  (it is no longer stripped), so a recurring template stays recurring.
+- **Create from template**: In ShoppingOverview, "From template" button opens
+  `TemplatePickerModal` showing saved templates (cards with icon, item preview, category
+  chips, recurrence badge, selection glow). Selecting one + entering a list name + optional
+  recurrence calls `createFromTemplate(templateId, title, recurrence)`, which deep-clones the
+  template's `shoppingItems` into a new list. If the template itself has a recurrence, it is
+  pre-filled into the modal's recurrence chooser.
 - **Template card**: Visually distinct in overview (dashed border, "Template" badge, not in
-  Active/Archived sections — shown in a dedicated "Templates" section above the create card)
-- **Recurring**: When creating from template, option to set recurrence (e.g., every Monday).
-  At app launch, a simple date check creates new lists from any recurring templates whose
-  schedule has elapsed — no background timers needed
-- **Recurrence config**: Reuses the existing `Recurrence` type (`frequency`, `interval`,
-  `weekdays`, `endType`, `endDate`). A recurrence configuration section is shown in the
-  template picker modal
+  Active/Archived sections — shown in a dedicated "Templates" group above the create card).
+  Tapping a template card opens the picker pre-focused on that template.
+- **Recurring (assignment)**: Recurrence is chosen at creation time in the modal (and editable
+  later via `ShoppingRepeatCard` on the detail page). `frequency`, `interval`, `weekdays`,
+  `endType`, `endDate`, `originDate` reuse the existing `Recurrence` type.
+- **Recurring (auto-create)**: ⚠️ **NOT IMPLEMENTED.** The plan called for a launch-time date
+  check that auto-creates new lists from recurring templates whose schedule has elapsed. No
+  such logic exists — `createFromTemplate` is only invoked manually from the modal. This is the
+  remaining Step 4 gap.
+
+### Repeat control redesign (post-implementation note)
+
+The original plan assumed a recurrence configuration section inside the template picker and a
+popover-based repeat editor on the detail page. Both were redesigned:
+
+- The detail-page repeat editor is now `ShoppingRepeatCard` — a self-contained inline expandable
+  card (collapsed shows "Repeats: <summary>" + next occurrence; tap expands the full editor).
+  End date uses an inline `IonDatetime`, not a nested popover.
+- The task edit screen's `RepeatSection` was later restyled to mirror `ShoppingRepeatCard`
+  (collapsed→expanded card, same chips/stepper/preview/remove visuals), keeping its primary
+  purple accent.
+- Theme: shopping repeat card uses tertiary teal-green (`--ion-color-tertiary`) to match the
+  shopping list; task repeat section uses primary purple.
 
 ### Acceptance criteria
 
-- Can save any list as a template
-- Creating a new list offers "from template" flow
-- Template lists are visually distinct (dashed border, badge)
-- Recurring lists auto-create on schedule (checked at app open)
+- ✅ Can save any list as a template (long-press → action sheet)
+- ✅ Creating a new list offers "from template" flow (`TemplatePickerModal`)
+- ✅ Template lists are visually distinct (dashed border, badge, dedicated Templates group)
+- ⚠️ Recurring lists auto-create on schedule (checked at app open) — **NOT IMPLEMENTED** (manual creation only)
 
 ---
 
@@ -526,9 +557,9 @@ Step 2 (Categories) — requires category field on ShoppingItem ✅ DONE
 Step 3 (Sort) — requires reorderShoppingItems action ✅ DONE
    └─ Step 1 auto-sets checked-last in store mode
 
-Step 4 (Templates) — requires isTemplate/templateId/recurrence on DoTodo
-   └─ independent of Steps 1-3
-   └─ ShoppingOverview changes independent of detail page changes
+Step 4 (Templates) — requires isTemplate/templateId/recurrence on DoTodo 🔶 PARTIAL
+    └─ independent of Steps 1-3
+    └─ Save/create/badge done; launch-time recurring auto-create NOT done
 
 Step 5 (Recent products) — new standalone store, taps into addShoppingItem ✅ DONE
     └─ independent of Steps 1-4 (composer area change only)
@@ -552,7 +583,11 @@ plan — see Step 2 section for details on the minimal-header approach (no colla
 sections, no per-item category chips, no color field). Step 5 chips filter by typed
 text rather than hiding when non-empty, and now store the last-used category per
 product (auto-filled on chip tap). `addShoppingItem` defaults quantity to 1 when
-omitted. Next up: Step 4 (Templates) or Step 6 (Sharing).
+omitted. Step 4 (Templates) is **partially** done: save-as-template, the
+`TemplatePickerModal`, "from template" creation, template cards/badges, and the
+`ShoppingRepeatCard` inline editor are all implemented; the launch-time recurring
+auto-create is the only remaining gap. Next up: finish Step 4 auto-create, or start
+Step 6 (Sharing).
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
@@ -569,6 +604,7 @@ parts of the detail page with minimal merge conflict risk).
 |-------|------|-------|
 | `/shopping` | `ShoppingOverview` | Phase 1 ✅ |
 | `/shopping/:listId` | `ShoppingListDetail` | Phase 1 ✅ |
+| (template creation) | `TemplatePickerModal` (in-page modal, not route) | Phase 2 Step 4 |
 | `/shopping/:listId/share` | `ShareModal` (in-page modal, not route) | Phase 2 Step 6 |
 
 ---
@@ -595,8 +631,10 @@ src/features/shopping/
 │   ├── ScannerOverlay.css
 │   ├── ShoppingItem.tsx                ← + storeMode prop, + category IonSelect in editor (no showCategory prop)
 │   ├── ShoppingItem.css                ← + store-mode variants, + .shop-editor-category (no .shop-item-category-chip)
-│   ├── TemplatePicker.tsx              ← NEW (Step 4)
-│   └── TemplatePicker.css              ← NEW (Step 4)
+│   ├── TemplatePickerModal.tsx         ← NEW (Step 4) — template selection + naming + recurrence
+│   ├── TemplatePickerModal.css         ← NEW (Step 4)
+│   ├── ShoppingRepeatCard.tsx          ← NEW — inline expandable repeat editor (replaces popover)
+│   └── ShoppingRepeatCard.css          ← NEW
 ├── pages/
 │   ├── ShoppingListDetail.tsx          ← + store mode, + categories (minimal headers), + sort, + drag-reorder, + recent products (Step 5), + share button (Step 6)
 │   ├── ShoppingListDetail.css          ← + store mode, + .shop-category-minimal-header, + sort, + recents styles
