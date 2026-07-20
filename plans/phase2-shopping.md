@@ -295,9 +295,10 @@ Key refs:
 **Goal**: Save a shopping list as a template. Create a new list from a template.
 Schedule a list to auto-create on a recurring basis.
 
-> **Status — as of 2026-07-18**: Template save, template picker modal, "from template"
-> creation, and per-list recurrence configuration are **implemented**. The launch-time
-> auto-generation of recurring lists is **NOT yet implemented** (see gap below).
+> **Status — as of 2026-07-19**: Template save (with toast), template picker modal,
+> "from template" creation (tap card opens modal preselected), template delete
+> (long-press), and per-list recurrence configuration are **implemented**. The
+> launch-time auto-generation of recurring lists is **NOT yet implemented** (see gap below).
 
 ### Files to create
 
@@ -313,8 +314,8 @@ Schedule a list to auto-create on a recurring basis.
 
 | File | Change |
 |------|--------|
-| `ShoppingOverview.tsx` | "From template" button in create area; dedicated collapsible "Templates" group with template cards (dashed border + "Template" `IonChip` badge); long-press action sheet with "Save as template" |
-| `ShoppingOverview.css` | Template card + badge + group styles |
+| `ShoppingOverview.tsx` | "From template" button in create area; dedicated collapsible "Templates" group with template cards (dashed border + "Template" `IonChip` badge); long-press action sheet with "Save as template"; toast confirmation on save; long-press on template card → "Template options" action sheet with Delete; tap on template card (or compact `+` on the hint line) opens `TemplatePickerModal` preselected via `initialTemplateId` |
+| `ShoppingOverview.css` | Template card + badge + group styles; `.shop-template-hint` + compact `.shop-template-use-btn` (`+` icon) |
 | `src/features/shared/types.ts` | `templateId`, `isTemplate`, and `recurrence` added to `DoTodo` (reuse existing `Recurrence` type) |
 | `src/features/shared/store/doTodoStore.ts` | `saveAsTemplate`, `getTemplates`/`selectTemplates`, `createFromTemplate` actions; templates filtered out of active/archived selectors via `isTemplate === true` |
 | `ShoppingListDetail.tsx` | Repeat control now uses `ShoppingRepeatCard` (inline expandable card — see redesign note) |
@@ -337,17 +338,23 @@ by checking `isTemplate === true`.
 ### Behaviour
 
 - **Save as template**: Long-press (card action sheet) on a list card → "Save as template"
-  calls `saveAsTemplate(listId)`. The template **preserves** the source list's recurrence
-  (it is no longer stripped), so a recurring template stays recurring.
+  calls `saveAsTemplate(listId)` and shows a tertiary "Saved as template" toast. The template
+  **preserves** the source list's recurrence (it is no longer stripped), so a recurring
+  template stays recurring.
 - **Create from template**: In ShoppingOverview, "From template" button opens
   `TemplatePickerModal` showing saved templates (cards with icon, item preview, category
-  chips, recurrence badge, selection glow). Selecting one + entering a list name + optional
-  recurrence calls `createFromTemplate(templateId, title, recurrence)`, which deep-clones the
-  template's `shoppingItems` into a new list. If the template itself has a recurrence, it is
-  pre-filled into the modal's recurrence chooser.
+  chips, recurrence badge, selection glow). Tapping a template card (or its compact `+` hint
+  button) opens the same modal **preselected** on that template via the `initialTemplateId`
+  prop (replacing the old behaviour of silently spawning an empty list). Selecting one +
+  entering a list name + optional recurrence calls `createFromTemplate(templateId, title,
+  recurrence)`, which deep-clones the template's `shoppingItems` into a new list. If the
+  template itself has a recurrence, it is pre-filled into the modal's recurrence chooser.
 - **Template card**: Visually distinct in overview (dashed border, "Template" badge, not in
   Active/Archived sections — shown in a dedicated "Templates" group above the create card).
-  Tapping a template card opens the picker pre-focused on that template.
+  Hint line "Tap to create a new list" + compact `+` button; whole card is tappable.
+- **Delete template**: Long-press a template card → "Template options" action sheet →
+  "Delete template" (destructive) calls `deleteTemplate(templateId)` and shows a
+  "Template deleted" toast.
 - **Recurring (assignment)**: Recurrence is chosen at creation time in the modal (and editable
   later via `ShoppingRepeatCard` on the detail page). `frequency`, `interval`, `weekdays`,
   `endType`, `endDate`, `originDate` reuse the existing `Recurrence` type.
@@ -372,9 +379,11 @@ popover-based repeat editor on the detail page. Both were redesigned:
 
 ### Acceptance criteria
 
-- ✅ Can save any list as a template (long-press → action sheet)
+- ✅ Can save any list as a template (long-press → action sheet) with toast confirmation
 - ✅ Creating a new list offers "from template" flow (`TemplatePickerModal`)
 - ✅ Template lists are visually distinct (dashed border, badge, dedicated Templates group)
+- ✅ Tapping a template card opens the picker preselected (no silent empty-list creation)
+- ✅ Delete template via long-press → action sheet (with toast)
 - ⚠️ Recurring lists auto-create on schedule (checked at app open) — **NOT IMPLEMENTED** (manual creation only)
 
 ---
