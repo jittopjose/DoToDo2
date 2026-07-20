@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     IonButton,
     IonButtons,
@@ -23,9 +23,10 @@ import './TemplatePickerModal.css';
 interface TemplatePickerModalProps {
     isOpen: boolean
     onDismiss: () => void
+    initialTemplateId?: string
 }
 
-const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDismiss }) => {
+const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDismiss, initialTemplateId }) => {
     const history = useHistory();
     const templates = useDoTodoStore(useShallow(selectTemplates));
     const createFromTemplate = useDoTodoStore((state) => state.createFromTemplate);
@@ -47,6 +48,13 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
             setRecurrence(tpl.recurrence);
         }
     }, [templates]);
+
+    useEffect(() => {
+        if (isOpen && initialTemplateId && !selectedId) {
+            handleSelect(initialTemplateId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, initialTemplateId]);
 
     const handleConfirm = useCallback(() => {
         if (!selectedId || !listName.trim()) return;

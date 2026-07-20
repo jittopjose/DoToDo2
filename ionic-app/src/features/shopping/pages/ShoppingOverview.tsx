@@ -36,6 +36,7 @@ const ShoppingOverview: React.FC = () => {
     const [newListName, setNewListName] = useState('');
     const [expanded, setExpanded] = useState<Set<string>>(new Set(['Active']));
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
+    const [templateModalInitialId, setTemplateModalInitialId] = useState<string | undefined>(undefined);
     const [actionListId, setActionListId] = useState<string | null>(null);
     const [templateActionId, setTemplateActionId] = useState<string | null>(null);
     const [presentToast] = useIonToast();
@@ -125,11 +126,9 @@ const ShoppingOverview: React.FC = () => {
         }, [listId]);
 
         const handleUseTemplate = useCallback(() => {
-            const tpl = templates.find((t) => t.id === listId);
-            if (!tpl) return;
-            const newId = addShoppingList(tpl.title + ' (copy)');
-            history.push(`/shopping/${encodeURIComponent(newId)}`);
-        }, [listId, templates, addShoppingList, history]);
+            setTemplateModalInitialId(listId);
+            setTemplateModalOpen(true);
+        }, [listId]);
 
         if (isTemplate) {
             const catCount = entry?.shoppingItems?.reduce<string[]>((acc, item) => {
@@ -155,6 +154,21 @@ const ShoppingOverview: React.FC = () => {
                             {summary.count} item{summary.count !== 1 ? 's' : ''}
                             {catCount.length > 0 && ` · ${catCount.length} categor${catCount.length !== 1 ? 'ies' : 'y'}`}
                             <IonChip className="shop-template-badge">Template</IonChip>
+                        </span>
+                        <span className="shop-template-hint">
+                            Tap to create a new list
+                            <IonButton
+                                className="shop-template-use-btn"
+                                fill="clear"
+                                size="small"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUseTemplate();
+                                }}
+                                aria-label="Use template"
+                            >
+                                <IonIcon icon={addOutline} slot="icon-only" />
+                            </IonButton>
                         </span>
                     </div>
                 </IonItem>
@@ -346,7 +360,11 @@ const ShoppingOverview: React.FC = () => {
 
                 <TemplatePickerModal
                     isOpen={templateModalOpen}
-                    onDismiss={() => setTemplateModalOpen(false)}
+                    initialTemplateId={templateModalInitialId}
+                    onDismiss={() => {
+                        setTemplateModalOpen(false);
+                        setTemplateModalInitialId(undefined);
+                    }}
                 />
             </IonContent>
         </IonPage>
