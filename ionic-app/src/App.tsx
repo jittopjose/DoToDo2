@@ -1,4 +1,4 @@
-import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
+import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact, useIonToast } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
@@ -65,11 +65,25 @@ const history = createMemoryHistory();
 const App: React.FC = () => {
   const themePreference = useSettingsStore((state) => state.themePreference);
   const isHydrated = useDoTodoStore((state) => state.isHydrated);
+  const [presentToast] = useIonToast();
 
   useEffect(() => {
     useDoTodoStore.getState().hydrate()
     initBridge().then(() => getBackend()?.log("React app loaded"))
   }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    const count = useDoTodoStore.getState().generateRecurringTemplates();
+    if (count > 0) {
+      presentToast({
+        message: count === 1 ? 'Created 1 list from a template' : `Created ${count} lists from templates`,
+        duration: 2500,
+        color: 'tertiary',
+        position: 'bottom',
+      });
+    }
+  }, [isHydrated, presentToast])
 
   useEffect(() => {
     const applyTheme = () => {

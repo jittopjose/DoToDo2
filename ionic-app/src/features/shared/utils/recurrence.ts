@@ -118,3 +118,71 @@ export function formatRecurrenceSummary(r: Recurrence): string {
 
   return label;
 }
+
+/**
+ * Compute the next occurrence strictly after `from` for a recurrence anchored at
+ * `recurrence.originDate`. Returns null if the recurrence has ended (endType
+ * 'until' and the computed occurrence is past endDate) or cannot be computed.
+ * Unlike getNextDueDate, this does not require a separate dueDate — it derives
+ * the schedule purely from originDate, which is what templates use.
+ */
+export function getNextOccurrence(recurrence: Recurrence, from: number): number | null {
+  const origin = recurrence.originDate;
+  let cursor = new Date(origin);
+  const start = new Date(from);
+
+  const step = (): Date | null => {
+    const base = new Date(cursor);
+    switch (recurrence.frequency) {
+      case 'daily': {
+        base.setDate(base.getDate() + recurrence.interval);
+        return base;
+      }
+      case 'weekdays': {
+        do {
+          base.setDate(base.getDate() + 1);
+        } while (base.getDay() === 0 || base.getDay() === 6);
+        return base;
+      }
+      case 'weekly': {
+        if (recurrence.weekdays && recurrence.weekdays.length > 0) {
+          return new Date(getNextWeekdayDate(base, recurrence.weekdays));
+        }
+        base.setDate(base.getDate() + 7 * recurrence.interval);
+        return base;
+      }
+      case 'biweekly': {
+        base.setDate(base.getDate() + 14 * recurrence.interval);
+        return base;
+      }
+      case 'monthly': {
+        base.setMonth(base.getMonth() + recurrence.interval);
+        const targetDay = recurrence.dayOfMonth ?? base.getDate();
+        const daysInMonth = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+        base.setDate(Math.min(targetDay, daysInMonth));
+        return base;
+      }
+      case 'yearly': {
+        base.setFullYear(base.getFullYear() + recurrence.interval);
+        return base;
+      }
+      default:
+        return null;
+    }
+  };
+
+  // Walk forward from origin until we pass `from`.
+  let next = step();
+  while (next && next.getTime() <= start.getTime()) {
+    cursor = next;
+    next = step();
+  }
+
+  if (!next) return null;
+
+  if (recurrence.endType === 'until' && recurrence.endDate !== undefined) {
+    if (next.getTime() > recurrence.endDate) return null;
+  }
+
+  return next.getTime();
+}

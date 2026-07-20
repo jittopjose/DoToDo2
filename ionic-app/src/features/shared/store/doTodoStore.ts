@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { DoTodo, ShoppingItem, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
-import { getNextDueDate } from '../utils/recurrence';
+import { getNextDueDate, getNextOccurrence } from '../utils/recurrence';
 import { loadData, saveData } from '../../../services/do-todo-storage.service';
 
 const normalizeToEndOfDay = (timestamp: number) => {
@@ -28,6 +28,7 @@ interface EntryState {
   searchTerm: string;
   customLists: string[];
   isHydrated: boolean;
+  lastRecurrenceCheck: number;
 
   hydrate: () => Promise<void>;
   addEntry: (title: string, itemType: DoTodo['itemType'], description?: string, dueDate?: number, priority?: DoTodoPriority, quantity?: number, price?: number, subtasks?: DoTodo['subtasks'], list?: string, recurrence?: Recurrence) => void;
@@ -43,6 +44,7 @@ interface EntryState {
   createFromTemplate: (templateId: string, title: string, recurrence?: Recurrence) => string;
   deleteTemplate: (templateId: string) => void;
   updateShoppingListRecurrence: (listId: string, recurrence: Recurrence | undefined) => void;
+  generateRecurringTemplates: (now?: number) => number;
   addShoppingItem: (listId: string, title: string, quantity?: number, price?: number, category?: string) => void;
   toggleShoppingItem: (listId: string, itemId: string) => void;
   updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price' | 'category'>>) => void;
@@ -70,6 +72,7 @@ export const useDoTodoStore = create<EntryState>()(
     searchTerm: '',
     customLists: [],
     isHydrated: false,
+    lastRecurrenceCheck: 0,
 
     hydrate: async () => {
       const data = await loadData()
@@ -475,6 +478,40 @@ export const useDoTodoStore = create<EntryState>()(
         },
       };
     }),
+
+    generateRecurringTemplates: (now = Date.now()) => {
+      const state = useDoTodoStore.getState();
+      const lastCheck = state.lastRecurrenceCheck || 0;
+      const created: string[] = [];
+
+      for (const id of state.entryIds) {
+        const tpl = state.entries[id];
+        if (!tpl || !tpl.isTemplate || !tpl.recurrence) continue;
+
+        const recurrence = tpl.recurrence;
+        const windowStart = lastCheck > 0 ? lastCheck : recurrence.originDate;
+        let cursor = windowStart;
+        let occurrence = getNextOccurrence(recurrence, cursor);
+
+        // Generate every occurrence whose date falls within (lastCheck, now].
+        // Cap iterations to avoid runaway loops on huge gaps.
+        let guard = 0;
+        while (occurrence !== null && occurrence <= now && guard < 100) {
+          guard++;
+          const listTitle = `${tpl.title} · ${new Date(occurrence).toLocaleDateString()}`;
+          const newId = state.createFromTemplate(tpl.id, listTitle, {
+            ...recurrence,
+            originDate: occurrence,
+          });
+          if (newId) created.push(newId);
+          cursor = occurrence;
+          occurrence = getNextOccurrence(recurrence, cursor);
+        }
+      }
+
+      set({ lastRecurrenceCheck: now });
+      return created.length;
+    },
   })
 );
 
