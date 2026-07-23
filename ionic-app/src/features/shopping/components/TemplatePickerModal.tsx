@@ -11,13 +11,11 @@ import {
     IonTitle,
     IonToolbar,
 } from '@ionic/react';
-import { cartOutline, checkmarkCircle, closeOutline, repeatOutline } from 'ionicons/icons';
+import { cartOutline, checkmarkCircle, closeOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectTemplates } from '../../shared/store/doTodoStore';
-import { DoTodo } from '../../shared/types';
 import { DEFAULT_CATEGORIES } from '../types';
-import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
 import './TemplatePickerModal.css';
 
 interface TemplatePickerModalProps {
@@ -33,7 +31,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
 
     const [selectedId, setSelectedId] = useState<string>('');
     const [listName, setListName] = useState('');
-    const [recurrence, setRecurrence] = useState<DoTodo['recurrence']>();
 
     const sel = useMemo(
         () => templates.find((t) => t.id === selectedId),
@@ -45,7 +42,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
         const tpl = templates.find((t) => t.id === id);
         if (tpl) {
             setListName(tpl.title);
-            setRecurrence(tpl.recurrence);
         }
     }, [templates]);
 
@@ -58,21 +54,19 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
 
     const handleConfirm = useCallback(() => {
         if (!selectedId || !listName.trim()) return;
-        const newId = createFromTemplate(selectedId, listName.trim(), recurrence);
+        const newId = createFromTemplate(selectedId, listName.trim());
         onDismiss();
         setSelectedId('');
         setListName('');
-        setRecurrence(undefined);
         if (newId) {
             history.push(`/shopping/${encodeURIComponent(newId)}`);
         }
-    }, [selectedId, listName, recurrence, createFromTemplate, onDismiss, history]);
+    }, [selectedId, listName, createFromTemplate, onDismiss, history]);
 
     const handleDismiss = useCallback(() => {
         onDismiss();
         setSelectedId('');
         setListName('');
-        setRecurrence(undefined);
     }, [onDismiss]);
 
     return (
@@ -125,7 +119,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                             const catLabels = catKeys
                                 .map((key) => DEFAULT_CATEGORIES.find((c) => c.key === key)?.label ?? key)
                                 .slice(0, 3);
-                            const summary = tpl.recurrence ? formatRecurrenceSummary(tpl.recurrence) : null;
 
                             return (
                                 <div
@@ -150,12 +143,6 @@ const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({ isOpen, onDis
                                             <div className="tpl-card-top">
                                                 <span className="tpl-card-name">{tpl.title}</span>
                                                 <span className="tpl-card-count">{itemCount}&nbsp;item{itemCount !== 1 ? 's' : ''}</span>
-                                                {summary && (
-                                                    <span className="tpl-card-recurrence">
-                                                        <IonIcon icon={repeatOutline} />
-                                                        {summary}
-                                                    </span>
-                                                )}
                                                 {isSelected && (
                                                     <IonIcon icon={checkmarkCircle} className="tpl-card-check" />
                                                 )}

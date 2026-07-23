@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
     IonActionSheet,
+    IonAlert,
     IonBackButton,
     IonBadge,
     IonButton,
@@ -39,11 +40,15 @@ const ShoppingOverview: React.FC = () => {
     const [templateModalInitialId, setTemplateModalInitialId] = useState<string | undefined>(undefined);
     const [actionListId, setActionListId] = useState<string | null>(null);
     const [templateActionId, setTemplateActionId] = useState<string | null>(null);
+    const [archivedActionId, setArchivedActionId] = useState<string | null>(null);
+    const [deleteAlert, setDeleteAlert] = useState<{ isOpen: boolean; listId: string | null }>({ isOpen: false, listId: null });
     const [presentToast] = useIonToast();
 
     const addShoppingList = useDoTodoStore((state) => state.addShoppingList);
     const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
     const deleteTemplate = useDoTodoStore((state) => state.deleteTemplate);
+    const unarchiveShoppingList = useDoTodoStore((state) => state.unarchiveShoppingList);
+    const deleteEntry = useDoTodoStore((state) => state.deleteEntry);
     const activeLists = useDoTodoStore(useShallow(selectActiveShoppingLists));
     const archivedLists = useDoTodoStore(useShallow(selectArchivedShoppingLists));
     const templates = useDoTodoStore(useShallow(selectTemplates));
@@ -96,21 +101,64 @@ const ShoppingOverview: React.FC = () => {
         }
     }, [templateActionId, deleteTemplate, presentToast]);
 
-    const ListCard: React.FC<{ listId: string; isTemplate?: boolean }> = ({ listId, isTemplate }) => {
+    const handleUnarchive = useCallback(() => {
+        if (archivedActionId) {
+            unarchiveShoppingList(archivedActionId);
+            setArchivedActionId(null);
+            presentToast({
+                message: 'List restored to active',
+                duration: 2000,
+                color: 'tertiary',
+                position: 'bottom',
+            });
+        }
+    }, [archivedActionId, unarchiveShoppingList, presentToast]);
+
+    const handleDeleteArchived = useCallback(() => {
+        if (archivedActionId) {
+            setArchivedActionId(null);
+            setDeleteAlert({ isOpen: true, listId: archivedActionId });
+        }
+    }, [archivedActionId]);
+
+    const handleConfirmDelete = useCallback(() => {
+        if (deleteAlert.listId) {
+            deleteEntry(deleteAlert.listId);
+            presentToast({
+                message: 'List deleted',
+                duration: 2000,
+                color: 'danger',
+                position: 'bottom',
+            });
+        }
+        setDeleteAlert({ isOpen: false, listId: null });
+    }, [deleteAlert.listId, deleteEntry, presentToast]);
+
+    const ListCard: React.FC<{ listId: string; isTemplate?: boolean; isArchived?: boolean }> = ({ listId, isTemplate, isArchived }) => {
         const entry = useDoTodoStore((state) => state.entries[listId]);
         const summary = useDoTodoStore(useShallow(selectShoppingListSummary(listId)));
         const doneCount = (entry?.shoppingItems ?? []).filter((i) => i.isCompleted).length;
         const longPressTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
         const handleTap = useCallback(() => {
-            history.push(`/shopping/${encodeURIComponent(listId)}`);
-        }, [history, listId]);
+            if (isArchived) {
+                history.push(`/shopping/archive/${encodeURIComponent(listId)}`);
+            } else {
+                history.push(`/shopping/${encodeURIComponent(listId)}`);
+            }
+        }, [listId, isArchived]);
 
         const handlePointerDown = useCallback(() => {
-            longPressTimer.current = setTimeout(() => {
-                setActionListId(listId);
-            }, 500);
-        }, [listId]);
+            if (isArchived) {
+                longPressTimer.current = setTimeout(() => {
+                    setArchivedActionId(listId);
+                }, 500);
+            } else {
+                longPressTimer.current = setTimeout(() => {
+                    setActionListId(listId);
+                }, 500);
+            }
+        }, [listId, isArchived]);
 
         const handlePointerUp = useCallback(() => {
             if (longPressTimer.current) {
@@ -169,6 +217,32 @@ const ShoppingOverview: React.FC = () => {
                             >
                                 <IonIcon icon={addOutline} slot="icon-only" />
                             </IonButton>
+                        </span>
+                    </div>
+                </IonItem>
+            );
+        }
+
+        if (isArchived) {
+            const boughtItems = (entry?.shoppingItems ?? []).filter((i) => i.isCompleted).length;
+            const skippedItems = (entry?.shoppingItems ?? []).filter((i) => !i.isCompleted).length;
+            const archivedDate = entry?.archivedAt ? new Date(entry.archivedAt).toLocaleDateString() : 'Unknown date';
+
+            return (
+                <IonItem
+                    className="shop-list-card shop-archived-card"
+                    button
+                    lines="none"
+                    onClick={handleTap}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerUp}
+                >
+                    <IonIcon icon={archiveOutline} className="shop-list-card-icon shop-archived-card-icon" slot="start" />
+                    <div className="shop-list-card-body">
+                        <span className="shop-list-card-name">{entry?.title ?? 'Unknown list'}</span>
+                        <span className="shop-list-card-summary">
+                            {archivedDate} · {boughtItems} bought, {skippedItems} skipped
                         </span>
                     </div>
                 </IonItem>
@@ -332,7 +406,7 @@ const ShoppingOverview: React.FC = () => {
                         </div>
                         <div className={`dotodo-group-items group--archived ${expanded.has('Archived') ? 'is-expanded' : ''}`}>
                             {expanded.has('Archived') && archivedLists.map((list) => (
-                                <ListCard key={list.id} listId={list.id} />
+                                <ListCard key={list.id} listId={list.id} isArchived />
                             ))}
                         </div>
                     </div>
@@ -355,6 +429,28 @@ const ShoppingOverview: React.FC = () => {
                     buttons={[
                         { text: 'Delete template', role: 'destructive', handler: handleDeleteTemplate },
                         { text: 'Cancel', role: 'cancel' },
+                    ]}
+                />
+
+                <IonActionSheet
+                    isOpen={archivedActionId !== null}
+                    onDidDismiss={() => setArchivedActionId(null)}
+                    header="Archived list options"
+                    buttons={[
+                        { text: 'Unarchive list', handler: handleUnarchive },
+                        { text: 'Delete permanently', role: 'destructive', handler: handleDeleteArchived },
+                        { text: 'Cancel', role: 'cancel' },
+                    ]}
+                />
+
+                <IonAlert
+                    isOpen={deleteAlert.isOpen}
+                    onDidDismiss={() => setDeleteAlert({ isOpen: false, listId: null })}
+                    header="Delete list?"
+                    message="This will permanently delete this archived list and all its items. This cannot be undone."
+                    buttons={[
+                        { text: 'Cancel', role: 'cancel' },
+                        { text: 'Delete', role: 'destructive', handler: handleConfirmDelete },
                     ]}
                 />
 

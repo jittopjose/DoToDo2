@@ -27,8 +27,6 @@ import { useSettingsStore } from '../../settings/store/settingsStore';
 import { formatPrice, getCurrencySymbol } from '../../shared/utils/formatPrice';
 import { ShoppingItem } from '../components/ShoppingItem';
 import { DEFAULT_CATEGORIES } from '../types';
-import { Recurrence } from '../../shared/types';
-import ShoppingRepeatCard from '../components/ShoppingRepeatCard';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { isNativeBarcodeScanAvailable, lookupProduct, scanBarcode } from '../../../services/barcode.service';
 import { useRecentProductsStore } from '../store/recentProductsStore';
@@ -49,7 +47,6 @@ const ShoppingListDetail: React.FC = () => {
     const reorderShoppingItems = useDoTodoStore((state) => state.reorderShoppingItems);
     const archiveShoppingList = useDoTodoStore((state) => state.archiveShoppingList);
     const saveAsTemplate = useDoTodoStore((state) => state.saveAsTemplate);
-    const updateShoppingListRecurrence = useDoTodoStore((state) => state.updateShoppingListRecurrence);
 
     const currency = useSettingsStore((state) => state.currency);
     const [sortMode, setSortMode] = useState<SortMode>('custom');
@@ -274,10 +271,6 @@ const ShoppingListDetail: React.FC = () => {
         });
     }, [listId, saveAsTemplate, presentToast]);
 
-    const handleRecurrenceChange = useCallback((recurrence: Recurrence | undefined) => {
-        updateShoppingListRecurrence(listId, recurrence);
-    }, [listId, updateShoppingListRecurrence]);
-
     if (!entry) {
         return (
             <IonPage>
@@ -347,12 +340,6 @@ const ShoppingListDetail: React.FC = () => {
             <IonContent className={`shop-detail-content ${storeMode ? 'shop-detail-store-mode' : ''}`}>
                 {!storeMode && (
                     <>
-                        <ShoppingRepeatCard
-                            value={entry.recurrence}
-                            dueDate={entry.dueDate}
-                            onChange={handleRecurrenceChange}
-                        />
-
                         <div className="shop-detail-total-row">
                             <IonCard className="shop-detail-total-card">
                                 <IonCardContent className="shop-detail-total-content">

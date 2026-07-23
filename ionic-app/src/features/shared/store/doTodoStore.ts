@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { DoTodo, ShoppingItem, Recurrence, DoTodoFilter, DoTodoPriority } from '../types';
-import { getNextDueDate, getNextOccurrence } from '../utils/recurrence';
+import { getNextDueDate } from '../utils/recurrence';
 import { loadData, saveData } from '../../../services/do-todo-storage.service';
 
 const normalizeToEndOfDay = (timestamp: number) => {
@@ -28,7 +28,6 @@ interface EntryState {
   searchTerm: string;
   customLists: string[];
   isHydrated: boolean;
-  lastRecurrenceCheck: number;
 
   hydrate: () => Promise<void>;
   addEntry: (title: string, itemType: DoTodo['itemType'], description?: string, dueDate?: number, priority?: DoTodoPriority, quantity?: number, price?: number, subtasks?: DoTodo['subtasks'], list?: string, recurrence?: Recurrence) => void;
@@ -39,18 +38,17 @@ interface EntryState {
   toggleSubtask: (entryId: string, subtaskId: string) => void;
   deleteEntry: (id: string) => void;
   updateEntry: (id: string, updates: Partial<Pick<DoTodo, 'title' | 'description' | 'dueDate' | 'priority' | 'list' | 'itemType' | 'quantity' | 'price' | 'subtasks' | 'shoppingItems' | 'recurrence' | 'isCompleted' | 'isArchived' | 'isTemplate'>>) => void;
-  addShoppingList: (title: string, recurrence?: Recurrence) => string;
+  addShoppingList: (title: string) => string;
   saveAsTemplate: (listId: string) => string;
-  createFromTemplate: (templateId: string, title: string, recurrence?: Recurrence) => string;
+  createFromTemplate: (templateId: string, title: string) => string;
   deleteTemplate: (templateId: string) => void;
-  updateShoppingListRecurrence: (listId: string, recurrence: Recurrence | undefined) => void;
-  generateRecurringTemplates: (now?: number) => number;
   addShoppingItem: (listId: string, title: string, quantity?: number, price?: number, category?: string) => void;
   toggleShoppingItem: (listId: string, itemId: string) => void;
   updateShoppingItem: (listId: string, itemId: string, updates: Partial<Pick<ShoppingItem, 'title' | 'quantity' | 'price' | 'category'>>) => void;
   removeShoppingItem: (listId: string, itemId: string) => void;
   reorderShoppingItems: (listId: string, itemIds: string[]) => void;
   archiveShoppingList: (listId: string) => void;
+  unarchiveShoppingList: (listId: string) => void;
   setFilter: (filter: DoTodoFilter) => void;
   setTypeFilter: (typeFilter: DoTodo['itemType'] | 'all') => void;
   setSearchTerm: (term: string) => void;
@@ -72,7 +70,6 @@ export const useDoTodoStore = create<EntryState>()(
     searchTerm: '',
     customLists: [],
     isHydrated: false,
-    lastRecurrenceCheck: 0,
 
     hydrate: async () => {
       const data = await loadData()
@@ -259,7 +256,7 @@ export const useDoTodoStore = create<EntryState>()(
       return { customLists: [...state.customLists, normalized] };
     }),
 
-    addShoppingList: (title, recurrence) => {
+    addShoppingList: (title) => {
       const id = uuidv4();
       const entry: DoTodo = {
         id,
@@ -269,7 +266,6 @@ export const useDoTodoStore = create<EntryState>()(
         list: 'all-lists',
         itemType: 'shopping',
         shoppingItems: [],
-        ...(recurrence !== undefined && { recurrence }),
       };
       set((state) => ({
         entries: { ...state.entries, [id]: entry },
@@ -364,43 +360,21 @@ export const useDoTodoStore = create<EntryState>()(
     archiveShoppingList: (listId) => set((state) => {
       const entry = state.entries[listId];
       if (!entry) return state;
-
-      if (!entry.isArchived && entry.recurrence) {
-        const nextDue = getNextDueDate({
-          ...entry,
-          dueDate: entry.dueDate ?? Date.now(),
-        });
-        if (nextDue) {
-          const cloneId = uuidv4();
-          const clone: DoTodo = {
-            ...entry,
-            id: cloneId,
-            isArchived: false,
-            isCompleted: false,
-            completedAt: undefined,
-            createdAt: Date.now(),
-            dueDate: nextDue,
-            shoppingItems: entry.shoppingItems?.map((item) => ({
-              ...item,
-              isCompleted: false,
-            })),
-            recurrence: { ...entry.recurrence, originDate: Date.now() },
-          };
-          return {
-            entries: {
-              ...state.entries,
-              [listId]: { ...entry, isArchived: true },
-              [cloneId]: clone,
-            },
-            entryIds: [cloneId, ...state.entryIds],
-          };
-        }
-      }
-
       return {
         entries: {
           ...state.entries,
-          [listId]: { ...entry, isArchived: !entry.isArchived },
+          [listId]: { ...entry, isArchived: true, archivedAt: Date.now() },
+        },
+      };
+    }),
+
+    unarchiveShoppingList: (listId) => set((state) => {
+      const entry = state.entries[listId];
+      if (!entry) return state;
+      return {
+        entries: {
+          ...state.entries,
+          [listId]: { ...entry, isArchived: false, archivedAt: undefined },
         },
       };
     }),
@@ -410,22 +384,20 @@ export const useDoTodoStore = create<EntryState>()(
       if (!entry || entry.itemType !== 'shopping') return '';
       const id = uuidv4();
       const template: DoTodo = {
-        ...entry,
         id,
         title: entry.title,
         isTemplate: true,
         isArchived: false,
         isCompleted: false,
-        completedAt: undefined,
         createdAt: Date.now(),
-        dueDate: undefined,
+        list: 'all-lists',
+        itemType: 'shopping',
         shoppingItems: entry.shoppingItems?.map((item) => ({
           ...item,
           id: uuidv4(),
           isCompleted: false,
           price: item.price,
         })),
-        list: 'all-lists',
       };
       set((state) => ({
         entries: { ...state.entries, [id]: template },
@@ -434,7 +406,7 @@ export const useDoTodoStore = create<EntryState>()(
       return id;
     },
 
-    createFromTemplate: (templateId, title, recurrence) => {
+    createFromTemplate: (templateId, title) => {
       const template = useDoTodoStore.getState().entries[templateId];
       if (!template || !template.shoppingItems) return '';
       const id = uuidv4();
@@ -450,7 +422,6 @@ export const useDoTodoStore = create<EntryState>()(
           id: uuidv4(),
           isCompleted: false,
         })),
-        ...(recurrence !== undefined && { recurrence }),
       };
       set((state) => ({
         entries: { ...state.entries, [id]: entry },
@@ -468,50 +439,7 @@ export const useDoTodoStore = create<EntryState>()(
       };
     }),
 
-    updateShoppingListRecurrence: (listId, recurrence) => set((state) => {
-      const entry = state.entries[listId];
-      if (!entry) return state;
-      return {
-        entries: {
-          ...state.entries,
-          [listId]: { ...entry, recurrence },
-        },
-      };
-    }),
 
-    generateRecurringTemplates: (now = Date.now()) => {
-      const state = useDoTodoStore.getState();
-      const lastCheck = state.lastRecurrenceCheck || 0;
-      const created: string[] = [];
-
-      for (const id of state.entryIds) {
-        const tpl = state.entries[id];
-        if (!tpl || !tpl.isTemplate || !tpl.recurrence) continue;
-
-        const recurrence = tpl.recurrence;
-        const windowStart = lastCheck > 0 ? lastCheck : recurrence.originDate;
-        let cursor = windowStart;
-        let occurrence = getNextOccurrence(recurrence, cursor);
-
-        // Generate every occurrence whose date falls within (lastCheck, now].
-        // Cap iterations to avoid runaway loops on huge gaps.
-        let guard = 0;
-        while (occurrence !== null && occurrence <= now && guard < 100) {
-          guard++;
-          const listTitle = `${tpl.title} · ${new Date(occurrence).toLocaleDateString()}`;
-          const newId = state.createFromTemplate(tpl.id, listTitle, {
-            ...recurrence,
-            originDate: occurrence,
-          });
-          if (newId) created.push(newId);
-          cursor = occurrence;
-          occurrence = getNextOccurrence(recurrence, cursor);
-        }
-      }
-
-      set({ lastRecurrenceCheck: now });
-      return created.length;
-    },
   })
 );
 

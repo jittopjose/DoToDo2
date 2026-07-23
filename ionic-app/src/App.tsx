@@ -1,4 +1,4 @@
-import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact, useIonToast } from '@ionic/react';
+import { IonApp, IonContent, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { createMemoryHistory } from 'history';
 import { useEffect } from 'react';
@@ -10,6 +10,7 @@ import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
 import ShoppingOverview from './features/shopping/pages/ShoppingOverview';
 import ShoppingListDetail from './features/shopping/pages/ShoppingListDetail';
+import ArchiveDetail from './features/shopping/pages/ArchiveDetail';
 import NotePage from './features/note/pages/NotePage';
 import ChecklistPage from './features/checklist/pages/ChecklistPage';
 import { useDoTodoStore } from './features/shared/store/doTodoStore';
@@ -65,25 +66,11 @@ const history = createMemoryHistory();
 const App: React.FC = () => {
   const themePreference = useSettingsStore((state) => state.themePreference);
   const isHydrated = useDoTodoStore((state) => state.isHydrated);
-  const [presentToast] = useIonToast();
 
   useEffect(() => {
     useDoTodoStore.getState().hydrate()
     initBridge().then(() => getBackend()?.log("React app loaded"))
   }, [])
-
-  useEffect(() => {
-    if (!isHydrated) return;
-    const count = useDoTodoStore.getState().generateRecurringTemplates();
-    if (count > 0) {
-      presentToast({
-        message: count === 1 ? 'Created 1 list from a template' : `Created ${count} lists from templates`,
-        duration: 2500,
-        color: 'tertiary',
-        position: 'bottom',
-      });
-    }
-  }, [isHydrated, presentToast])
 
   useEffect(() => {
     const applyTheme = () => {
@@ -136,6 +123,9 @@ const App: React.FC = () => {
                 </Route>
                 <Route path="/shopping" exact>
                   <ShoppingOverview />
+                </Route>
+                <Route path="/shopping/archive/:listId" exact>
+                  <ArchiveDetail />
                 </Route>
                 <Route path="/shopping/:listId" exact>
                   <ShoppingListDetail />

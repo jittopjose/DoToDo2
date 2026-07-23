@@ -47,6 +47,7 @@ export interface DoTodo extends BaseItem {
     priority?: DoTodoPriority;
     recurrence?: Recurrence;
     isArchived?: boolean;
+    archivedAt?: number;
     isTemplate?: boolean;
 }
 
