@@ -8,7 +8,8 @@ sorting, templates, recent products, and real-time sharing via Firebase.
 
 > **Current status (2026-07-20)**: Steps 1–5 are complete. Step 4 includes breaking
 > changes — recurrence removed from shopping lists, archive enhanced with summary view.
-> Step 6 (Firebase sharing) is pending.
+> Step 6 (Firebase sharing) is the only remaining item in Phase 2. New feature
+> discussion is in progress before starting Step 6.
 
 **Design constraints** (unchanged from Phase 1):
 - Shopping lists are `DoTodo` entries with `itemType: 'shopping'` and `shoppingItems: ShoppingItem[]`
@@ -616,7 +617,8 @@ product (auto-filled on chip tap). `addShoppingItem` defaults quantity to 1 when
 omitted. Step 4 (Templates & Archive) is **done** with breaking changes: recurrence
 removed from shopping lists, `ShoppingRepeatCard` deleted, archive enhanced with
 summary view (date, items bought/skipped), unarchive option, and permanent delete
-with confirmation. Next up: Step 6 (Sharing).
+with confirmation. Only Step 6 (Sharing) remains in Phase 2 — pending new feature
+discussion.
 
 Each step builds naturally: store mode is quick and high-impact, sort is small,
 categories is the most involved UI change, recent products is a standalone store,
