@@ -8,8 +8,7 @@ sorting, templates, recent products, and real-time sharing via Firebase.
 
 > **Current status (2026-07-20)**: Steps 1–5 are complete. Step 4 includes breaking
 > changes — recurrence removed from shopping lists, archive enhanced with summary view.
-> Step 6 (Firebase sharing) is the only remaining item in Phase 2. New feature
-> discussion is in progress before starting Step 6.
+> Step 6 (Firebase sharing) moved to Phase 3. New feature discussion in progress.
 
 **Design constraints** (unchanged from Phase 1):
 - Shopping lists are `DoTodo` entries with `itemType: 'shopping'` and `shoppingItems: ShoppingItem[]`
