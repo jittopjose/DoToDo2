@@ -13,15 +13,78 @@ carried over as last item.
 
 ## Step 1 — Smart Suggestions (Priority: MEDIUM)
 
-**Goal**: Suggest items to add based on purchase history, reducing typing.
+**Goal**: Make it faster to add items you buy regularly.
 
-> **Note**: This is a refined version of the "Recent Products" concept from Phase 2
-> Step 5. The current implementation shows chips only when input is focused. Phase 3
-> will enhance this with a dedicated suggestions section and frequency-based ranking.
+> Refines the "Recent Products" feature from Phase 2 Step 5. Two improvements:
+> (1) One-tap add via "+" button on chips, (2) Smarter ranking by frequency × recency.
 
-### Details
+### Files to modify
 
-_TBD — to be refined during planning._
+| File | Change |
+|------|--------|
+| `ShoppingListDetail.tsx` | Add "+" button to recent product chips; handle direct add on tap; update ranking formula |
+| `ShoppingListDetail.css` | Style "+" button on chips (tertiary color, small icon) |
+| `src/features/shopping/store/recentProductsStore.ts` | Add `getSuggestions()` method with frequency × recency ranking |
+
+### Improvement 1: One-tap add
+
+Currently: Tap chip fills input → user presses Enter to confirm (4 steps).
+
+New: Tap "+" on chip adds item directly (1 step). Tapping the item name still fills input (for editing).
+
+```
+Current:
+┌─────────────────────────────────────┐
+│  Add an item...                     │
+├─────────────────────────────────────┤
+│  [Milk] [Eggs] [Bread] [Cheese]    │  ← tap fills input
+└─────────────────────────────────────┘
+
+New:
+┌─────────────────────────────────────┐
+│  Add an item...                     │
+├─────────────────────────────────────┤
+│  [Milk +] [Eggs +] [Bread +]       │  ← tap "+" adds directly
+└─────────────────────────────────────┘
+```
+
+Behaviour:
+- Tap item name → fills input (old behavior, for editing)
+- Tap "+" → adds directly with quantity 1 (new behavior)
+- When user types → chips filter as before
+- No new UI elements, no layout changes
+- Uses existing `addShoppingItem` action
+- Records usage in `recentProductsStore` after add
+
+### Improvement 2: Smarter ranking
+
+Currently: Sorted by `lastUsed` (most recent first).
+
+New: Factor in frequency. Items bought regularly rank higher.
+
+Formula: `score = useCount × recencyWeight`
+
+Where `recencyWeight`:
+- Bought today: 1.0
+- Bought this week: 0.8
+- Bought this month: 0.5
+- Bought older: 0.2
+
+Example:
+- Milk: useCount=12, bought yesterday → score = 12 × 1.0 = 12.0
+- Eggs: useCount=8, bought 3 days ago → score = 8 × 0.8 = 6.4
+- Saffron: useCount=1, bought today → score = 1 × 1.0 = 1.0
+
+Result: Milk and Eggs (staples) rank above Saffron (rare).
+
+### Acceptance criteria
+
+- ✅ "+" button visible on recent product chips
+- ✅ Tapping "+" adds item directly to list
+- ✅ Tapping item name still fills input (existing behavior preserved)
+- ✅ Chips filter by typed text (existing behavior preserved)
+- ✅ Items ranked by frequency × recency, not just recency
+- ✅ No layout changes — reuses existing chip row
 
 ---
 
