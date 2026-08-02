@@ -364,6 +364,26 @@
 
 /* ── Recent products chip row ── */
 
+.shop-recent {
+    margin: 0 0 12px;
+}
+
+.shop-recent-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dotodo-muted);
+}
+
+.shop-recent-label ion-icon {
+    font-size: 13px;
+}
+
 .shop-recent-row {
     display: flex;
     gap: 6px;
@@ -384,19 +404,42 @@
     --color: var(--dotodo-text);
     flex-shrink: 0;
     cursor: pointer;
+    transition: box-shadow var(--dotodo-motion-fast), transform var(--dotodo-motion-fast);
+}
+
+.shop-recent-chip:active {
+    transform: scale(0.97);
 }
 
 .shop-recent-chip-add {
-    --padding-start: 4px;
-    --padding-end: 4px;
-    --padding-top: 4px;
-    --padding-bottom: 4px;
-    --color: var(--ion-color-tertiary);
-    margin-left: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: var(--ion-color-tertiary);
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--dotodo-motion-fast), transform var(--dotodo-motion-fast);
 }
 
 .shop-recent-chip-add ion-icon {
-    font-size: 15px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.shop-recent-chip-add:hover {
+    background: rgba(var(--ion-color-tertiary-rgb), 0.85);
+}
+
+.shop-recent-chip-add:active {
+    transform: scale(0.9);
+}
+
+.shop-recent-chip.is-added .shop-recent-chip-add {
+    background: var(--dotodo-success);
 }
 
 /* ── Repeat card ──

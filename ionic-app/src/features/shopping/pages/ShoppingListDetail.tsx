@@ -19,7 +19,7 @@ import {
     IonToolbar,
     useIonToast,
 } from '@ionic/react';
-import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, scanOutline } from 'ionicons/icons';
+import { addOutline, archiveOutline, cart, cartOutline, checkmarkCircleOutline, checkmarkOutline, chevronDownOutline, chevronUpOutline, documentOutline, ellipsisHorizontalOutline, funnelOutline, scanOutline, timeOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectShoppingListItems, selectShoppingListSummary } from '../../shared/store/doTodoStore';
@@ -76,6 +76,8 @@ const ShoppingListDetail: React.FC = () => {
             : suggestedProducts;
     }, [suggestedProducts, newItemText]);
     const showRecents = inputFocused && filteredRecents.length > 0;
+    const [justAdded, setJustAdded] = useState<string | null>(null);
+    const justAddedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -222,7 +224,14 @@ const ShoppingListDetail: React.FC = () => {
     const handleQuickAdd = useCallback((title: string, category?: string) => {
         addShoppingItem(listId, title, undefined, undefined, category);
         recordUsage(title, category);
+        setJustAdded(title);
+        if (justAddedTimer.current) clearTimeout(justAddedTimer.current);
+        justAddedTimer.current = setTimeout(() => setJustAdded(null), 900);
     }, [listId, addShoppingItem, recordUsage]);
+
+    useEffect(() => () => {
+        if (justAddedTimer.current) clearTimeout(justAddedTimer.current);
+    }, []);
 
     const handleQtyDec = useCallback(() => {
         setNewItemQty((prev) => Math.max(1, prev - 1));
@@ -438,31 +447,47 @@ const ShoppingListDetail: React.FC = () => {
                         </IonCard>
 
                         {showRecents && (
-                            <div className="shop-recent-row">
-                                {filteredRecents.map((p) => (
-                                    <IonChip
-                                        key={p.title}
-                                        className="shop-recent-chip"
-                                        onClick={() => {
-                                            setNewItemText(p.title);
-                                            setNewItemCategory(p.category || '');
-                                        }}
-                                    >
-                                        {p.title}
-                                        <IonButton
-                                            className="shop-recent-chip-add"
-                                            fill="clear"
-                                            size="small"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleQuickAdd(p.title, p.category);
-                                            }}
-                                            aria-label={`Add ${p.title}`}
-                                        >
-                                            <IonIcon icon={addOutline} />
-                                        </IonButton>
-                                    </IonChip>
-                                ))}
+                            <div className="shop-recent">
+                                <div className="shop-recent-label">
+                                    <IonIcon icon={timeOutline} />
+                                    <span>Add again</span>
+                                </div>
+                                <div className="shop-recent-row">
+                                    {filteredRecents.map((p) => {
+                                        const isAdded = justAdded === p.title;
+                                        return (
+                                            <IonChip
+                                                key={p.title}
+                                                className={`shop-recent-chip${isAdded ? ' is-added' : ''}`}
+                                                onClick={() => {
+                                                    setNewItemText(p.title);
+                                                    setNewItemCategory(p.category || '');
+                                                }}
+                                            >
+                                                {p.title}
+                                                <span
+                                                    className="shop-recent-chip-add"
+                                                    role="button"
+                                                    tabIndex={0}
+                                                    aria-label={`Add ${p.title}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleQuickAdd(p.title, p.category);
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleQuickAdd(p.title, p.category);
+                                                        }
+                                                    }}
+                                                >
+                                                    <IonIcon icon={isAdded ? checkmarkOutline : addOutline} />
+                                                </span>
+                                            </IonChip>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
                     </>
