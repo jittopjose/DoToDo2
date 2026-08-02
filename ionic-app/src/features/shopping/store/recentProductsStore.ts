@@ -11,14 +11,29 @@ export interface RecentProduct {
 interface RecentProductsState {
     products: RecentProduct[];
     recordUsage: (title: string, category?: string) => void;
+    getSuggestions: () => RecentProduct[];
     clearHistory: () => void;
 }
 
 const MAX_PRODUCTS = 15;
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function getRecencyWeight(lastUsed: number, now: number): number {
+    const days = (now - lastUsed) / DAY_MS;
+    if (days <= 1) return 1.0;
+    if (days <= 7) return 0.8;
+    if (days <= 30) return 0.5;
+    return 0.2;
+}
+
+export function scoreProduct(p: RecentProduct, now: number = Date.now()): number {
+    return p.useCount * getRecencyWeight(p.lastUsed, now);
+}
+
 export const useRecentProductsStore = create<RecentProductsState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             products: [],
             recordUsage: (title, category?) =>
                 set((state) => {
@@ -42,6 +57,10 @@ export const useRecentProductsStore = create<RecentProductsState>()(
                     }
                     return { products: updated };
                 }),
+            getSuggestions: () => {
+                const now = Date.now();
+                return [...get().products].sort((a, b) => scoreProduct(b, now) - scoreProduct(a, now));
+            },
             clearHistory: () => set({ products: [] }),
         }),
         {

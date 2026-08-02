@@ -66,13 +66,15 @@ const ShoppingListDetail: React.FC = () => {
     const [moreOpen, setMoreOpen] = useState(false);
     const [inputFocused, setInputFocused] = useState(false);
     const recentProducts = useRecentProductsStore((s) => s.products);
+    const getSuggestions = useRecentProductsStore((s) => s.getSuggestions);
     const recordUsage = useRecentProductsStore((s) => s.recordUsage);
+    const suggestedProducts = useMemo(() => getSuggestions(), [getSuggestions, recentProducts]); // eslint-disable-line react-hooks/exhaustive-deps
     const filteredRecents = useMemo(() => {
         const lower = newItemText.toLowerCase().trim();
         return lower
-            ? recentProducts.filter((p) => p.title.toLowerCase().includes(lower))
-            : recentProducts;
-    }, [recentProducts, newItemText]);
+            ? suggestedProducts.filter((p) => p.title.toLowerCase().includes(lower))
+            : suggestedProducts;
+    }, [suggestedProducts, newItemText]);
     const showRecents = inputFocused && filteredRecents.length > 0;
     const dragFromRef = useRef<number | null>(null);
     const dragListRef = useRef<string[]>([]);
@@ -216,6 +218,11 @@ const ShoppingListDetail: React.FC = () => {
             handleAddItem();
         }
     }, [handleAddItem]);
+
+    const handleQuickAdd = useCallback((title: string, category?: string) => {
+        addShoppingItem(listId, title, undefined, undefined, category);
+        recordUsage(title, category);
+    }, [listId, addShoppingItem, recordUsage]);
 
     const handleQtyDec = useCallback(() => {
         setNewItemQty((prev) => Math.max(1, prev - 1));
@@ -442,6 +449,19 @@ const ShoppingListDetail: React.FC = () => {
                                         }}
                                     >
                                         {p.title}
+                                        <IonButton
+                                            className="shop-recent-chip-add"
+                                            slot="end"
+                                            fill="clear"
+                                            size="small"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleQuickAdd(p.title, p.category);
+                                            }}
+                                            aria-label={`Add ${p.title}`}
+                                        >
+                                            <IonIcon icon={addOutline} />
+                                        </IonButton>
                                     </IonChip>
                                 ))}
                             </div>
