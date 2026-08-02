@@ -419,8 +419,8 @@
     height: 18px;
     margin-left: 6px;
     border-radius: 50%;
-    background: var(--ion-color-tertiary);
-    color: #fff;
+    background: rgba(var(--ion-color-tertiary-rgb), 0.15);
+    color: var(--ion-color-tertiary);
     cursor: pointer;
     transition: background var(--dotodo-motion-fast), transform var(--dotodo-motion-fast);
 }
@@ -431,7 +431,7 @@
 }
 
 .shop-recent-chip-add:hover {
-    background: rgba(var(--ion-color-tertiary-rgb), 0.85);
+    background: rgba(var(--ion-color-tertiary-rgb), 0.25);
 }
 
 .shop-recent-chip-add:active {
@@ -439,7 +439,8 @@
 }
 
 .shop-recent-chip.is-added .shop-recent-chip-add {
-    background: var(--dotodo-success);
+    background: rgba(var(--dotodo-success-rgb), 0.15);
+    color: var(--dotodo-success);
 }
 
 /* ── Repeat card ──
