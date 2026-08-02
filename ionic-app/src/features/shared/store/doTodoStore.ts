@@ -555,3 +555,15 @@ export const selectShoppingListSummary = (listId: string) => (state: EntryState)
   }
   return { count: items.length, total, completedCount };
 };
+
+export const selectChecklists = (state: EntryState): DoTodo[] =>
+  state.entryIds
+    .map((id) => state.entries[id])
+    .filter((entry) => entry.itemType === 'checklist');
+
+export const selectChecklistProgress = (listId: string) => (state: EntryState): { total: number; completed: number } => {
+  const entry = state.entries[listId];
+  const subtasks = entry?.subtasks ?? [];
+  const completed = subtasks.filter((s) => s.isCompleted).length;
+  return { total: subtasks.length, completed };
+};
