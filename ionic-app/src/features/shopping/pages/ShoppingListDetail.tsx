@@ -451,7 +451,6 @@ const ShoppingListDetail: React.FC = () => {
                                         {p.title}
                                         <IonButton
                                             className="shop-recent-chip-add"
-                                            slot="end"
                                             fill="clear"
                                             size="small"
                                             onClick={(e) => {
