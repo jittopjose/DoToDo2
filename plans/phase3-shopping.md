@@ -48,13 +48,17 @@ New:
 └─────────────────────────────────────┘
 ```
 
-Behaviour:
-- Tap item name → fills input (old behavior, for editing)
-- Tap "+" → adds directly with quantity 1 (new behavior)
-- When user types → chips filter as before
-- No new UI elements, no layout changes
-- Uses existing `addShoppingItem` action
-- Records usage in `recentProductsStore` after add
+#### Design decisions (finalized)
+
+- **Chip layout**: Two tap zones on one chip. Chip body fills input (old behavior);
+  a small "+" icon pinned at the right edge adds directly. "+" uses `stopPropagation`
+  so the two zones don't conflict. (Option A)
+- **Direct add**: Calls `addShoppingItem(listId, title, undefined, undefined, category)`
+  then `recordUsage(title, category)` (increments count — item used again).
+- **Chip stays** after direct add — user may add multiple quantities of the same item.
+- **No toast** on direct add — item appearing in the list below is feedback enough.
+- **Independent of input**: Tapping "+" adds even if text is currently in the input
+  field (input state is untouched).
 
 ### Improvement 2: Smarter ranking
 
@@ -77,13 +81,22 @@ Example:
 
 Result: Milk and Eggs (staples) rank above Saffron (rare).
 
+#### Design decisions (finalized)
+
+- **Store method**: Add `getSuggestions()` to `recentProductsStore` (returns products
+  sorted by score). A pure helper `scoreProduct(p, now)` exported from the store file.
+- **`recordUsage` sort stays** as `lastUsed` (keeps persisted data tidy); display order
+  is computed at render via `getSuggestions()`.
+- **Recency weights**: Use the 1.0 / 0.8 / 0.5 / 0.2 bucket approach (no smooth decay).
+
 ### Acceptance criteria
 
-- ✅ "+" button visible on recent product chips
-- ✅ Tapping "+" adds item directly to list
+- ✅ "+" button visible on recent product chips (right-edge zone, `stopPropagation`)
+- ✅ Tapping "+" adds item directly to list (independent of input state)
+- ✅ Chip stays in row after direct add; no toast
 - ✅ Tapping item name still fills input (existing behavior preserved)
 - ✅ Chips filter by typed text (existing behavior preserved)
-- ✅ Items ranked by frequency × recency, not just recency
+- ✅ Items ranked by `getSuggestions()` (frequency × recency), not just recency
 - ✅ No layout changes — reuses existing chip row
 
 ---
