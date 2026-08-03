@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     IonAlert,
     IonBackButton,
@@ -30,8 +30,10 @@ import {
 import { useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 import { useDoTodoStore, selectChecklists, selectChecklistProgress } from '../../shared/store/doTodoStore';
-import { DoTodo, DoTodoSubtask } from '../../shared/types';
+import { DoTodo, DoTodoSubtask, Recurrence } from '../../shared/types';
 import { formatRecurrenceSummary } from '../../shared/utils/recurrence';
+import { RepeatSection } from '../../todo/components/RepeatSection';
+import '../../todo/components/RepeatSection.css';
 import '../../todo/components/TodoInput.css';
 import '../../todo/components/TodoItem.css';
 import './ChecklistPage.css';
@@ -39,6 +41,7 @@ import './ChecklistPage.css';
 interface ChecklistCardProps {
     listId: string;
     isExpanded: boolean;
+    view: 'active' | 'completed';
     onToggle: () => void;
     draft: string;
     onDraftChange: (value: string) => void;
@@ -48,6 +51,7 @@ interface ChecklistCardProps {
 const ChecklistCard: React.FC<ChecklistCardProps> = ({
     listId,
     isExpanded,
+    view,
     onToggle,
     draft,
     onDraftChange,
@@ -59,6 +63,9 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({
     const toggleSubtask = useDoTodoStore((state) => state.toggleSubtask);
     const updateSubtask = useDoTodoStore((state) => state.updateSubtask);
     const deleteSubtask = useDoTodoStore((state) => state.deleteSubtask);
+    const toggleEntry = useDoTodoStore((state) => state.toggleEntry);
+    const updateEntry = useDoTodoStore((state) => state.updateEntry);
+    const [presentToast] = useIonToast();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState('');
 
@@ -87,6 +94,28 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({
         addSubtask(listId, trimmed);
         onDraftChange('');
     }, [addSubtask, draft, listId, onDraftChange]);
+
+    const handleComplete = useCallback(() => {
+        const isRoutine = !!entry?.recurrence;
+        toggleEntry(listId);
+        presentToast({
+            message: isRoutine ? `${entry?.title}: completed — next run scheduled` : `${entry?.title}: marked complete`,
+            duration: 2000,
+            color: 'success',
+            position: 'bottom',
+        });
+    }, [entry, listId, presentToast, toggleEntry]);
+
+    const handleRecurrenceChange = useCallback((recurrence?: Recurrence) => {
+        if (!recurrence) {
+            updateEntry(listId, { recurrence: undefined });
+            return;
+        }
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+        const dueDate = entry?.dueDate ?? endOfToday.getTime();
+        updateEntry(listId, { recurrence, dueDate });
+    }, [entry, listId, updateEntry]);
 
     if (!entry) return null;
 
@@ -190,27 +219,44 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({
                         ))}
                     </div>
                 )}
-                <div className="subtask-add-row checklist-add-row">
-                    <IonInput
-                        className="subtask-add-input"
-                        value={draft}
-                        placeholder="Add an item..."
-                        onIonInput={(e) => onDraftChange(e.detail.value ?? '')}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleAddItem();
-                        }}
-                        aria-label="New checklist item"
-                    />
-                    <IonButton
-                        className="subtask-add-button"
-                        fill="solid"
-                        onClick={handleAddItem}
-                        disabled={!draft.trim()}
-                    >
-                        <IonIcon icon={addOutline} slot="start" />
-                        Add
-                    </IonButton>
-                </div>
+                {view === 'active' && (
+                    <div className="subtask-add-row checklist-add-row">
+                        <IonInput
+                            className="subtask-add-input"
+                            value={draft}
+                            placeholder="Add an item..."
+                            onIonInput={(e) => onDraftChange(e.detail.value ?? '')}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleAddItem();
+                            }}
+                            aria-label="New checklist item"
+                        />
+                        <IonButton
+                            className="subtask-add-button"
+                            fill="solid"
+                            onClick={handleAddItem}
+                            disabled={!draft.trim()}
+                        >
+                            <IonIcon icon={addOutline} slot="start" />
+                            Add
+                        </IonButton>
+                    </div>
+                )}
+
+                {view === 'active' && (
+                    <div className="checklist-card-footer">
+                        <RepeatSection value={entry.recurrence} dueDate={entry.dueDate} onChange={handleRecurrenceChange} />
+                        <IonButton
+                            className="checklist-complete-btn"
+                            fill="solid"
+                            expand="block"
+                            onClick={handleComplete}
+                        >
+                            <IonIcon icon={checkmarkDoneOutline} slot="start" />
+                            {entry.recurrence ? 'Complete today' : 'Mark complete'}
+                        </IonButton>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -230,6 +276,7 @@ const ChecklistPage: React.FC = () => {
     const [newListName, setNewListName] = useState('');
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
     const [drafts, setDrafts] = useState<Record<string, string>>({});
+    const [view, setView] = useState<'active' | 'completed'>('active');
     const [deleteTarget, setDeleteTarget] = useState<DoTodo | null>(null);
     const [presentToast] = useIonToast();
     const addEntry = useDoTodoStore((state) => state.addEntry);
@@ -243,8 +290,42 @@ const ChecklistPage: React.FC = () => {
         });
     }, [checklists]);
 
-    const routines = checklists.filter((c) => c.recurrence);
-    const oneOffs = checklists.filter((c) => !c.recurrence);
+    const routines = checklists.filter((c) => !!c.recurrence && !c.isCompleted);
+    const oneOffs = checklists.filter((c) => !c.recurrence && !c.isCompleted);
+    const completed = checklists.filter((c) => c.isCompleted);
+    const activeCount = routines.length + oneOffs.length;
+
+    const orderedActive = useMemo(() => {
+        const rows: Array<{
+            item: DoTodo;
+            showHeader: boolean;
+            headerIcon: string;
+            headerTitle: string;
+            headerCount: number;
+            headerIsFirst: boolean;
+        }> = [];
+        routines.forEach((c, i) => {
+            rows.push({
+                item: c,
+                showHeader: i === 0,
+                headerIcon: repeatOutline,
+                headerTitle: 'Routines',
+                headerCount: routines.length,
+                headerIsFirst: true,
+            });
+        });
+        oneOffs.forEach((c, i) => {
+            rows.push({
+                item: c,
+                showHeader: i === 0,
+                headerIcon: checkmarkDoneOutline,
+                headerTitle: 'One-off',
+                headerCount: oneOffs.length,
+                headerIsFirst: routines.length === 0,
+            });
+        });
+        return rows;
+    }, [routines, oneOffs]);
 
     const handleCreate = useCallback(() => {
         const trimmed = newListName.trim();
@@ -330,50 +411,98 @@ const ChecklistPage: React.FC = () => {
                     </div>
                 </div>
 
-                {checklists.length === 0 && (
-                    <div className="checklist-empty">
-                        <div className="checklist-empty-icon" aria-hidden="true">
-                            <IonIcon icon={listOutline} />
+                <div className="checklist-view-toggle" role="tablist" aria-label="Filter checklists">
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={view === 'active'}
+                        className={`checklist-view-toggle-btn ${view === 'active' ? 'is-active' : ''}`}
+                        onClick={() => setView('active')}
+                    >
+                        Active
+                        <span className="checklist-view-count">{activeCount}</span>
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={view === 'completed'}
+                        className={`checklist-view-toggle-btn ${view === 'completed' ? 'is-active' : ''}`}
+                        onClick={() => setView('completed')}
+                    >
+                        Completed
+                        <span className="checklist-view-count">{completed.length}</span>
+                    </button>
+                </div>
+
+                {view === 'active' ? (
+                    activeCount === 0 ? (
+                        <div className="checklist-empty">
+                            <div className="checklist-empty-icon" aria-hidden="true">
+                                <IonIcon icon={listOutline} />
+                            </div>
+                            <p className="checklist-empty-title">
+                                {checklists.length === 0 ? 'No checklists yet' : 'All clear'}
+                            </p>
+                            <p className="checklist-empty-copy">
+                                {checklists.length === 0
+                                    ? 'Packing lists, chores, routines —'
+                                    : 'Nothing active right now.'}
+                                <br />
+                                {checklists.length === 0
+                                    ? 'Start one above.'
+                                    : 'Finished checklists land in Completed.'}
+                            </p>
                         </div>
-                        <p className="checklist-empty-title">No checklists yet</p>
-                        <p className="checklist-empty-copy">
-                            Packing lists, chores, routines —<br />start one above.
-                        </p>
-                    </div>
-                )}
+                    ) : (
+                        <div className="checklist-section">
+                            {orderedActive.map(({ item: checklist, showHeader, headerIcon, headerTitle, headerCount, headerIsFirst }) => (
+                                <React.Fragment key={checklist.id}>
+                                    {showHeader && (
+                                        <SectionHeader icon={headerIcon} title={headerTitle} count={headerCount} isFirst={headerIsFirst} />
+                                    )}
+                                    <ChecklistCard
+                                        listId={checklist.id}
+                                        isExpanded={expanded.has(checklist.id)}
+                                        view="active"
+                                        onToggle={() => toggleCard(checklist.id)}
+                                        draft={drafts[checklist.id] ?? ''}
+                                        onDraftChange={(value) => handleDraftChange(checklist.id, value)}
+                                        onDelete={setDeleteTarget}
+                                    />
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    )
+                ) : (
+                    <>
+                        {completed.length > 0 && (
+                            <div className="checklist-section">
+                                <SectionHeader icon={checkmarkDoneOutline} title="Completed" count={completed.length} isFirst />
+                                {completed.map((checklist) => (
+                                    <ChecklistCard
+                                        key={checklist.id}
+                                        listId={checklist.id}
+                                        isExpanded={expanded.has(checklist.id)}
+                                        view="completed"
+                                        onToggle={() => toggleCard(checklist.id)}
+                                        draft={drafts[checklist.id] ?? ''}
+                                        onDraftChange={(value) => handleDraftChange(checklist.id, value)}
+                                        onDelete={setDeleteTarget}
+                                    />
+                                ))}
+                            </div>
+                        )}
 
-                {routines.length > 0 && (
-                    <div className="checklist-section">
-                        <SectionHeader icon={repeatOutline} title="Routines" count={routines.length} isFirst />
-                        {routines.map((checklist) => (
-                            <ChecklistCard
-                                key={checklist.id}
-                                listId={checklist.id}
-                                isExpanded={expanded.has(checklist.id)}
-                                onToggle={() => toggleCard(checklist.id)}
-                                draft={drafts[checklist.id] ?? ''}
-                                onDraftChange={(value) => handleDraftChange(checklist.id, value)}
-                                onDelete={setDeleteTarget}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {oneOffs.length > 0 && (
-                    <div className="checklist-section">
-                        <SectionHeader icon={checkmarkDoneOutline} title="One-off" count={oneOffs.length} isFirst={routines.length === 0} />
-                        {oneOffs.map((checklist) => (
-                            <ChecklistCard
-                                key={checklist.id}
-                                listId={checklist.id}
-                                isExpanded={expanded.has(checklist.id)}
-                                onToggle={() => toggleCard(checklist.id)}
-                                draft={drafts[checklist.id] ?? ''}
-                                onDraftChange={(value) => handleDraftChange(checklist.id, value)}
-                                onDelete={setDeleteTarget}
-                            />
-                        ))}
-                    </div>
+                        {completed.length === 0 && (
+                            <div className="checklist-empty">
+                                <div className="checklist-empty-icon" aria-hidden="true">
+                                    <IonIcon icon={checkmarkDoneOutline} />
+                                </div>
+                                <p className="checklist-empty-title">Nothing completed yet</p>
+                                <p className="checklist-empty-copy">Finished checklists land here.</p>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <IonAlert

@@ -42,6 +42,67 @@
     pointer-events: none;
 }
 
+/* ── Active / Completed toggle ── */
+
+.checklist-view-toggle {
+    display: flex;
+    gap: 4px;
+    width: fit-content;
+    padding: 4px;
+    margin-bottom: 8px;
+    background: rgba(var(--dotodo-bg-rgb), 0.04);
+    border: 1px solid var(--dotodo-card-border);
+    border-radius: 999px;
+}
+
+.checklist-view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--dotodo-muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background var(--dotodo-motion-soft), color var(--dotodo-motion-soft);
+}
+
+.checklist-view-toggle-btn.is-active {
+    background: var(--dotodo-success);
+    color: var(--dotodo-success-contrast, #ffffff);
+}
+
+.checklist-view-count {
+    font-size: 11px;
+    font-weight: 800;
+    opacity: 0.85;
+}
+
+/* ── Card footer (repeat + complete) ── */
+
+.checklist-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.checklist-complete-btn {
+    --background: var(--dotodo-success);
+    --background-activated: var(--dotodo-success-shade, #10a37f);
+    --color: var(--dotodo-success-contrast, #ffffff);
+    margin: 0;
+    font-weight: 750;
+}
+
+.checklist-complete-btn:disabled {
+    --background: rgba(var(--dotodo-success-rgb), 0.2);
+}
+
 /* ── Sections ── */
 
 .checklist-section {
